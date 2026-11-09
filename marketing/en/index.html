@@ -418,7 +418,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="btn btn-primary" href="https://demo.dwello.ch/dashboard" rel="noopener">See the demo <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
 				<a class="btn btn-secondary" href="#installieren">How to get Dwello</a>
 			</div>
-			<p class="hero-note">Free and without a subscription. Someone who knows computers does the setup, updates and backups; to work with Dwello you need no technical knowledge.</p>
+			<p class="hero-note">Free and without a subscription. Someone who knows computers does the setup and the updates; to work with Dwello you need no technical knowledge.</p>
 		</div>
 	</div>
 </section>
@@ -556,7 +556,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg><h3>Rental contracts and contract end</h3><p>Fixed-term or open-ended. At the end, Dwello shows the notice period and asks for the new address.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><h3>Documents per tenant</h3><p>Letters, statements and reminders in one place.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><h3>Buildings from the building register</h3><p>Take over buildings and apartments with area, floor and rooms from the federal register.</p></article>
-			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><h3>Annual report for tax and accountant</h3><p>Per building and calendar year: the agreed rental income and the costs you bear yourself, as PDF and CSV.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><h3>Annual report for tax and your accountant</h3><p>Per building and calendar year: the agreed rental income and the costs you bear yourself, as PDF and CSV.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><h3>Cost reconciliation</h3><p>Under «Reports» you see, for each billing period you have created statements for, which part of the costs the tenants bear and which part you bear yourself, for example for vacancy.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><h3>AI programs with an access key</h3><p>With an access key, an AI program of your choice reads your data in Dwello, including your tenants’ data (MCP). It cannot change anything or open documents. The program processes the data under its own rules. Each key expires after 90 days, and you can revoke it at any time.</p></article>
 		</div>
 	</div>
 </section>
@@ -567,7 +569,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Install</span>
 			<h2>Have it set up, then work in the browser.</h2>
-			<p>Someone who knows computers sets it up once: a family member, a friend or your IT service. Give that person the guide; it takes about an hour. After that you work in the browser, with no technical knowledge. That person does updates and regular backups; the guide describes them. On your own PC Dwello runs only while it is switched on; on a home server or a server in the cloud it is always reachable, from your phone too.</p>
+			<p>Someone who knows computers sets it up once: a family member, a friend or your IT service. Give that person the guide; it takes about an hour. After that you work in the browser, with no technical knowledge. Dwello backs up your data every day in encrypted form; you print the recovery code for it on the emergency sheet when you first sign in. That person does the updates and regularly copies the backups to another device; the guide describes both. On your own PC Dwello runs only while it is switched on; on a home server or a server in the cloud it is always reachable, from your phone too.</p>
 			<div class="actions"><a class="btn btn-primary" href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Guide to hand on</a></div>
 		</div>
 		<div class="alert" style="margin-bottom:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Sign-in with password</b>During setup, an account with email address and password is created. If you prefer, sign in with your Google account instead; the guide shows both. A one-step installer is planned (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 on GitHub: one-step installer">#579</a>).</span></div>
@@ -664,7 +666,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="sec-head">
 				<span class="kicker">Privacy</span>
 				<h2>Built for the Swiss Data Protection Act.</h2>
-				<p>Tenant data is personal data. Dwello treats it that way: it stays on your server, nothing comes to us, and you can answer any information request at any time. Only what a task needs goes out: sign-in with Google, if you use it, the address search in the federal building register, your e-mails to tenants and, if you set it up that way, invoices to an external AI. You remain responsible for your tenants’ data.</p>
+				<p>Tenant data is personal data. Dwello treats it that way: it stays on your server, nothing comes to us, and you can answer any information request at any time. Only what a task needs goes out: sign-in with Google or Microsoft, if you use it, the address search in the federal building register, your e-mails to tenants and, if you set it up that way, invoices to an external AI and your data to AI programs you give an access key. You remain responsible for your tenants’ data.</p>
 			</div>
 			<!-- In the app's illustration style: line, fill, one accent stroke -->
 			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="A house with a server inside" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -684,7 +686,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<li><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><span><b>Invoices stay at home</b>The AI runs with Ollama on your server. No invoice goes to a cloud service unless you want it to.</span></li>
 			<li><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span><b>Data portability at the push of a button</b><span class="ref">Art. 28 FADP.</span> All data of one tenant as a ZIP, with folders in their language.</span></li>
 			<li><svg class="ic" aria-hidden="true"><use href="#i-eye-off"/></svg><span><b>No tracking</b>No ads, no analytics cookies. We never learn that you use Dwello.</span></li>
-			<li><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span><b>Log and privacy statement</b>Every change to statement data is logged. A privacy statement for your tenants is included.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span><b>Log and privacy statement</b>Dwello records with the date sign-ins, changes that affect statements and every request from an AI program. A privacy statement for your tenants is included.</span></li>
 		</ul>
 	</div>
 </section>
@@ -714,7 +716,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h2>Frequently asked questions.</h2>
 		</div>
 		<div class="faq">
-			<details open><summary>Do I need technical knowledge?</summary><p>For the setup, and after that for updates and regular backups. Ask someone who knows computers and give them the guide. To work with Dwello you need no prior knowledge: every term is explained at its field.</p></details>
+			<details open><summary>Do I need technical knowledge?</summary><p>For the setup, and after that for updates and to copy the daily backups to another device. Ask someone who knows computers and give them the guide. To work with Dwello you need no prior knowledge: every term is explained at its field.</p></details>
 			<details><summary>Is Dwello really free?</summary><p>Yes. Dwello is open source and free. At most you pay for your own server or the power for your PC, and the postage for letters. If you use an external AI instead of the local one, you pay the provider directly.</p></details>
 			<details><summary>How many apartments is Dwello suited for?</summary><p>For private landlords with one to five buildings and up to 50 apartments. Dwello is not made for large property management firms with teams.</p></details>
 			<details><summary>What happens if the AI misreads an invoice?</summary><p>Nothing happens without your confirmation. The AI suggests the details and Dwello tells you which ones to check. The invoice is only created once you confirm. You can also add any invoice yourself.</p></details>
@@ -750,7 +752,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		</div>
 		<ul class="road">
 			<li><span class="badge plan">Planned</span><a href="https://github.com/rudini/Dwello/issues/579" rel="noopener">One-step installer</a><span>One line to paste installs Docker and Dwello; the rest happens in the browser.</span></li>
-			<li><span class="badge plan">Planned</span><a href="https://github.com/rudini/Dwello/issues/495" rel="noopener">MCP server</a><span>Dwello as a tool for your AI assistant, local and with your permission.</span></li>
 		</ul>
 	</div>
 </section>

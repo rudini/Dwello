@@ -198,6 +198,20 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #1403: a sent statement an invoice recorded after it makes due for correcting, with what correcting would claim
+	it('GET /statements/:id/changed-invoices liefert die Felder von statement-changed-invoices-due.json', async () => {
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, statementId));
+		await insertInvoice(rental.building, { amount: '80.00', invoiceDate: '2024-11-30', description: `Nachzügler ${token}` });
+		try {
+			const actual = await (await callApi(`/api/v1/statements/${statementId}/changed-invoices`)).json();
+			expect(drift(await sample('statement-changed-invoices-due'), actual)).toEqual([]);
+			expect(actual).toMatchObject({ correctionDue: true, recalculated: { open: expect.any(String) } }); // drift skips a null
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, `Nachzügler ${token}`));
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId));
+		}
+	});
+
 	// #1309: a key of its invoices that cannot be calculated for the building, with those invoices
 	it('GET /statements/:id/changed-invoices liefert die Felder von statement-changed-invoices-key.json', async () => {
 		const key = await idOf(await sendJson('POST', '/api/v1/distribution-keys', { name: `Halbe Zimmer ${crypto.randomUUID()}`, formula: '1 / (({rooms} - 3.5) * ({rooms} - 3.5))' }));

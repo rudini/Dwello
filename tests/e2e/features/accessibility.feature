@@ -51,6 +51,7 @@ Funktionalität: Barrierefreiheit
       | buildings              | default             |
       | buildings              | empty               |
       | buildings              | filtered-empty      |
+      | buildings              | paged               |
       | building-new           | default             |
       | building-new           | submit-empty        |
       | building-new           | register-preview    |
@@ -70,6 +71,7 @@ Funktionalität: Barrierefreiheit
       | apartments             | default             |
       | apartments             | empty               |
       | apartments             | filtered-empty      |
+      | apartments             | paged               |
       | apartment-new          | default             |
       | apartment-new          | submit-empty        |
       | apartment-detail       | default             |
@@ -87,6 +89,7 @@ Funktionalität: Barrierefreiheit
       | tenants                | default             |
       | tenants                | empty               |
       | tenants                | filtered-empty      |
+      | tenants                | paged               |
       | tenant-new             | default             |
       | tenant-new             | submit-empty        |
       | tenant-detail          | default             |
@@ -105,6 +108,7 @@ Funktionalität: Barrierefreiheit
       | contracts              | default             |
       | contracts              | empty               |
       | contracts              | filtered-empty      |
+      | contracts              | paged               |
       | contract-new           | default             |
       | contract-new           | submit-empty        |
       | contract-new           | every-wizard-step   |
@@ -182,6 +186,7 @@ Funktionalität: Barrierefreiheit
       | invoices               | upload-unreadable   |
       | invoices               | upload-ki-none      |
       | invoices               | upload-no-building  |
+      | invoices               | paged               |
       | invoice-new            | default             |
       | invoice-new            | submit-empty        |
       | invoice-detail         | default             |
@@ -200,6 +205,7 @@ Funktionalität: Barrierefreiheit
       | statements             | list-scoped         |
       | statements             | pdf-missing         |
       | statements             | status-empty        |
+      | statements             | paged               |
       | statements-period      | default             |
       | statements-period      | list-scoped         |
       | statement-generate     | default             |
@@ -248,6 +254,7 @@ Funktionalität: Barrierefreiheit
       | statement-part-paid-detail | default          |
       | statement-part-paid-detail | mark-paid-dialog |
       | statement-part-paid-detail | reset-payment-dialog |
+      | statement-part-paid-detail | reminder-dialog |
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |

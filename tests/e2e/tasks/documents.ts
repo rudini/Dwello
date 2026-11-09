@@ -36,9 +36,9 @@ export const chooseView = (view: 'Alle' | 'Zu versenden'): Activity => (actor) =
 		Wait.forUrl((url) => (url.searchParams.get('status') === 'to_send') === (view === 'Zu versenden'))
 	);
 
-// done once the statement reports how the reminder went
-export const sendReminder: Activity = (actor) =>
-	actor.attemptsTo(Click.on(reminderButton), Click.on(confirmReminderButton), Wait.until(reminderFeedback));
+// done once the statement reports how the reminder went; from the open dialog, after a warning in it (#1403)
+export const confirmReminder: Activity = (actor) => actor.attemptsTo(Click.on(confirmReminderButton), Wait.until(reminderFeedback));
+export const sendReminder: Activity = (actor) => actor.attemptsTo(Click.on(reminderButton), confirmReminder);
 
 export const markLetterSent = (title: string, tenantName: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(markSentButton(title, tenantName)), Click.on(confirmMarkSentButton));

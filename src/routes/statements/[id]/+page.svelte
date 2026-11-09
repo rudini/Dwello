@@ -351,4 +351,4 @@
 	{list}
 />
 
-<ReminderModal bind:open={showReminder} {statement} sentReminders={statement.remindersCounted ?? 0} />
+<ReminderModal bind:open={showReminder} {statement} sentReminders={statement.remindersCounted ?? 0} later={data.later} />

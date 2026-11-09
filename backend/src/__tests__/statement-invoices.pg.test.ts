@@ -473,6 +473,53 @@ describe('Abrechnung berichtigen fällig', () => {
 			expect(changes.recalculated).toMatchObject({ declineCosts: difference }); // code review 546-1 C-1
 		}));
 
+	// #1403 (Fachreview 1403-1 V-1): what the berichtigte Abrechnung would claim, after what was paid on this one and
+	// rounded once to 5 Rappen as it does, not the new Saldo less the payment
+	it('nennt den offenen Betrag, den die berichtigte Abrechnung nach einer Teilzahlung verlangt', () =>
+		sent(async (id) => {
+			await db.update(utilityStatements).set({ paidAmount: '0.03' }).where(eq(utilityStatements.id, id));
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			const changes = (await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { recalculated: { open: string } };
+			await callApi(`/api/v1/statements/${id}/replace`, { method: 'POST' });
+			const correction = (await (await callApi(`/api/v1/statements/${id}/correction`, { method: 'POST' })).json()) as { id: string; balance: string };
+			statements.unshift(correction.id); // deleted before the statement it replaces
+			expect(changes.recalculated.open).toBe(Number(correction.balance).toFixed(2));
+		}));
+	// Fachreview 1403-1 V-2: a refund or a Saldo below CHF 5 is not claimed, so nothing is open
+	it('nennt keinen offenen Betrag, wenn die berichtigte Abrechnung nichts verlangt', () =>
+		sent(async (id) => {
+			await db.update(utilityStatements).set({ paidAmount: '100000.00' }).where(eq(utilityStatements.id, id));
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			const changes = (await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { recalculated: { open: string } };
+			expect(changes.recalculated.open).toBe('0.00');
+		}));
+	// code review 1403-1 C-2: a rest below CHF 5 is carried over, not claimed, except on a Schlussabrechnung
+	const openAfterPaying = async (id: string, rest: number) => {
+		const open = async () =>
+			((await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { recalculated: { open: string } }).recalculated.open;
+		const all = Number(await open());
+		await db.update(utilityStatements).set({ paidAmount: (all - rest).toFixed(2) }).where(eq(utilityStatements.id, id));
+		return open();
+	};
+	it('nennt auf der Schlussabrechnung auch einen Rest unter CHF 5 als offen', () =>
+		sent(async (id) => {
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			expect(await openAfterPaying(id, 2)).toBe('2.00'); // the shared rental ends 31.03.2024
+		}));
+	it('nennt einen Rest unter CHF 5 nicht als offen, wenn die Abrechnung ihn überträgt', async () => {
+		const whole = await createRental(`${token}-rest`, { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		const created = await generateStatement({ contractId: whole.contract, buildingId: whole.building, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
+		try {
+			await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, created.id));
+			await invoice({ buildingId: whole.building, amount: '100.00', invoiceDate: '2024-02-15' });
+			expect(await openAfterPaying(created.id, 2)).toBe('0.00');
+		} finally {
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, created.id));
+			await deleteStatement(created.id);
+			await db.delete(invoices).where(eq(invoices.buildingId, whole.building));
+			await whole.remove();
+		}
+	});
 	// code review 546-1 C-2 (Fachreview 546-1 V-4): the billed Saldo below CHF 5 is explained too
 	// not a Schlussabrechnung: its own rental without an end (the shared one ends 31.03.2024)
 	it('erklärt einen bisherigen Saldo unter CHF 5', async () => {

@@ -531,6 +531,22 @@ describe('Offener Übertrag', () => {
 		return (await (await callApi(`/api/v1/statements/${id}/correction`, { method: 'POST' })).json()) as Statement & { priorPayments: string };
 	};
 
+	// #1403 (Datenprüfung 1403-1): the 2024 Saldo settled after the 2025 statement went out is open while that one is
+	// sent, but its berichtigte Abrechnung counts it; the warning before a Mahnung names what the correction claims
+	it('nennt vor dem Berichtigen den offenen Betrag mit dem Übertrag, den die berichtigte Abrechnung verrechnet', async () => {
+		const rental = await rentalOf();
+		const previous = await generate(rental, 2024);
+		const later = await send(await generate(rental, 2025));
+		await db.update(utilityStatements).set({ balance: '3.00' }).where(eq(utilityStatements.id, previous));
+		expect(await send(previous)).toMatchObject({ status: 'settled' });
+		await insertInvoice(rental.building, { amount: '100.00', invoiceDate: '2025-06-30' });
+		const changes = (await (await callApi(`/api/v1/statements/${later.id}/changed-invoices`)).json()) as { recalculated: { open: string } };
+		const corrected = await replaceAndCorrect(later.id);
+
+		expect(corrected.carriedFrom).toMatchObject({ id: previous });
+		expect(changes.recalculated.open).toBe(Number(corrected.balance).toFixed(2));
+	});
+
 	it('nennt einen Übertrag, wenn der Mietvertrag in seiner Periode endet', async () => {
 		const rental = await rentalOf();
 		const previous = await sentWith(rental, 2024, '3.00');
