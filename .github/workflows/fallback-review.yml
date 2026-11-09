@@ -142,6 +142,11 @@ jobs:
           jq -r '.[] | select(.filename | endswith(".lock")) |
             "diff --git a/\(.filename) b/\(.filename)\n(lock file changed; its content is left out)"' files.json >> diff.txt
           gh api "repos/$GH_REPO/contents/CLAUDE.md" -H 'Accept: application/vnd.github.raw' > rules.md || : > rules.md
+          # the reviewer report (#1273), written by «Pull request comments» after CI; the review compares it and the
+          # PR text's Type, Decisions and Risks with the diff (#1275)
+          gh api --paginate "repos/$GH_REPO/issues/$PR/comments" \
+            --jq '.[] | select(.user.type == "Bot") | select(.body | startswith("<!-- review-report -->")) | .body' > report.md
+          [ -s report.md ] || echo "(no reviewer report)" > report.md
           : > files.txt
           budget=$MAX_FILES_BYTES
           gh api --paginate "repos/$GH_REPO/pulls/$PR/files" \
@@ -169,6 +174,9 @@ jobs:
             the concrete failure it causes and the fix. Most severe first, at most 10.
           The changed files follow the diff whole, as they are at the head commit: before reporting, check a finding
           against them (other branches, callers and guards in the same file), and report only what the diff changes.
+          Compare the explanation with the diff: the pull request's sections Type, Decisions and Risks and the reviewer
+          report. Report as a finding each change the explanation does not name, e.g. a new table, a new module
+          dependency or a changed gate file without a decision.
           If you are not sure a finding holds, leave it out. You have no tools and cannot open the repository: review
           the text below as it is and answer at once.
 
@@ -176,11 +184,11 @@ jobs:
           PROMPT
           cat rules.md >> system.md
 
-          jq -n --arg model "$MODEL" --arg effort "$REASONING_EFFORT" --rawfile system system.md --rawfile pr pr.md --rawfile diff diff.txt --rawfile files files.txt '{
+          jq -n --arg model "$MODEL" --arg effort "$REASONING_EFFORT" --rawfile system system.md --rawfile pr pr.md --rawfile diff diff.txt --rawfile files files.txt --rawfile report report.md '{
             model: $model, max_tokens: 32000, reasoning_effort: $effort, temperature: 0.2, stream: true,
             messages: [
               {role: "system", content: $system},
-              {role: "user", content: ("Pull request:\n" + $pr + "\n\nDiff:\n```diff\n" + $diff + "\n```\n\nChanged files at the head commit:\n" + $files)}
+              {role: "user", content: ("Pull request:\n" + $pr + "\n\nDiff:\n```diff\n" + $diff + "\n```\n\nReviewer report:\n" + $report + "\n\nChanged files at the head commit:\n" + $files)}
             ]}' > request.json
           # a second try when the answer is empty or a made-up tool call instead of a review; 10 minutes for Copilot and
           # two tries of 8 stay within the job's 30, with time left to comment «No review»
