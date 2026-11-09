@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../db/connection';
 import { localAccounts } from '../db/schema';
+import { jwtSecret } from '../config/jwt';
 
 /** A session of a Konto mit Passwort holds while the account exists and its password was not set again after it began */
 async function localSessionHolds(sub: string, issuedAt: number): Promise<boolean> {
@@ -18,7 +19,8 @@ async function localSessionHolds(sub: string, issuedAt: number): Promise<boolean
 	return !!account && Math.floor(account.changed.getTime() / 1000) <= issuedAt;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key-change-in-production';
+// Read at import, so a backend in production without a proper secret refuses to start (#1376)
+const JWT_SECRET = jwtSecret();
 
 /**
  * Zod schema for JWT payload validation
