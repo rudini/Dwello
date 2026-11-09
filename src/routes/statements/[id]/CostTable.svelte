@@ -17,6 +17,17 @@
 		stacked ? { list: '', table: 'hidden' } : { list: '@5xl:hidden', table: 'hidden @5xl:block' }
 	);
 
+	// A position's key outlasts a recalculation, which gives new ids (#1366): its category and key (the id for one
+	// deleted before #1160/#1255), and how many positions of that pair came before it, as positions saved through the
+	// API may repeat a pair (fallback review of #1369)
+	const pair = (item: Item) => `${item.categoryId ?? item.id}/${item.distributionKeyId ?? item.id}`;
+	const keyed = $derived(
+		statement.lineItems.map((item, index, all) => ({
+			item,
+			key: `${pair(item)}/${all.slice(0, index).filter((other) => pair(other) === pair(item)).length}`
+		}))
+	);
+
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
 	// The Saldo goes to 5 Rappen. As in the PDF: the amount before, its rounding seen from the amount shown (a refund
 	// that grows gets +), the Saldo; only a real rounding (under 5 Rappen)
@@ -127,12 +138,11 @@
 	<p class="text-ink-muted">{m.statements_no_lines()}</p>
 {:else}
 	<!-- A narrow region (and stacked pages at every width) gets the lines one below the other, every amount in view;
-	     a position is keyed by category and key, which a recalculation keeps: its new ids would replace each card, and
-	     WebKit, without a scroll anchor, moved the page by the card for a moment (#1366); a category or key deleted
-	     before #1160/#1255 falls back to the id, so two such positions still differ -->
+	     keyed so that a recalculation updates each card instead of replacing it: WebKit, without a scroll anchor,
+	     moved the page by a replaced card for a moment (#1366) -->
 	<div class="@container">
 		<ul class="flex flex-col gap-4 {shown.list}" aria-label={m.statements_lines()}>
-			{#each statement.lineItems as item (`${item.categoryId ?? item.id}/${item.distributionKeyId ?? item.id}`)}
+			{#each keyed as { item, key } (key)}
 				<li class="rounded-panel border border-line p-4" data-testid="statement-line-card">
 					<dl class="grid grid-cols-2 gap-x-4 gap-y-2 tabular-nums">
 						<dt class="text-ink-muted">{m.buildings_category()}</dt>
@@ -161,7 +171,7 @@
 
 		<div class={shown.table}>
 			<Table caption={m.statements_lines()} captionHidden {columns}>
-				{#each statement.lineItems as item (`${item.categoryId ?? item.id}/${item.distributionKeyId ?? item.id}`)}
+				{#each keyed as { item, key } (key)}
 					<tr data-testid="statement-line-item">
 						<td class="text-ink">{item.categoryName}</td>
 						<td class="text-ink-muted">{item.distributionKeyName}</td>

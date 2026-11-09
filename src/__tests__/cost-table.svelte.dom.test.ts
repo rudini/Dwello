@@ -47,4 +47,20 @@ describe('Kostenaufstellung', () => {
 
 		expect(allByTestId('statement-line-card')).toHaveLength(2);
 	});
+
+	// fallback review of #1369: POST /statements/:id/line-items takes any positions, also two of one category and key
+	it('zeigt zwei Positionen derselben Kategorie und desselben Verteilschlüssels beide', () => {
+		const [first, second] = statement().lineItems;
+		show(CostTable, {
+			statement: statement({
+				lineItems: [
+					{ ...first, categoryId: 'c1', distributionKeyId: 'k1' },
+					{ ...second, categoryId: 'c1', distributionKeyId: 'k1' }
+				]
+			})
+		});
+
+		expect(allByTestId('statement-line-card')).toHaveLength(2);
+		expect(allByTestId('statement-line-item')).toHaveLength(2);
+	});
 });
