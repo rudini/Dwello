@@ -1223,8 +1223,12 @@
 		{
 			"name": "analytics",
 			"path": "/analytics",
+			"queries": {
+				"default": "?building={building}&year=2025"
+			},
 			"states": [
-				"default"
+				"default",
+				"empty"
 			]
 		},
 		{

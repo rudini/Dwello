@@ -372,6 +372,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | terms                  | default             |
       | terms                  | demo                |
       | analytics              | default             |
+      | analytics              | empty               |
       | reports                | default             |
       | reports                | empty               |
       | report-reconciliation  | default             |
