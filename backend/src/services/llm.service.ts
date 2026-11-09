@@ -84,7 +84,7 @@ async function callLlm(prompt: Content): Promise<string> {
 	const timeoutId = setTimeout(() => controller.abort(), llmConfig.timeout);
 
 	try {
-		const response = await fetch(`${ki.baseUrl}/chat/completions`, {
+		const response = await fetch(new URL('chat/completions', `${ki.baseUrl}/`), {
 			method: 'POST',
 			headers: llmHeaders(ki.apiKey),
 			body: JSON.stringify({
@@ -92,7 +92,9 @@ async function callLlm(prompt: Content): Promise<string> {
 				// No max_tokens or temperature: reasoning models reject both; the prompt asks for short JSON
 				messages: [{ role: 'user', content: prompt }]
 			}),
-			signal: controller.signal
+			signal: controller.signal,
+			// a stored API key never goes on to another address (#1372)
+			redirect: 'error'
 		});
 
 		clearTimeout(timeoutId);
@@ -122,10 +124,11 @@ export async function isLlmAvailable(): Promise<boolean> {
 	if (ki.mode === 'none') return false;
 
 	try {
-		const response = await fetch(`${ki.baseUrl}/models`, {
+		const response = await fetch(new URL('models', `${ki.baseUrl}/`), {
 			method: 'GET',
 			headers: llmHeaders(ki.apiKey),
-			signal: AbortSignal.timeout(5000)
+			signal: AbortSignal.timeout(5000),
+			redirect: 'error'
 		});
 		return response.ok;
 	} catch {

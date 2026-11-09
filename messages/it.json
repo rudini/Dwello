@@ -2319,6 +2319,7 @@
 	"ki_settings_missing_provider": "Indichi il nome del fornitore. L’informativa sulla protezione dei dati lo menziona.",
 	"ki_settings_missing_country": "Indichi il paese in cui il fornitore tratta i dati. L’informativa sulla protezione dei dati lo menziona.",
 	"ki_settings_missing_base_url": "Indichi l’indirizzo dell’IA che Le comunica il fornitore, per esempio https://api.fornitore.ch/v1.",
+	"backend_ki_address_invalid": "Dwello non può usare questo indirizzo. Indichi l’indirizzo dell’IA che Le comunica il fornitore, per esempio https://api.fornitore.ch/v1.",
 	"ki_settings_missing_model": "Indichi il modello. Ne scelga uno che legge le immagini.",
 	"ki_settings_check_ok": "La connessione funziona e il modello legge le immagini delle fatture.",
 	"ki_settings_check_wrong_key": "Il fornitore rifiuta la chiave API. Verifichi la chiave nel Suo conto presso il fornitore e la inserisca di nuovo.",

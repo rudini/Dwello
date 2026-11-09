@@ -2319,6 +2319,7 @@
 	"ki_settings_missing_provider": "Indiquez le nom du fournisseur. La déclaration de protection des données le mentionne.",
 	"ki_settings_missing_country": "Indiquez le pays dans lequel le fournisseur traite les données. La déclaration de protection des données le mentionne.",
 	"ki_settings_missing_base_url": "Indiquez l’adresse de l’IA que le fournisseur vous communique, par exemple https://api.fournisseur.ch/v1.",
+	"backend_ki_address_invalid": "Dwello ne peut pas utiliser cette adresse. Indiquez l’adresse de l’IA que le fournisseur vous communique, par exemple https://api.fournisseur.ch/v1.",
 	"ki_settings_missing_model": "Indiquez le modèle. Choisissez-en un qui lit les images.",
 	"ki_settings_check_ok": "La connexion fonctionne et le modèle lit les images de factures.",
 	"ki_settings_check_wrong_key": "Le fournisseur refuse la clé API. Vérifiez la clé dans votre compte chez le fournisseur et saisissez-la à nouveau.",

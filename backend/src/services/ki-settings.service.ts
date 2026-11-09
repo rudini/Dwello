@@ -135,6 +135,14 @@ async function keyFor(baseUrl: string, entered: string) {
 	return decrypt(row.apiKeyEncrypted);
 }
 
+// Dwello appends the path to the address itself: credentials, a query or a fragment in it would send the request
+// elsewhere (#1372)
+function checkAddress(baseUrl: string) {
+	const url = URL.parse(baseUrl);
+	if (!url || !['http:', 'https:'].includes(url.protocol) || url.username || url.password || /[?#]/.test(baseUrl))
+		throw new CodedError('KI_ADDRESS_INVALID', 'Diese Adresse kann Dwello nicht verwenden.');
+}
+
 const locked = () => new CodedError('KI_SET_BY_OPERATOR', 'Die KI ist vom Betreiber festgelegt.');
 
 export async function saveKiSettings(input: KiInput) {
@@ -161,6 +169,7 @@ export async function saveKiSettings(input: KiInput) {
 		throw new CodedError('KI_PROVIDER_INCOMPLETE', 'Es fehlen Angaben zum Anbieter der KI.', {
 			missing: missing.join(',')
 		});
+	checkAddress(values.baseUrl);
 	const apiKey = await keyFor(values.baseUrl, values.apiKey);
 	const apiKeyEncrypted = apiKey ? await encrypt(apiKey) : null;
 	const { provider, providerCountry: country } = values;
@@ -182,11 +191,13 @@ const CHECK_IMAGE =
 export async function checkKiConnection(
 	input: KiInput
 ): Promise<{ result: 'ok' | 'wrong-key' | 'unreachable' | 'no-images' }> {
+	if (llmConfig.byOperator) throw locked();
 	const { baseUrl, model, apiKey: entered } = trimmed(input);
+	checkAddress(baseUrl);
 	const apiKey = await keyFor(baseUrl, entered);
 	let response: Response;
 	try {
-		response = await fetch(`${baseUrl}/chat/completions`, {
+		response = await fetch(new URL('chat/completions', `${baseUrl}/`), {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -204,7 +215,8 @@ export async function checkKiConnection(
 					}
 				]
 			}),
-			signal: AbortSignal.timeout(llmConfig.timeout)
+			signal: AbortSignal.timeout(llmConfig.timeout),
+			redirect: 'error'
 		});
 	} catch {
 		return { result: 'unreachable' };

@@ -4,6 +4,7 @@ import { runAction } from './helpers/action';
 import settings from '../../tests/contracts/ki-settings.json';
 import incomplete from '../../tests/contracts/ki-settings-incomplete.json';
 import checked from '../../tests/contracts/ki-settings-check.json';
+import addressInvalid from '../../tests/contracts/ki-settings-address-invalid.json';
 import loading from '../../tests/contracts/ki-model-loading.json';
 
 const API = 'http://localhost:3001/api/v1';
@@ -110,6 +111,20 @@ describe('KI speichern', () => {
 				errors: {
 					apiKey:
 						'Geben Sie den API-Schlüssel erneut ein. Dwello schickt den gespeicherten Schlüssel nicht an eine andere Adresse.'
+				}
+			}
+		});
+	});
+
+	// #1372
+	it('nennt eine Adresse, die Dwello nicht verwenden kann, beim Feld der Adresse', async () => {
+		const { result } = runAction(actions.save, '', 422, { ...provider, baseUrl: 'https://api.example.ch/v1?x=1' }, addressInvalid);
+
+		expect(await result).toMatchObject({
+			data: {
+				errors: {
+					baseUrl:
+						'Diese Adresse kann Dwello nicht verwenden. Geben Sie die Adresse der KI an, die Ihnen der Anbieter nennt, zum Beispiel https://api.anbieter.ch/v1.'
 				}
 			}
 		});

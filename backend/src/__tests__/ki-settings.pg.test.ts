@@ -202,6 +202,28 @@ describe('KI in den Einstellungen', () => {
 		]);
 	});
 
+	// #1372: auch Kategorisieren und die Frage, ob die KI antwortet, folgen keiner Umleitung mit dem Schlüssel
+	it('folgt mit dem gespeicherten Anbieter keiner Umleitung', async () => {
+		const forwarded: string[] = [];
+		const target = Bun.serve({ port: 0, fetch: (request) => (forwarded.push(request.url), new Response('{}')) });
+		const redirecting = Bun.serve({
+			port: 0,
+			fetch: (request) => Response.redirect(`http://127.0.0.1:${target.port}${new URL(request.url).pathname}`, 307)
+		});
+		try {
+			await save({ ...muster, baseUrl: `http://127.0.0.1:${redirecting.port}/v1` });
+
+			await sendJson('POST', '/api/v1/categories/propose', { name: 'Treppenhausreinigung', description: '' });
+			const status = await (await callApi('/api/v1/invoices/llm-status')).json();
+
+			expect(forwarded).toEqual([]);
+			expect(status).toMatchObject({ llmAvailable: false });
+		} finally {
+			redirecting.stop(true);
+			target.stop(true);
+		}
+	});
+
 	it('fragt mit «Keine KI» niemanden und nennt keinen Empfänger', async () => {
 		await save(muster);
 		await save({ mode: 'none' });
@@ -233,6 +255,20 @@ describe('KI in den Einstellungen', () => {
 			code: 'KI_PROVIDER_INCOMPLETE',
 			params: { missing: 'baseUrl,model,provider,providerCountry,confirmed' }
 		});
+		expect(await settings()).toMatchObject({ mode: 'local' });
+	});
+
+	// #1372: Dwello hängt den Pfad an die Adresse selbst; Anmeldedaten, Abfrage oder Sprungmarke darin lenken die Anfrage um
+	it('verweigert eine Adresse mit Anmeldedaten, Abfrage oder Sprungmarke beim Speichern und Prüfen', async () => {
+		for (const baseUrl of [`${address}?x=1`, `${address}#x`, address.replace('://', '://nutzer:geheim@'), 'kein url']) {
+			for (const send of [save, check]) {
+				const response = await send({ ...muster, baseUrl });
+
+				expect(response.status).toBe(422);
+				expect(await response.json()).toMatchObject({ code: 'KI_ADDRESS_INVALID' });
+			}
+		}
+		expect(requests).toEqual([]);
 		expect(await settings()).toMatchObject({ mode: 'local' });
 	});
 
@@ -398,6 +434,17 @@ describe('Vom Betreiber festgelegte KI', () => {
 		expect(await response.json()).toMatchObject({ code: 'KI_SET_BY_OPERATOR' });
 	});
 
+	// #1372: auch die Prüfung schickt keine Anfrage an eine Adresse, die der Betreiber nicht festgelegt hat
+	it('verweigert die Prüfung einer Verbindung, solange der Betreiber die KI festlegt', async () => {
+		llmConfig.byOperator = true;
+
+		const response = await check(muster);
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ code: 'KI_SET_BY_OPERATOR' });
+		expect(requests).toEqual([]);
+	});
+
 	// llm:eval setzt nur Adresse, Schlüssel und Modell; den Anbieter verlangt erst der Start des Servers
 	it('fragt die KI des Betreibers auch ohne Namen und Land des Anbieters', async () => {
 		Object.assign(llmConfig, {
@@ -456,6 +503,22 @@ describe('Verbindung prüfen', () => {
 			} finally {
 				failing.stop(true);
 			}
+		}
+	});
+
+	// #1372: der gespeicherte Schlüssel geht nie über eine Umleitung an eine andere Adresse
+	it('folgt keiner Umleitung und meldet die Adresse als nicht erreichbar', async () => {
+		const redirecting = Bun.serve({
+			port: 0,
+			fetch: () => Response.redirect(`${address}/chat/completions`, 307)
+		});
+		try {
+			const result = await check({ ...muster, baseUrl: `http://127.0.0.1:${redirecting.port}/v1` });
+
+			expect(await result.json()).toEqual({ result: 'unreachable' });
+			expect(requests).toEqual([]);
+		} finally {
+			redirecting.stop(true);
 		}
 	});
 

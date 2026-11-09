@@ -73,6 +73,26 @@ When(
 	}
 );
 
+// #1372: an address with more than the address of the KI in it
+const stubAddress = stubProvider('', '').address;
+const withExtra: Record<string, string> = {
+	Abfrage: `${stubAddress}?version=1`,
+	Sprungmarke: `${stubAddress}#chat`,
+	Anmeldedaten: stubAddress.replace('://', '://nutzer:geheim@')
+};
+When(
+	/^der Liegenschaftsverwalter einen Anbieter der KI mit einer Adresse mit (Abfrage|Sprungmarke|Anmeldedaten) speichert$/,
+	async ({ verwalter }, extra: string) => {
+		await verwalter.attemptsTo(saveProvider({ ...stubProvider('Muster KI AG', 'Deutschland'), address: withExtra[extra] }));
+	}
+);
+When(
+	/^der Liegenschaftsverwalter die Verbindung zu einer Adresse mit (Abfrage|Sprungmarke|Anmeldedaten) prüft$/,
+	async ({ verwalter }, extra: string) => {
+		await verwalter.attemptsTo(checkConnection({ ...stubProvider('Muster KI AG', 'Deutschland'), address: withExtra[extra] }));
+	}
+);
+
 const cases: Record<string, Partial<Provider>> = {
 	'gültigem Schlüssel': {},
 	'falschem Schlüssel': { key: 'falsch' },

@@ -68,7 +68,8 @@ const missingMessage: Record<string, () => string> = {
 	confirmed: m.ki_settings_missing_confirmed
 };
 
-// A refusal at the field it names: what is missing, the key for a new address; anything else for the whole form
+// A refusal at the field it names: what is missing, the key for a new address, an address Dwello cannot use (#1372);
+// anything else for the whole form
 function refusalErrors(refused: BackendError): Record<string, string> {
 	if (refused.code === 'KI_PROVIDER_INCOMPLETE')
 		return Object.fromEntries(
@@ -78,7 +79,10 @@ function refusalErrors(refused: BackendError): Record<string, string> {
 				.map((field) => [field, missingMessage[field]()])
 		);
 	const message = backendMessage(refused, m.ki_settings_not_saved());
-	return refused.code === 'KI_KEY_FOR_NEW_ADDRESS' ? { apiKey: message } : { form: message };
+	const field =
+		{ KI_KEY_FOR_NEW_ADDRESS: 'apiKey', KI_ADDRESS_INVALID: 'baseUrl' }[String(refused.code)] ??
+		'form';
+	return { [field]: message };
 }
 
 const send = (fetch: typeof globalThis.fetch, method: string, path: string, body?: object) =>
