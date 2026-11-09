@@ -40,7 +40,7 @@ $docker compose up -d
 $docker compose up -d --wait --wait-timeout 600 frontend
 
 code=$($docker logs dwello-backend 2>&1 | sed -n 's/.*Einrichtungscode: \([A-Z0-9-]*\).*/\1/p' | tail -1)
-url=$(sed -n 's/^PUBLIC_APP_URL=//p' .env 2>/dev/null | tail -1)
+url=$(sed -n 's/^PUBLIC_APP_URL=//p' .env 2>/dev/null | tail -1 || true)
 if [ -n "$url" ]; then say "Dwello runs at $url."
 else say "Dwello runs at http://localhost:3000 on this machine only. To open it from another device, put its address into ~/dwello/.env (docs/installation.md, section 7) and paste the line again: Dwello accepts the sign-in only at that address."; fi
 # only while the setup is still open: the log keeps an older code after the setup

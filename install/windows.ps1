@@ -20,7 +20,7 @@
 				if ($LASTEXITCODE -ne 0) {
 					Say 'Installing WSL2, which Docker needs. Windows asks for administrator rights.'
 					$wsl = Start-Process wsl.exe -ArgumentList '--install', '--no-distribution' -Verb RunAs -Wait -PassThru -ErrorAction Stop
-					if ($wsl.ExitCode -ne 0) { Stop-Install 'WSL2 was not installed (the message is in its window).' 'run Windows Update, then paste the line again.' }
+					if ($wsl.ExitCode -notin 0, 3010) { Stop-Install 'WSL2 was not installed (the message is in its window).' 'run Windows Update, then paste the line again.' }
 					Say 'Restart Windows now, then open PowerShell and paste the line again: it continues here.'
 					return
 				}
@@ -54,7 +54,7 @@
 		$code = & docker logs dwello-backend 2>&1 | Select-String 'Einrichtungscode: ([A-Z0-9-]+)' | Select-Object -Last 1
 		Say 'Dwello runs at http://localhost:3000 and opens in the browser.'
 		# only while the setup is still open: the log keeps an older code after the setup
-		$open = try { (Invoke-WebRequest -UseBasicParsing -MaximumRedirection 0 'http://localhost:3000/setup').StatusCode -eq 200 } catch { $false }
+		$open = try { (Invoke-WebRequest -UseBasicParsing -MaximumRedirection 0 'http://localhost:3000/setup' -ErrorAction Stop).StatusCode -eq 200 } catch { $false }
 		if ($code -and $open) { Say "Einrichtungscode for «Dwello einrichten»: $($code.Matches[0].Groups[1].Value)" }
 		Start-Process 'http://localhost:3000'
 	} catch {
