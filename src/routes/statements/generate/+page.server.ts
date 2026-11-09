@@ -57,8 +57,8 @@ async function defaults(
 
 export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
 	const [buildings, heatingProfiles] = await Promise.all([
-		json(fetch, 'buildings?limit=1000'),
-		json(fetch, 'heating-profiles?limit=1000') // all of them (#588)
+		json(fetch, 'buildings?limit=all'),
+		json(fetch, 'heating-profiles?limit=all') // all of them (#588)
 	]);
 	const buildingList = (buildings.buildings ?? []) as (Building & { apartmentCount: number })[];
 	const chosen = await defaults(fetch, url, buildingList as unknown as Row[]);

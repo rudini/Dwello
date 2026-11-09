@@ -33,7 +33,7 @@ export function toDistributionKey(d: DistributionKeyRow): DistributionKey {
 export async function listDistributionKeys(
 	fetch: typeof globalThis.fetch
 ): Promise<DistributionKey[]> {
-	const response = await fetch(`${API}?limit=1000`); // all of them (#588)
+	const response = await fetch(`${API}?limit=all`); // all of them (#588)
 	if (!response.ok) throw error(response.status, m.keys_load_failed());
 	const { data = [] }: { data?: DistributionKeyRow[] } = await response.json();
 	return data.map(toDistributionKey);

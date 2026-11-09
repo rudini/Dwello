@@ -11,8 +11,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const get = (path: string) => fetch(`${API}/${path}`).then((response) => response.json());
 	const [config, heatingProfiles, distributionKeys, { backup }] = await Promise.all([
 		get('config'),
-		get('heating-profiles?limit=1000'), // all of them (#588)
-		get('distribution-keys?limit=1000'),
+		get('heating-profiles?limit=all'), // all of them (#588)
+		get('distribution-keys?limit=all'),
 		backupState(fetch)
 	]);
 

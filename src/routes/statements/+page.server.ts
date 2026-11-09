@@ -95,7 +95,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 			fetch,
 			`${BACKEND_URL}/api/v1/statements/counts${counted.size ? `?${counted}` : ''}`
 		),
-		backendJson(fetch, `${BACKEND_URL}/api/v1/buildings?limit=1000`),
+		backendJson(fetch, `${BACKEND_URL}/api/v1/buildings?limit=all`),
 		// without the sentence the list still shows, as when the contract is gone
 		contractId ? contractScope(fetch, contractId).catch(() => null) : null
 	]);

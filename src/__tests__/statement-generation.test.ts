@@ -21,6 +21,8 @@ import contractAgreements from '../../tests/contracts/contract-agreements.json';
 import category from '../../tests/contracts/category.json';
 import building from '../../tests/contracts/building.json';
 
+import { overLimit, page } from './helpers/paged-list';
+
 const API = 'http://localhost:3001/api/v1';
 const period = {
 	buildingIds: ['b1'],
@@ -78,7 +80,7 @@ function backend(
 		});
 	// the reads by their address; the run of any period of b1
 	const reads: Record<string, () => Response> = {
-		[`${API}/statements?buildingId=b1&limit=1000`]: () => Response.json({ data: statements }),
+		[`${API}/statements?buildingId=b1&limit=all`]: () => Response.json({ data: statements }),
 		[`${API}/contracts?buildingId=b1&limit=1000`]: () => Response.json({ contracts: inBuilding }),
 		[`${API}/buildings/b1`]: () => Response.json(building)
 	};
@@ -338,9 +340,28 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		// each category compared with the same dates one year earlier
 		expect(urls).toContain(`${API}/invoices/completeness/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
 		// statements of the building whose period overlaps the chosen one
-		expect(urls).toContain(`${API}/statements?buildingId=b2&limit=1000`);
+		expect(urls).toContain(`${API}/statements?buildingId=b2&limit=all`);
 		// the invoices the statement takes: by Leistungszeitraum, otherwise by Rechnungsdatum
 		expect(urls[0]).toBe(`${API}/invoices/for-statement/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
+	});
+
+	// #1337: the statement history grows every year; the run counts every one of the building, also above 1000
+	it('zählt alle 1001 Abrechnungen des Gebäudes in der Periode', async () => {
+		const overlapping = overLimit((i) => ({
+			id: `s${i}`,
+			periodStart: '2024-01-01',
+			periodEnd: '2024-12-31'
+		}));
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('/for-statement/')
+					? []
+					: url.includes('/statements?')
+						? { data: page(url, overlapping) }
+						: invoiceCompleteness
+			)) as typeof globalThis.fetch;
+
+		expect(await invoicesInPeriod(fetch, period)).toMatchObject([{ statements: 1001 }]);
 	});
 
 	// Die Rechnung vom Januar 2025 für das 4. Quartal 2024 deckt das Ende der Periode ab, nicht den Januar
@@ -633,7 +654,7 @@ describe('Vereinbarte Nebenkosten der Mietverträge des Laufs', () => {
 				overlap: [],
 				skipped: []
 			});
-		if (url === `${API}/categories?limit=1000`) return Response.json({ categories: names });
+		if (url === `${API}/categories?limit=all`) return Response.json({ categories: names });
 		return Response.json(contractAgreements);
 	}) as typeof globalThis.fetch;
 

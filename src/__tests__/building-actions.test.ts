@@ -328,7 +328,7 @@ describe('Gebäudeliste', () => {
 			fetch
 		} as never)) as { buildings: { reletStarts: string[]; reservedCount: number; discontinuedCount: number }[] };
 
-		expect(urls).toContain('http://localhost:3001/api/v1/apartments?limit=1000');
+		expect(urls).toContain('http://localhost:3001/api/v1/apartments?limit=all');
 		expect(data.buildings[0]).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 0, discontinuedCount: 1 });
 	});
 

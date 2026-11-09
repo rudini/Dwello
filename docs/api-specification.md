@@ -43,7 +43,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 - **Schema validation:** a body, query or path parameter that fails the Elysia `t` schema returns **422** `{ error: 'Invalid request', code: 'VALIDATION_ERROR', params: {} }` (one `onError` in `backend/src/app.ts`); the UI shows `backend_validation_error`.
 - **Not found:** a path id that is no UUID (`/buildings/abc`) names no record and returns **404** `{ error: 'Not found', code: 'NOT_FOUND', params: {} }` before its schema or the database sees it; so does an unknown route.
 - **Types:** IDs are UUID strings. Money, area, rooms and percentages stored as `numeric` are **strings** (`"450.00"`). Dates are `YYYY-MM-DD`; timestamps ISO 8601.
-- **Pagination:** `limit` and `offset` query parameters (strings parsed as integers). Default `limit` per router is noted below. There is no sorting parameter; each list has a fixed order.
+- **Pagination:** `limit` and `offset` query parameters (strings parsed as integers). Default `limit` per router is noted below. `limit=all` lists every record (the lists of buildings, apartments, tenants, categories, distribution keys, heating profiles and statements; the BFF's loads that need every record, #1337). There is no sorting parameter; each list has a fixed order.
 - **Delete:** success is **204** with an empty body.
 - **Status codes used:** 200, 201 (create), 204 (delete), 400 (business rule or bad input), 401, 404, 409 (conflict with existing data), 422 (schema), 500, 503 (LLM unavailable on recategorize).
 

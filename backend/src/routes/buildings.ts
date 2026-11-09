@@ -29,6 +29,7 @@ import {
 } from '../services/fuel-stock.service';
 import { numberTakenError } from './apartments';
 import { FIRST_MONTH, type AccountingPeriodType } from '../services/period-types';
+import { pageLimit } from './page-limit';
 
 const fuelStockParams = t.Object({ id: t.String({ format: 'uuid' }) });
 
@@ -82,7 +83,7 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 				search: query.search,
 				city: query.city,
 				canton: query.canton,
-				limit: query.limit ? parseInt(query.limit, 10) : undefined,
+				limit: pageLimit(query.limit),
 				offset: query.offset ? parseInt(query.offset, 10) : undefined
 			};
 			return await listBuildings(filters);

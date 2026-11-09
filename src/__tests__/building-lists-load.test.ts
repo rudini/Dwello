@@ -36,7 +36,7 @@ describe('Gebäudelisten', () => {
 				fetch
 			}).catch(() => {});
 
-			expect(urls).toContain('http://localhost:3001/api/v1/buildings?limit=1000');
+			expect(urls).toContain('http://localhost:3001/api/v1/buildings?limit=all');
 		}
 	);
 });
