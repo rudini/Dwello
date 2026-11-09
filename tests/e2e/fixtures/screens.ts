@@ -138,7 +138,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-other-period', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'uncalculable-keys', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', otherPeriodBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-other-period', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'discontinued-figure', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'uncalculable-keys', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', otherPeriodBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -294,6 +294,18 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	// #1221: in 2025 a custom key divides by zero at K1's 3.5 rooms; the wizard's preview refuses
 	await seed.distributionKey('Zimmerformel', '1 / (({rooms} - 3.5) * ({rooms} - 3.5))');
 	await seed.invoiceOnByKey('Kreuzweg', 'Hauswart', '900.00', '2025-06-30', seed.names.get('Zimmerformel')!);
+	// #1309: a draft (2023) and a sent statement (2024) whose key divides by zero at L1's 3.5 rooms since it changed
+	await seed.building('Lärchenweg', 'Winterthur');
+	await seed.apartment('Lärchenweg', 'L1', 'vacant');
+	await seed.tenant('Ruth');
+	await seed.contract('Ruth', 'L1', { startDate: '2023-01-01', baseRent: '1200.00' });
+	await seed.distributionKey('Raumformel', '{rooms}');
+	for (const year of [2023, 2024]) {
+		await seed.invoiceOnByKey('Lärchenweg', 'Hauswart', '600.00', `${year}-06-30`, 'Raumformel');
+		await seed.statement('Ruth', 'Lärchenweg', year);
+	}
+	await seed.sendStatement('Ruth', 2024);
+	await seed.keyFormula('Raumformel', '1 / (({rooms} - 3.5) * ({rooms} - 3.5))');
 	// empty since a tenancy ended long before any statement: «Leer seit», «Frühere Mietverträge» (#145, #117)
 	await seed.apartment('Bergsicht', '2.02', 'vacant');
 	await seed.tenant('Emil');
@@ -326,6 +338,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.building('Ahornweg', 'Winterthur');
 	await seed.accountingPeriod('Ahornweg', 'november-october');
 	await seed.apartment('Ahornweg', '4.01', 'vacant');
+	// #1311: no longer exists since 01.01.2026: its pages show «Aufgehoben seit …» without «Mietvertrag erfassen» and a fixed status
+	await seed.apartment('Ahornweg', '8.01', 'vacant');
+	await seed.discontinueApartment('8.01', '2026-01-01');
 	await seed.tenant('Vera');
 	await seed.contract('Vera', '4.01', { startDate: '2019-11-01', baseRent: '1100.00' });
 	await seed.statement('Vera', 'Ahornweg', 2020, 'Standard', ['2019-11-01', '2020-10-31']);
@@ -385,6 +400,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
 		partsStatement: seed.idOf('Abrechnung Greta 2025'),
 		splitStatement: seed.idOf('Abrechnung Pia 2023'),
+		uncalculableDraft: seed.idOf('Abrechnung Ruth 2023'), // #1309
+		uncalculableSent: seed.idOf('Abrechnung Ruth 2024'),
 		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
@@ -403,6 +420,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		undeliveredTenant: seed.idOf('Hugo'), // #736
 		undeliveredStatement: seed.idOf('Abrechnung Hugo 2023'),
 		freeApartment: seed.idOf('1.03'),
+		discontinuedApartment: seed.idOf('8.01'),
 		resizedApartment: seed.idOf('U.01'), // #1301
 		limitedApartment: seed.idOf('1.04'),
 		earlierContract: seed.idOf('Mietvertrag Vreni'),

@@ -190,6 +190,11 @@ export function testData(api: CallTheApi) {
 			await put(`apartments/${ids.get(number)}`, { area, rooms, sizeFrom });
 		},
 
+		// #1328: Fläche and Zimmeranzahl corrected, without a day
+		async correctApartmentSize(number: string, area: string, rooms: string) {
+			await put(`apartments/${ids.get(number)}`, { area, rooms });
+		},
+
 		async tenant(title: string) {
 			const [, token] = unique(title).split(/ (?=[^ ]+$)/);
 			const tenant = await post('tenants', { firstName: title, lastName: token });
@@ -510,6 +515,11 @@ export function testData(api: CallTheApi) {
 			extras.push(`heating-profiles/${profile.id}`);
 		},
 
+		// The landlord saves names in other languages for an own profile later, e.g. { nameFR: '…' } (#689)
+		async translateHeatingProfile(title: string, translations: object) {
+			await put(`heating-profiles/${ids.get(title)}`, translations);
+		},
+
 		// The landlord renames an own profile later (#229)
 		async renameHeatingProfile(title: string, newTitle: string) {
 			await put(`heating-profiles/${ids.get(title)}`, { name: unique(newTitle) });
@@ -572,7 +582,7 @@ export function testData(api: CallTheApi) {
 		async invoiceOnByKey(buildingTitle: string, categoryName: string, amount: string, date: string, keyName: string) {
 			const category = await predefinedCategory(categoryName);
 			const key = (await get('distribution-keys?limit=100')).data.find((k: { nameDE: string }) => k.nameDE === keyName);
-			const id = await invoice(buildingTitle, { categoryId: category.id, distributionKeyId: key.id }, `${categoryName} ${date}`, amount, date);
+			const id = await invoice(buildingTitle, { categoryId: category.id, distributionKeyId: ids.get(keyName) ?? key.id }, `${categoryName} ${date}`, amount, date);
 			ids.set(`Rechnung ${categoryName} ${date}`, id);
 		},
 
@@ -608,7 +618,8 @@ export function testData(api: CallTheApi) {
 			restores.push(() => put(`categories/${category.id}`, { isAllowedUtilityCost: category.isAllowedUtilityCost }));
 		},
 
-		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
+		category: (title: string, isAllowedUtilityCost: boolean, translations: object = {}) =>
+			addCategory(title, () => ({ isAllowedUtilityCost, ...translations })),
 		categoryWithSortOrder: (title: string, sortOrder: number) => addCategory(title, () => ({ isAllowedUtilityCost: true, sortOrder })),
 		// #1123: an allocable category the list shows right after another one, whatever other workers add or remove:
 		// its name is the other's with the rest of its title, and only names that begin with the other's sort in between
@@ -731,11 +742,17 @@ export function testData(api: CallTheApi) {
 			await put(`invoices/${id}`, { llmCategoryId: categoryId, llmConfidence: '0.9' });
 		},
 
-		async distributionKey(title: string, formula: string) {
+		// translations: e.g. { nameFR: 'Selon le volume' } (#689)
+		async distributionKey(title: string, formula: string, translations: object = {}) {
 			const name = unique(title);
-			const key = await post('distribution-keys', { name, nameDE: name, type: 'custom', formula });
+			const key = await post('distribution-keys', { name, nameDE: name, type: 'custom', formula, ...translations });
 			ids.set(title, key.id);
 			extras.push(`distribution-keys/${key.id}`);
+		},
+
+		// #1328: a custom key's formula changed afterwards
+		async keyFormula(title: string, formula: string) {
+			await put(`distribution-keys/${ids.get(title)}`, { formula });
 		},
 
 		async invoiceByKey(buildingTitle: string, keyTitle: string, date = '2026-03-31') {

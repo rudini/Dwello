@@ -14,14 +14,16 @@ const APARTMENTS = '/apartments';
 export const openApartmentList = Navigate.to(APARTMENTS);
 
 // The filter navigates on the client; the list is filtered once the URL carries the building
-const filteredBy = (buildingId: string) => Wait.forUrl((url) => url.searchParams.get('building') === buildingId);
+// the status too: a second search in the same building waits for its own list (code review 1311-1 C-4)
+const filteredBy = (buildingId: string, status = '') =>
+	Wait.forUrl((url) => url.searchParams.get('building') === buildingId && (url.searchParams.get('status') ?? '') === status);
 
 export const showApartmentsOfBuilding = (buildingId: string, status = ''): Activity => (actor) =>
 	actor.attemptsTo(
 		Select.option(buildingId).from(apartmentBuildingFilter),
 		Select.option(status).from(apartmentStatusFilter),
 		Click.on(apartmentSearchButton),
-		filteredBy(buildingId)
+		filteredBy(buildingId, status)
 	);
 
 // The building is chosen before the page is hydrated; the search runs once it is

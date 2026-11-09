@@ -219,7 +219,7 @@
 		},
 		{
 			"path": "src/routes/statements/[id]/+page.svelte",
-			"line": "statement.status === 'draft' && later && (later.invoices || later.fuelStock)",
+			"line": "statement.status === 'draft' && later && (later.invoices || later.fuelStock || later.values)",
 			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
 		},
 		{
@@ -618,7 +618,7 @@
 	},
 	"coChangeWarn": 26,
 	"routeQueries": {
-		"/api/v1/dashboard": 68,
+		"/api/v1/dashboard": 63,
 		"/api/v1/buildings": 3,
 		"/api/v1/apartments": 2,
 		"/api/v1/apartments/move-outs": 4,
@@ -627,7 +627,7 @@
 		"/api/v1/contracts/missing-statements": 7,
 		"/api/v1/invoices": 2,
 		"/api/v1/statements": 4,
-		"/api/v1/statements/outdated": 28,
+		"/api/v1/statements/outdated": 21,
 		"/api/v1/documents": 1,
 		"/api/v1/categories": 2,
 		"/api/v1/distribution-keys": 2,

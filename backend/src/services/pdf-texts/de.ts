@@ -75,9 +75,9 @@ export const de: Record<string, string> = {
 	partShare: 'Ihr Anteil{colon}{apartment} × Zeitanteil ({sum}) / {costs} = {share}',
 	partShareZero: 'Ihr Anteil{colon}({sum}) × {keyShare} (Anteil Ihrer Wohnung nach dem Verteilschlüssel) = {share}',
 	// #1284: a position split at the day an apartment no longer exists (Fachreview 1284-1)
-	segmentIntro: 'Wohnung {number} gibt es ab {date} nicht mehr. Bis zum {dayBefore} zählt sie im Verteilschlüssel mit; ihren Anteil trägt der Vermieter.',
+	segmentIntro: 'Wohnung {number} gibt es ab {date} nicht mehr. Bis zum {dayBefore} zählt sie im Verteilschlüssel mit; solange sie leer steht, trägt der Vermieter ihren Anteil. Ab {date} werden die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen verteilt.',
 	sizeChangeIntro: 'Wohnung {number} hat ab {date} {area} m² und {rooms} Zimmer, bis zum {dayBefore} {earlierArea} m² und {earlierRooms} Zimmer.', // #1301
-	segmentNote: 'Unter den betroffenen Abrechnungspositionen steht die Rechnung je Zeitraum.', // once below the intros (Fachreview 1301-1 V-4)
+	segmentNote: 'Unter den betroffenen Abrechnungspositionen steht die Berechnung je Zeitraum.', // once below the intros (Fachreview 1301-1 V-4)
 	keyShareSegments: 'je Zeitraum, siehe unten',
 	segmentLineDays: '{start} – {end}, {count} Wohnungen{colon}{keyShare} × CHF {costs} = CHF {apartment} × {days}/{total} Tage = CHF {share}',
 	segmentLinePercent: '{start} – {end}, {count} Wohnungen{colon}{keyShare} × CHF {costs} = CHF {apartment} × Zeitanteil {percent}\u00a0% = CHF {share}',

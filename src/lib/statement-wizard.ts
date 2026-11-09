@@ -92,6 +92,7 @@ export interface HintedInvoice {
 	invoiceDate: string;
 	amount: string;
 	categoryName?: string; // a heating invoice's category in the UI language (#339)
+	note?: string; // a remark the hint adds to the invoice (#1323)
 }
 
 export interface InvoiceCheck {
@@ -104,7 +105,8 @@ export interface InvoiceCheck {
 	heatingWithoutServicePeriod?: (HintedInvoice & { categoryId: string | null })[];
 	oldHeatingRule?: string[]; // sent statements sharing the heating costs over the period although an invoice has one (#335)
 	splitKeys?: SplitKeyHint[]; // #528: invoices whose key differs from their Kategorie's, names in the UI language
-	uncalculableKeys?: (HintedInvoice & { distributionKeyName: string })[]; // #1221: they hold the run
+	// #1221: they hold the run; why, where (#1315) and whether the invoice is the delivery whose key the Tankbestand takes (#1323)
+	uncalculableKeys?: (HintedInvoice & { distributionKeyName: string; reason: string; apartment: string | null; fuelStock?: boolean })[];
 }
 
 /** An existing statement of the run's period that misses invoices or was made with other settings (#132) */
@@ -114,6 +116,7 @@ export interface ChangedStatement {
 	tenantName: string;
 	outdated: boolean; // a draft that misses invoices of its period as they are now (#96)
 	fuelStock: boolean; // a draft whose Tankbestand changed since (#454)
+	values: boolean; // a draft an apartment or a key changed since (#1328)
 	profile: { used: string; run: string } | null;
 	profileEdited: string | null; // its Heizprofil, edited after it was created
 	fee: { used: number; now: number; source: 'run' | 'contract' | 'none' } | null;
@@ -367,8 +370,19 @@ const feeNotes = {
 };
 
 /** What changed since an existing statement was made, or what it does differently from the run, in words (#132) */
-export const changedNotes = ({ outdated, fuelStock, profile, profileEdited, fee, oldRule, heatingSum, tenantName }: ChangedStatement) =>
+export const changedNotes = ({
+	outdated,
+	fuelStock,
+	values,
+	profile,
+	profileEdited,
+	fee,
+	oldRule,
+	heatingSum,
+	tenantName
+}: ChangedStatement) =>
 	[
+		values && !outdated && !fuelStock && m.statements_existing_values(),
 		outdated && !fuelStock && m.statements_existing_outdated(),
 		fuelStock && (outdated ? m.statements_existing_outdated_fuel_stock() : m.statements_existing_fuel_stock()),
 		profile && m.statements_existing_profile(profile),

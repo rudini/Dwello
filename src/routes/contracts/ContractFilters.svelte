@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { applyFilterChoice } from '$lib/utils/list-filter';
+	import { applyFilterChoice, showAppliedFilter } from '$lib/utils/list-filter';
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import Field from '$lib/ui/Field.svelte';
@@ -21,6 +21,9 @@
 		{ value: 'future', label: m.contracts_filter_future() },
 		{ value: 'ended', label: m.contracts_filter_ended() }
 	];
+
+	let form = $state<HTMLFormElement>();
+	showAppliedFilter(() => form);
 </script>
 
 {#snippet choice(
@@ -45,6 +48,7 @@
 {/snippet}
 
 <form
+	bind:this={form}
 	method="GET"
 	action="/contracts"
 	role="search"

@@ -37,6 +37,7 @@ Funktionalität: Barrierefreiheit
       | dashboard              | backup-confirmed    |
       | dashboard              | backup-stale        |
       | dashboard              | old-address-task    |
+      | dashboard              | discontinued-figure |
       | dashboard              | first-use           |
       | dashboard              | ki-model-loading    |
       | dashboard              | ki-model-failed     |
@@ -81,6 +82,8 @@ Funktionalität: Barrierefreiheit
       | apartment-edit         | default             |
       | apartment-edit         | submit-cleared      |
       | apartment-edit         | discontinue-refused |
+      | apartment-detail-discontinued | default     |
+      | apartment-edit-discontinued | default       |
       | tenants                | default             |
       | tenants                | empty               |
       | tenants                | filtered-empty      |
@@ -254,6 +257,9 @@ Funktionalität: Barrierefreiheit
       | statement-sent-detail  | decline-dialog      |
       | statement-sent-detail  | redeliver-dialog    |
       | statement-sent-detail  | new-pdf-sent-dialog |
+      | statement-uncalculable-draft-detail | default |
+      | statement-uncalculable-draft-detail | send-dialog |
+      | statement-uncalculable-sent-detail | default |
       | statement-unaffected-detail | default        |
       | statement-declined-detail | default          |
       | statement-lowered-detail | default           |

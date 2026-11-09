@@ -98,6 +98,7 @@
 	let restoredAt = $state<Date | null>(null);
 	let dropped = $state({ buildings: 0, heatingProfile: false }); // what the draft named and is gone meanwhile
 	let resumed = $state(false); // back from "Rechnung erfassen", on the step before the preview
+	let fromInvoice = $state(false); // #1314: back from an invoice a hint of the preview named
 	let section = $state<HTMLElement>();
 	let wizard = $state<HTMLFormElement>();
 
@@ -140,7 +141,9 @@
 		restoredAt = draft.savedAt;
 		// In the step it was left in (#201); back from "Rechnung erfassen" the step before the preview, so "Weiter"
 		// calculates it anew; a building gone meanwhile is checked first, in step 2 (code review C-5)
-		const back = new URL(location.href).searchParams.get('schritt') === '3';
+		const query = new URL(location.href).searchParams;
+		const back = query.get('schritt') === '3';
+		fromInvoice = query.get('from') === 'invoice'; // #1314: an invoice a hint of the preview named, no new one
 		step = restoredStep(back ? 3 : left, selection, dropped);
 		resumed = back && step === 3;
 		// opened in a later step: the landlord starts at its name, not at the top of the page (#738)
@@ -283,7 +286,7 @@
 	<DraftNotice savedAt={restoredAt} ondiscard={discardDraft} notes={droppedNotes(dropped)}>
 		<!-- Back from "Rechnung erfassen": why the wizard shows the step before the preview -->
 		<p class:hidden={!resumed || step !== 3} data-testid="resume-notice">
-			{m.statements_resume()}
+			{fromInvoice ? m.statements_resume_invoice() : m.statements_resume()}
 		</p>
 	</DraftNotice>
 

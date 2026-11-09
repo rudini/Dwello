@@ -311,6 +311,11 @@ jobs:
       - name: Queries per route
         if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
         run: bun tools/fitness/p2-benchmark.ts --queries --format github
+      # P1 (docs/architecture/utility-tree.md, #934): the statement run of 50 apartments with its PDFs within 30 s, through
+      # the BFF; about 30 s with the build
+      - name: Statement run for 50 apartments
+        if: ${{ !cancelled() && needs.changes.outputs.app == 'true' }}
+        run: bun run fitness:p1
 
   # The axe check (@a11y, every screen and state in tests/a11y/screens.json) runs as its own check, so it can be required on its own
   # Each runs in shards (Playwright --shard) on parallel runners; the job "e2e-results" reports each under its own name

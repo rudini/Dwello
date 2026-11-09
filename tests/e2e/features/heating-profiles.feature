@@ -26,6 +26,29 @@ Funktionalität: Heizprofile
     Dann trägt der Januar im Heizprofil "20 %" der Heizkosten
     Und ergeben die Monatsanteile zusammen "100 %"
 
+  # #689: Liste und Detailseite sagen, in welchen Sprachen ein eigenes Heizprofil übersetzt ist, ohne die Namen zu nennen
+  Szenario: Liste und Detailseite zeigen, dass ein eigenes Heizprofil übersetzt ist
+    Angenommen das Heizprofil "Bergtal" hat Namen auf Französisch, Italienisch und Englisch
+    Und der Liegenschaftsverwalter ist auf der Seite "Heizprofile"
+    Dann steht beim Heizprofil "Bergtal" "Übersetzt: FR, IT, EN"
+    Wenn der Liegenschaftsverwalter das Heizprofil "Bergtal" öffnet
+    Dann steht auf der Detailseite des Heizprofils "Übersetzt: FR, IT, EN"
+
+  # #689
+  Szenario: Liste und Detailseite zeigen, dass ein eigenes Heizprofil nicht übersetzt ist
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Heizprofile"
+    Dann steht beim Heizprofil "Bergtal" "Keine Übersetzung"
+    Aber steht beim vordefinierten Heizprofil "Heizung Mittelland" nichts zur Übersetzung
+    Wenn der Liegenschaftsverwalter das Heizprofil "Bergtal" öffnet
+    Dann steht auf der Detailseite des Heizprofils "Keine Übersetzung"
+
+  # #689: vordefinierte Heizprofile sind immer übersetzt und zeigen keinen Hinweis
+  Szenario: Die Detailseite eines vordefinierten Heizprofils zeigt nichts zur Übersetzung
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Heizprofile"
+    Wenn der Liegenschaftsverwalter das Heizprofil "Heizung Mittelland" öffnet
+    Dann ergeben die Monatsanteile zusammen "100 %"
+    Aber steht auf der Detailseite des Heizprofils nichts zur Übersetzung
+
   Szenario: Heizprofil erfassen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neues Heizprofil"
     Wenn der Liegenschaftsverwalter das Heizprofil "Seeufer" mit "16.4" % im Januar und je "7.6" % in den übrigen Monaten erfasst

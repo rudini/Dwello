@@ -44,7 +44,8 @@ async function toReconciliation(fetch: Fetch, body: Body): Promise<Reconciliatio
 		nonAllocable: body.nonAllocable,
 		withoutStatement: body.withoutStatement ?? 0,
 		drafts: body.drafts ?? [],
-		notUpToDate: body.notUpToDate ?? []
+		notUpToDate: body.notUpToDate ?? [],
+		keyNotCalculable: body.keyNotCalculable ?? []
 	};
 }
 

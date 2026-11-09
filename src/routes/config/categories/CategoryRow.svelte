@@ -5,6 +5,7 @@
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import CategoryReason from './CategoryReason.svelte';
+	import TranslationMarker from '$lib/TranslationMarker.svelte';
 
 	let { category, ondelete }: { category: CategoryWithUsage; ondelete: () => void } = $props();
 
@@ -29,6 +30,9 @@
 		<!-- The predefined categories' descriptions are English; only own ones are shown -->
 		{#if category.description && !category.predefined}
 			<p class="text-ink-muted" data-testid="category-description">{category.description}</p>
+		{/if}
+		{#if !category.predefined}
+			<TranslationMarker names={category} testid="category-translations" />
 		{/if}
 		<CategoryReason {category} />
 	</div>

@@ -26,7 +26,9 @@ export const load: PageServerLoad = ({ url }) => {
 	// not their «Laden Sie die Seite neu»: here that shows this page again (personas 1093 P-1)
 	const deleted: Record<string, () => string> = {
 		INVOICE_NOT_FOUND: m.documents_refused_invoice_gone,
-		DOCUMENT_NOT_FOUND: m.documents_refused_document_gone
+		DOCUMENT_NOT_FOUND: m.documents_refused_document_gone,
+		// #1333: its refusal names the key and the invoices, which the page does not get (Fachreview 1333-2)
+		STATEMENT_KEY_NOT_CALCULABLE: m.documents_refused_key_not_calculable
 	};
 	// only the code's own entry: `__proto__` and the like name what every object has (fallback review of #1107)
 	const of = <T>(table: Record<string, T>) =>

@@ -4,7 +4,11 @@ import { readable } from 'svelte/store';
 import { flushSync } from 'svelte';
 
 vi.mock('$app/environment', () => ({ browser: true }));
-vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn(),
+	invalidateAll: vi.fn(),
+	afterNavigate: vi.fn()
+}));
 let url = new URL('http://localhost/invoices?search=Hauswart');
 vi.mock('$app/stores', () => ({
 	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }

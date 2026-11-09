@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
 
 let url = new URL('http://localhost/apartments');
-vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
 vi.mock('$app/stores', () => ({
 	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
 }));
@@ -474,6 +474,17 @@ describe('Wohnungsdetail', () => {
 		expect(byTestId('contract-history-row')!.textContent).toContain('ab 01.11.2099, unbefristet');
 		// a later contract can still be recorded, but it is no longer the next step
 		expect(byTestId('apartment-new-contract')!.className).not.toContain('bg-accent ');
+	});
+
+	// #1311: eine aufgehobene Wohnung ist nicht vermietbar
+	it('bietet bei einer aufgehobenen Wohnung keinen Mietvertrag an', () => {
+		const data = details(false);
+		const apartment = { ...data.apartment, status: 'discontinued', discontinuedFrom: '2025-07-01' };
+		show(ApartmentPage, { data: { ...data, apartment } } as never);
+
+		expect(byTestId('apartment-info-status')!.textContent).toContain('Aufgehoben seit 01.07.2025');
+		expect(byTestId('apartment-info-status')!.textContent).not.toContain('Nebenkosten einer leeren Wohnung');
+		expect(byTestId('apartment-new-contract')).toBeNull();
 	});
 
 	it('bietet bei einer leeren Wohnung den Mietvertrag als nächsten Schritt an', () => {

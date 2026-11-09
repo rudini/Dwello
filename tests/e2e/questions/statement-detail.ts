@@ -19,6 +19,8 @@ import {
 	redeliverButton,
 	newPdfToSend,
 	declineCorrectionButton,
+	laterCorrectButton,
+	laterKeyInvoice,
 	correctPaidAmountInput,
 	earlyPaidDateWarning,
 	paymentDeadline,
@@ -175,6 +177,7 @@ export const letterInsteadOffers = Count.of(letterInsteadLink);
 
 // #454 (Fachreview 454-1 E-6)
 export const declineCorrectionOffered = Count.of(declineCorrectionButton);
+export const correctionFromHintOffered = Count.of(laterCorrectButton); // #1309: not while a key cannot be calculated
 
 // what «Als bezahlt markieren» says about a part paid (#523)
 export const partialPaymentAdvice = Text.of(partialPaymentHint);
@@ -197,5 +200,6 @@ export const paymentDone = Text.of(successToast);
 
 export const discontinuedNoteText = Text.of(discontinuedNote);
 export const sizeChangeNoteText = Text.of(sizeChangeNote); // #1301
+export const laterKeyInvoiceText = (date: string) => Text.of(laterKeyInvoice(date)); // #1309
 /** #658: what the detail page's cost breakdown hides sideways; 0 when every column shows */
 export const detailCostsHiddenSideways = HiddenSideways.within(costBreakdown);

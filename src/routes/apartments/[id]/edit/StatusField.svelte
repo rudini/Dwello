@@ -4,17 +4,27 @@
 	import { statusHelp, statusLabels, statusText } from '$lib/apartment';
 	import EarlySelect from '$lib/ui/EarlySelect.svelte';
 
-	let { apartment }: { apartment: { status: ApartmentStatus; nextContractStart: string | null } } =
-		$props();
-	// Vermietet and Vermietet ab follow from the rental contracts; only Leer and Gesperrt are set by hand
-	const rented = $derived(apartment.status === 'occupied' || apartment.status === 'relet');
+	let {
+		apartment
+	}: {
+		apartment: {
+			status: ApartmentStatus;
+			nextContractStart: string | null;
+			discontinuedFrom?: string | null;
+		};
+	} = $props();
+	// Vermietet and Vermietet ab follow from the rental contracts, Aufgehoben from «Aufgehoben ab» (#1311); only Leer
+	// and Gesperrt are set by hand
+	const fixed = $derived(apartment.status !== 'vacant' && apartment.status !== 'reserved');
 </script>
 
-{#if rented}
+{#if fixed}
 	<div class="flex flex-col gap-2">
 		<p class="font-semibold text-ink">{m.apartments_status()}</p>
 		<p class="text-ink-muted">
-			{m.apartments_status_fixed()}
+			{apartment.status === 'discontinued'
+				? m.apartments_status_fixed_discontinued()
+				: m.apartments_status_fixed()}
 		</p>
 		<p class="rounded-control bg-sunken px-4 py-2 text-ink" data-testid="apartment-status-rented">
 			{statusText(apartment)}

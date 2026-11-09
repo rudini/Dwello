@@ -32,7 +32,8 @@
 	"distributionKey": {
 		"id": "k1",
 		"name": "Per Area (m²)",
-		"nameDE": "Pro Fläche (m²)"
+		"nameDE": "Pro Fläche (m²)",
+		"formula": "{area}"
 	},
 	"llmCategory": {
 		"id": "c1",

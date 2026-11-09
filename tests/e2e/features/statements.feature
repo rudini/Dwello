@@ -246,6 +246,19 @@ Funktionalität: Nebenkostenabrechnungen
     Dann steht unter den Statusfiltern "Die Liste unten zeigt 11 Abrechnungen mit dem Status «Entwurf»."
     Und steht über der Abrechnungsliste "Abrechnung 11 von 11 mit dem Status «Entwurf», Seite 2 von 2"
 
+  # #680: die Suche zeigt immer genau, wonach die Liste gefiltert ist; ein nicht gesuchter Text fällt weg
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn die Abrechnungsliste über die Hauptnavigation wieder geöffnet wird
+    Wenn der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Nebenkostenabrechnungen" wählt
+    Dann zeigt die Suche ""
+
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn der Browser die Abrechnungsliste wieder zeigt
+    Wenn der Liegenschaftsverwalter die Abrechnungen von "Anna Keller" sucht
+    Und der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet
+    Und der Liegenschaftsverwalter im Browser zurückgeht
+    Dann zeigt die Suche "Anna Keller"
+
   # #658 (Decided): Filter und Zeilen richten sich nach der Breite ihres Bereichs, nicht des Fensters; nichts ist abgeschnitten
   Szenariogrundriss: Die Abrechnungsliste zeigt bei jeder Breite alles ganz
     Angenommen das Browserfenster ist <Breite> Pixel breit

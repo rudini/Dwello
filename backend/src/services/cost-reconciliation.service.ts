@@ -178,7 +178,8 @@ export async function reportReconciliation(buildingId: string, period: Range): P
 			.length,
 		// PO 05.11.2026 (persona Sven 1126 P-2): named by their tenants, as the statements not up to date
 		drafts: named(statements.filter((s) => s.status === 'draft')),
-		notUpToDate: named(outdated)
+		notUpToDate: named(outdated.changed),
+		keyNotCalculable: named(outdated.keyNotCalculable) // #1309: a note of its own (Fachreview 1309-1)
 	};
 }
 

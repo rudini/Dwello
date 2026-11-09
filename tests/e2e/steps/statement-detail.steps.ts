@@ -21,6 +21,8 @@ import {
 	invoicesOfPosition,
 	laterInvoicesHint,
 	laterInvoicesHints,
+	correctionFromHintOffered,
+	laterKeyInvoiceText,
 	declineCorrectionOffered,
 	declineCorrectionQuestion,
 	languageOfPdf,
@@ -119,7 +121,9 @@ import {
 	askToRedeliver,
 	redeliverByLetter,
 	markNewPdfSent,
-	stayAtMoreActions
+	stayAtMoreActions,
+	editLaterKeyInvoice,
+	tryToGenerateStatementPdf
 } from '../tasks/statement-detail';
 import { focusedText } from '../questions/app-frame';
 import { inDays, swissDate } from '../fixtures/dates';
@@ -305,6 +309,10 @@ When('der Liegenschaftsverwalter das PDF der Abrechnung erstellt', async ({ verw
 	await verwalter.attemptsTo(generateStatementPdf);
 });
 
+When('der Liegenschaftsverwalter das PDF der Abrechnung zu erstellen versucht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(tryToGenerateStatementPdf);
+});
+
 When('der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(downloadStatementPdf);
 });
@@ -485,6 +493,21 @@ When('der Liegenschaftsverwalter die Abrechnung nicht berichtigt', async ({ verw
 // after a positive check on the same page
 Then('bietet die Abrechnung «Nicht berichtigen» nicht mehr an', async ({ verwalter }) => {
 	await verwalter.sees(declineCorrectionOffered).toBe(0);
+});
+
+Then(
+	'nennt der Hinweis auf Änderungen seit dem Erstellen die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(laterKeyInvoiceText(date)).toContain(amount);
+	}
+);
+
+When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis auf der Abrechnung bearbeitet', async ({ verwalter }, date: string) => {
+	await verwalter.attemptsTo(editLaterKeyInvoice(date));
+});
+
+Then('bietet der Hinweis auf Änderungen seit dem Erstellen das Berichtigen nicht an', async ({ verwalter }) => {
+	await verwalter.sees(correctionFromHintOffered).toBe(0);
 });
 
 

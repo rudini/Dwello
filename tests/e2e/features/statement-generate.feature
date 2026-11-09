@@ -318,11 +318,34 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann nennt der Hinweis auf nicht berechenbare Verteilschlüssel die Rechnung vom "30.09.2024" über "900.00"
-    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "Diese Rechnungen haben einen Verteilschlüssel, der sich für die Wohnungen ihres Gebäudes nicht berechnen lässt: «Halbe Zimmer». Die Formel muss für jede Wohnung eine Zahl von 0 oder mehr ergeben und für mindestens eine Wohnung mehr als 0."
+    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "Die Formel von «Halbe Zimmer» teilt für die Wohnung 3.01 im Gebäude «Lindenhof» durch null."
+    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist."
     Wenn der Liegenschaftsverwalter zum Erstellen weitergeht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen."
     Und steht der Fokus auf der Fehlermeldung
     Und ist der Assistent im Schritt "Vorschau"
+
+  # #1323: die Veränderung des Tankbestands nimmt den Verteilschlüssel der letzten Lieferung bis zum Ende der Periode,
+  # auch aus einer früheren Periode; lässt er sich nicht berechnen, hält er die Vorschau an wie eine Rechnung der Periode
+  Szenario: Der Verteilschlüssel einer früheren Lieferung hält die Vorschau an, wenn er die Veränderung Tankbestand verteilt
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "800" Franken vom "2023-10-15" nach dem Verteilschlüssel "Halbe Zimmer"
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt der Hinweis auf nicht berechenbare Verteilschlüssel die Rechnung vom "15.10.2023" über "800.00"
+    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "Lieferung aus einer anderen Abrechnungsperiode: Nach ihrem Verteilschlüssel verteilt Dwello die Veränderung Tankbestand."
+
+  # #1336: die Prüfung zählt die Wohnungen, die die Berechnung zählt; eine Wohnung, die vor der Periode aufgehoben
+  # ist, hält den Lauf nicht an (#1284)
+  Szenario: Ein Verteilschlüssel, der nur für eine aufgehobene Wohnung nicht aufgeht, hält die Vorschau nicht an
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02" mit 55 m²
+    Und die Wohnung "3.02" ist aufgehoben ab "2024-01-01"
+    Und es gibt den Verteilschlüssel "Ohne 3.02" mit der Formel "1 / (({area} - 55) * ({area} - 55))"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Ohne 3.02" verteilt wird
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann ist der Assistent im Schritt "Erstellen"
 
   Szenario: Rechnung mit einem nicht berechenbaren Verteilschlüssel aus der Vorschau öffnen
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
@@ -865,6 +888,16 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
     Und der Liegenschaftsverwalter die Rechnung vom "31.03.2024" aus dem Hinweis bearbeitet
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
+
+  # #1314 (Personas Helga 1221 P-4, Marco 1221 P-5): zurück von einer Rechnung aus einem Hinweis der Vorschau sagt der
+  # Assistent, dass er die Vorschau mit den Rechnungen neu berechnet, wie sie jetzt sind, nicht mit einer neuen Rechnung
+  Szenario: Zurück von einer Rechnung aus der Vorschau sagt der Assistent, wie es weitergeht
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter die Rechnung vom "20.01.2025" aus dem Hinweis bearbeitet
+    Und der Liegenschaftsverwalter die Bearbeitung abbricht
+    Dann ist der Assistent im Schritt "Heizprofil und Verwaltungspauschale"
+    Und sagt der Assistent nach der Rückkehr "Mit «Weiter» berechnet Dwello die Vorschau neu, mit den Rechnungen, wie sie jetzt sind."
 
   # #738: der Schritt «Gebäude» sagt, was er nicht laden konnte, statt ein Gebäude ohne Rechnungen zu zeigen
   Szenario: Die Wahl der Gebäude sagt, wenn die Rechnungen nicht gezählt werden konnten

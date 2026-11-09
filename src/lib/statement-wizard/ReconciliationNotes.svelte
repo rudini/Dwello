@@ -10,6 +10,7 @@
 	const without = $derived(reconciliation.withoutStatement);
 	const drafts = $derived(reconciliation.drafts);
 	const outdated = $derived(reconciliation.notUpToDate);
+	const keyed = $derived(reconciliation.keyNotCalculable ?? []); // #1309, a line of its own (Fachreview 1309-1)
 	const draftsText = (statements: string) =>
 		drafts.length === 1
 			? m.reports_note_drafts_one({ statements })
@@ -18,9 +19,13 @@
 		outdated.length === 1
 			? m.reports_note_not_current_one({ statements })
 			: m.reports_note_not_current_many({ count: outdated.length, statements });
+	const keyedText = (statements: string) =>
+		keyed.length === 1
+			? m.reports_note_key_one({ statements })
+			: m.reports_note_key_many({ count: keyed.length, statements });
 </script>
 
-{#if without || drafts.length || outdated.length}
+{#if without || drafts.length || outdated.length || keyed.length}
 	<ul class="flex flex-col gap-2 text-ink">
 		{#if without}
 			<li data-testid="cost-reconciliation-note">
@@ -34,6 +39,9 @@
 		{/if}
 		{#if outdated.length}
 			<LinkedNote text={outdatedText} statements={outdated} />
+		{/if}
+		{#if keyed.length}
+			<LinkedNote text={keyedText} statements={keyed} />
 		{/if}
 	</ul>
 {/if}

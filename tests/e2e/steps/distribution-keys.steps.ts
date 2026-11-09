@@ -1,5 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { translationsIn } from '../fixtures/translations';
 import {
 	formulaMarkedInvalid,
 	formulaOf,
@@ -12,7 +13,9 @@ import {
 	keyListed,
 	listedKeysNamed,
 	nameProblem,
-	shareOfSample
+	shareOfSample,
+	translationMarkers,
+	translationsOf
 } from '../questions/distribution-keys';
 import { pageTitle } from '../questions/navigation';
 import { confirmedNames } from '../questions/app-frame';
@@ -37,6 +40,14 @@ Given(
 	'es gibt den Verteilschlüssel {string} mit der Formel {string}',
 	async ({ seed }, title: string, formula: string) => {
 		await seed.distributionKey(title, formula);
+	}
+);
+
+// #1328
+Given(
+	'der Verteilschlüssel {string} hat danach die Formel {string}',
+	async ({ seed }, title: string, formula: string) => {
+		await seed.keyFormula(title, formula);
 	}
 );
 
@@ -221,3 +232,23 @@ When('der Liegenschaftsverwalter den Baustein {string} übernimmt', async ({ ver
 When('der Liegenschaftsverwalter {string} weiterschreibt', async ({ verwalter }, text: string) => {
 	await verwalter.attemptsTo(typeOn(text));
 });
+
+Given(
+	'es gibt den Verteilschlüssel {string} mit der Formel {string} und Namen auf {word} und {word}',
+	async ({ seed }, title: string, formula: string, first: string, second: string) => {
+		await seed.distributionKey(title, formula, translationsIn(`${first} und ${second}`, title));
+	}
+);
+
+Then('steht beim Verteilschlüssel {string} {string}', async ({ verwalter, names }, title: string, text: string) => {
+	await verwalter.sees(translationsOf(names.get(title)!)).toBe(text);
+});
+
+// A predefined key has its names in every language: the list says nothing about them
+Then(
+	'steht beim vordefinierten Verteilschlüssel {string} nichts zur Übersetzung',
+	async ({ verwalter }, name: string) => {
+		await verwalter.sees(keyListed(name)).toBe(true);
+		await verwalter.sees(translationMarkers(name)).toBe(0);
+	}
+);

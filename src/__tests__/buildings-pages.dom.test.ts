@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
 
 let url = new URL('http://localhost/buildings');
-vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
 vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
 vi.mock('$app/stores', () => ({
 	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
@@ -105,6 +105,15 @@ describe('Gebäudeliste', () => {
 		expect(words).toContain('1 vermietet ab 01.11.2099');
 		expect(words).toContain('1 leer');
 		expect(words).toContain('1 gesperrt');
+	});
+
+	// #1311: eine aufgehobene Wohnung zählt bei den Wohnungen wie in der Liste, aber nicht als leer (Persona Helga 1311 P-1)
+	it('zählt eine aufgehobene Wohnung bei den Wohnungen als eigenen Teil, nicht als leer', () => {
+		list([building({ apartmentCount: 3, occupiedCount: 1, vacantCount: 1, discontinuedCount: 1 })]);
+		const words = byTestId('building-card-b1')!.textContent!.replace(/\s+/g, ' ');
+		expect(words).toContain('3 Wohnungen');
+		expect(words).toContain('1 leer');
+		expect(words).toContain('1 aufgehoben');
 	});
 
 	it('plant die Route in Google Maps mit sichtbarer Beschriftung', () => {
@@ -212,6 +221,18 @@ describe('Gebäudedetail', () => {
 			reservedCount: 0
 		});
 		expect(text()).toContain('6, davon 4 vermietet, 1 vermietet ab 01.11.2099 und 1 leer');
+	});
+
+	// Code-Review 1311-1 C-1, Persona Helga 1311 P-1: die aufgehobene Wohnung zählt mit und steht als eigener Teil
+	it('fasst die Belegung mit einer aufgehobenen Wohnung so zusammen, dass sie aufgeht', () => {
+		detail([flat('a1', '1.01', 1)], {
+			apartmentCount: 3,
+			occupiedCount: 1,
+			vacantCount: 1,
+			reservedCount: 0,
+			discontinuedCount: 1
+		});
+		expect(text()).toContain('3, davon 1 vermietet, 1 leer und 1 aufgehoben');
 	});
 
 	it('listet die Wohnungen nach Stockwerk, von unten nach oben', () => {

@@ -10,7 +10,7 @@ import { belowMinimum, roundToRappen } from './pdf-format';
 import { ACCOUNT_HOLDER_KEYS, getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { creditorRefusal, isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
-import { datedToday, getStatement, keyValuesOf, updateStatementStatus } from './statement.service';
+import { datedToday, getStatement, keyValuesOf, refuseUncalculableKeys, updateStatementStatus } from './statement.service';
 import type { StatementWithDetails } from '../api/statement';
 import { refusal } from './coded-error';
 import { billingStart, getContract } from './contract.service';
@@ -346,6 +346,11 @@ export async function generateStatementPdf(id: string, language?: string) {
 		if (found.status === 'draft')
 			await db.update(utilityStatements).set({ pdfBlob: null, pdfGeneratedAt: null }).where(eq(utilityStatements.id, id));
 	};
+	// #1333 (product owner, Fachreview 1333-1 V-3): no PDF of a draft whose key cannot be calculated, until it is fixed
+	if (found.status === 'draft')
+		await refuseUncalculableKeys(found.building!.id, found.periodStart, found.periodEnd, 'STATEMENT_KEY_THEN_RECALCULATE_PDF', found).catch(
+			(error: unknown) => discard().then(() => Promise.reject(error))
+		);
 	const qrConfig = await qrBillConfig();
 	if (!qrConfig) return discard().then(() => 'no-iban' as const);
 	// A draft's PDF shows the statement as if sent today; sending dates it again

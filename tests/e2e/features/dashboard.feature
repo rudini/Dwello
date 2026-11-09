@@ -128,7 +128,8 @@ Funktionalität: Übersicht
 
   # #454 (#408 Punkt 7, #386): ein Entwurf, dem eine danach erfasste Rechnung fehlt, ist nicht aktuell; die Übersicht
   # nennt ihn vor den Entwürfen zum Zustellen und führt zu den Entwürfen des Gebäudes und der Periode
-  # ein aktueller Entwurf in einem anderen Gebäude: die Entwurfsaufgabe zählt nur ihn, unabhängig von parallelen Läufen
+  # ein aktueller Entwurf in einem anderen Gebäude: die Entwurfsaufgabe zählt nur ihn, unabhängig von parallelen Läufen;
+  # der Text nennt seit #1328 auch Wohnungen und Verteilschlüssel (Entscheid PO)
   Szenario: Nicht aktuelle Entwürfe als eigene Aufgabe
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
     Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
@@ -139,7 +140,7 @@ Funktionalität: Übersicht
     Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe zu nicht aktuellen Entwürfen die Entwürfe von "Seeblick" des letzten Jahres
-    Und sagt die Aufgabe zu nicht aktuellen Entwürfen "Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht, der Tankbestand wurde geändert, oder es hat sich geändert, welchen Übertrag aus einer früheren Abrechnung sie verrechnen. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen."
+    Und sagt die Aufgabe zu nicht aktuellen Entwürfen "Seit dem Erstellen hat sich etwas geändert, womit sie rechnen: die Rechnungen oder der Tankbestand ihrer Abrechnungsperiode, der Übertrag aus einer früheren Abrechnung, eine Wohnung oder ein Verteilschlüssel. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen."
     Und steht die Aufgabe zu nicht aktuellen Entwürfen vor der Aufgabe "Abrechnungen prüfen und versenden"
 
   # #981 (A): ein Entwurf, der jetzt einen anderen Übertrag verrechnen würde, ist nicht aktuell und darum eine Aufgabe
@@ -157,7 +158,7 @@ Funktionalität: Übersicht
     Und die Abrechnung 2024 von "Bruno Meier" ist versendet
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe zu nicht aktuellen Entwürfen die Entwürfe von "Rosenhof" 2025
-    Und sagt die Aufgabe zu nicht aktuellen Entwürfen "es hat sich geändert, welchen Übertrag aus einer früheren Abrechnung sie verrechnen"
+    Und sagt die Aufgabe zu nicht aktuellen Entwürfen "der Übertrag aus einer früheren Abrechnung"
 
   Szenario: Von den nicht aktuellen Entwürfen zu den Entwürfen des Gebäudes
     Angenommen "Anna Keller" hat eine Abrechnung im Entwurf
@@ -376,3 +377,11 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht die Aufgabe "Nachmieter für Wohnung 1.01 suchen" für "Anna Keller"
     Aber nicht die Aufgabe "Befristeten Mietvertrag prüfen" für "Anna Keller"
+
+  # #1311 (Decided): eine aufgehobene Wohnung ist nicht mehr vermietbar und zählt in der Belegung nicht mit
+  Szenario: Aufgehobene Wohnung in der Belegung
+    Angenommen die Wohnung "1.02" ist aufgehoben ab "2025-07-01"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann sind im Gebäude "Seeblick" "1/1" Wohnungen vermietet
+    Aber nennt die Belegung von "Seeblick" nicht "Wohnung 1.02 leer"
+    Und erklärt die Übersicht bei den Kennzahlen "Aufgehoben" mit "Die Wohnung gibt es ab dem Tag unter «Aufgehoben ab» nicht mehr; ab diesem Tag kann sie nicht vermietet werden."

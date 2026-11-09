@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { focusedPlace, pageAddress } from '../questions/navigation';
 import {
+	resumeNoticeText,
 	proposedPeriod,
 	proposedPeriodText,
 	allBuildingsNoteText,
@@ -642,6 +643,10 @@ Then('nennt die Vorschau die bestehenden Abrechnungen von {string}', async ({ ve
 
 Then('ist der Assistent im Schritt {string}', async ({ verwalter }, step: string) => {
 	await verwalter.sees(currentStep).toBe(step);
+});
+
+Then('sagt der Assistent nach der Rückkehr {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(resumeNoticeText).toBe(text);
 });
 
 Then('nennt die Prüfung der Kategorien keinen fehlenden Tankbestand', async ({ verwalter }) => {

@@ -22,8 +22,10 @@ const messageOf = (code: unknown) =>
 const reminderName = (level: number) =>
 	[m.documents_reminder_1, m.documents_reminder_2, m.documents_reminder_3][level - 1]?.() ?? String(level);
 
-// Params that carry a code (the cause of a formula error) show as its message; others are user data
-const codeParams = ['cause', 'reason'];
+// Params that carry a code (the cause of a formula error) show as its message; others are user data. A sentence added
+// to another (the Lieferung behind the Veränderung Tankbestand, #1323) comes with its space, or is empty
+const codeParams = ['cause', 'reason', 'fuelStock', 'then']; // then: what to do once the key is fixed (#1333)
+const addedSentences = { fuelStock: '' };
 function render(message: (params: Params) => string, params: Params): string {
 	const shown = Object.entries(params).map(([key, value]) => {
 		if (key === 'month') return [key, monthName(String(value))]; // the backend names a month by its key
@@ -32,7 +34,7 @@ function render(message: (params: Params) => string, params: Params): string {
 		const part = codeParams.includes(key) ? messageOf(value) : undefined;
 		if (!part) return [key, value];
 		const { [key]: _, ...rest } = params; // each part without itself, so nesting ends
-		return [key, render(part, rest)];
+		return [key, `${key in addedSentences ? ' ' : ''}${render(part, rest)}`];
 	});
 	return message(Object.fromEntries(shown));
 }
@@ -46,7 +48,11 @@ export function backendMessage(body: BackendError | null | undefined, fallback: 
 	});
 	// a part without a known code: the caller's sentence, since the backend's own text is not in the UI language
 	if (message && !causes?.some((cause) => !cause))
-		return render(message, { ...body?.params, ...(causes && { cause: causes.join(' ') }) });
+		return render(message, {
+			...addedSentences,
+			...body?.params,
+			...(causes && { cause: causes.join(' ') })
+		});
 	return fallback;
 }
 

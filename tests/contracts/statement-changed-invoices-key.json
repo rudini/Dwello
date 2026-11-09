@@ -1,0 +1,20 @@
+{
+	"invoiceIds": ["d0000000-0000-4000-8000-000000000003"],
+	"uncalculableKeys": [
+		{
+			"key": "Halbe Zimmer",
+			"reason": "STATEMENT_KEY_REASON_DIVISION_BY_ZERO",
+			"apartment": "2.01",
+			"invoices": [
+				{
+					"id": "d0000000-0000-4000-8000-000000000003",
+					"billingEntityName": "Garten AG",
+					"description": "Gartenpflege 2024",
+					"invoiceDate": "2024-05-31",
+					"amount": "600.00",
+					"fuelStock": false
+				}
+			]
+		}
+	]
+}

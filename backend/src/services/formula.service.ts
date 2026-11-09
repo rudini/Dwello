@@ -335,17 +335,19 @@ export function calculateDistribution(
 	distributions: { variables: FormulaVariables; share: number; amount: number }[];
 	error?: string;
 	errorCode?: ErrorCode;
+	apartmentIndex?: number; // the apartment where it fails, if it fails for one (#1315)
 } {
 	// Evaluate formula for each apartment
 	const evaluations: { variables: FormulaVariables; value: number }[] = [];
 	let totalValue = 0;
 
-	for (const apt of withTotals(apartments)) {
+	for (const [apartmentIndex, apt] of withTotals(apartments).entries()) {
 		const result = evaluateFormula(formula, apt);
 		if (!result.isValid) {
 			return {
 				isValid: false,
 				distributions: [],
+				apartmentIndex,
 				...coded('FORMULA_APARTMENT_FAILED', result.error!, {
 					...result.errorCode!.params,
 					reason: result.errorCode!.code
@@ -357,6 +359,7 @@ export function calculateDistribution(
 			return {
 				isValid: false,
 				distributions: [],
+				apartmentIndex,
 				...coded('FORMULA_NEGATIVE', 'Für eine Wohnung ergibt die Formel einen negativen Wert, meist weil sie dort zu viel abzieht. Prüfen Sie, was nach «-» steht.')
 			};
 		}

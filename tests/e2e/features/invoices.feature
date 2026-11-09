@@ -343,6 +343,19 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter wieder alle Rechnungen anzeigt
     Dann steht der Fokus auf dem Ergebnis der Liste
 
+  # #680: die Suche zeigt immer genau, wonach die Liste gefiltert ist; ein nicht gesuchter Text fällt weg
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn die Rechnungsliste über die Hauptnavigation wieder geöffnet wird
+    Wenn der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Rechnungen" wählt
+    Dann zeigt die Suche ""
+
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn der Browser die Rechnungsliste wieder zeigt
+    Wenn der Liegenschaftsverwalter nach dem Rechnungssteller "Hauswart Huber" sucht
+    Und der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet
+    Und der Liegenschaftsverwalter im Browser zurückgeht
+    Dann zeigt die Suche "Hauswart Huber"
+
   # #658 (Decided): Filter und Zeilen richten sich nach der Breite ihres Bereichs, nicht des Fensters; nichts ist abgeschnitten
   Szenariogrundriss: Die Rechnungsliste zeigt bei jeder Breite alles ganz
     Angenommen das Browserfenster ist <Breite> Pixel breit

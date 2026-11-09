@@ -10,6 +10,7 @@ import {
 	earlierContractShown,
 	earlierContractsListed,
 	monthlyTotalOfApartment,
+	newContractOffers,
 	nextTenant,
 	sizeChangeDialogText,
 	vacancyShown
@@ -92,6 +93,14 @@ Given(
 	'die Wohnung {string} hat ab {string} {string} m² und {string} Zimmer',
 	async ({ seed }, number: string, date: string, area: string, rooms: string) => {
 		await seed.changeApartmentSize(number, date, area, rooms);
+	}
+);
+
+// #1328
+Given(
+	'die Wohnung {string} hat danach {string} m² und {string} Zimmer',
+	async ({ seed }, number: string, area: string, rooms: string) => {
+		await seed.correctApartmentSize(number, area, rooms);
 	}
 );
 
@@ -186,3 +195,8 @@ Given(
 		await seed.apartment(building, number, 'vacant', '70', floor);
 	}
 );
+
+// a negative check: the step before it reads the apartment's Mietstatus on the same page
+Then('bietet die Wohnungsseite keinen neuen Mietvertrag an', async ({ verwalter }) => {
+	await verwalter.sees(newContractOffers).toBe(0);
+});

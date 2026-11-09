@@ -20,8 +20,12 @@ case " $* " in *" --keep-db "*) KEEP_DB=1 ;; esac
 (cd backend && DATABASE_URL=$DB bun scripts/migrate.ts > /tmp/persona-migrate.log 2>&1)
 [ -n "$KEEP_DB$FRESH" ] || (cd backend && DATABASE_URL=$DB bun scripts/demo-data.ts) > /tmp/persona-demo.log 2>&1
 # its own build directories (svelte.config.js, BUILD_DIR), so an E2E build cannot change the pages under a running persona;
-# the build gets package.json (ES modules) and a link to node_modules; --no-build serves the last one again
-case " $* " in *" --no-build "* | *" --second "*) ;; *) BUILD_DIR=/tmp/persona-app bun run build > /tmp/persona-build.log 2>&1 ;; esac
+# the build gets package.json (ES modules) and a link to node_modules; --no-build serves the last one again. A fresh
+# container has neither src/lib/paraglide/ nor .svelte-kit/tsconfig.json, so both are generated before the build
+case " $* " in *" --no-build "* | *" --second "*) ;; *)
+  { bun run i18n && bunx svelte-kit sync && BUILD_DIR=/tmp/persona-app bun run build; } > /tmp/persona-build.log 2>&1 ||
+    { echo "not ready: the build failed (/tmp/persona-build.log)"; tail -n 5 /tmp/persona-build.log; exit 1; } ;;
+esac
 [ -f /tmp/persona-app/index.js ] || { echo "no persona build in /tmp/persona-app: run without --no-build"; exit 1; }
 cp package.json /tmp/persona-app/ && ln -sfn "$PWD/node_modules" /tmp/persona-app/node_modules
 # the servers keep none of the script's output open, so a caller that pipes it gets its end when the script exits

@@ -14,7 +14,7 @@ import { db } from '../db/connection';
 import { documents, utilityStatements, type Language } from '../db/schema';
 import { newPdfTitle, statementMail, statementTitle } from './reminder-letter';
 import { changeStatementStatus, generateStatementPdf, qrBillConfig } from './statement-pdf.service';
-import { datedToday, getStatement } from './statement.service';
+import { datedToday, getStatement, refuseUncalculableKeys } from './statement.service';
 import { fileNameOf, keepPdfBeforeChange } from './delivery';
 import { getTenant } from './tenant.service';
 
@@ -22,6 +22,8 @@ export async function sendStatement(id: string, byLetter = false) {
 	const statement = await getStatement(id);
 	if (!statement) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (statement.status !== 'draft') throw new CodedError('STATEMENT_ALREADY_SENT', 'Only a draft can be sent');
+	// #1333 (product owner): before anything goes out
+	await refuseUncalculableKeys(statement.building!.id, statement.periodStart, statement.periodEnd, 'STATEMENT_KEY_THEN_RECALCULATE', statement);
 	const tenant = (await getTenant(statement.tenantId))!;
 	if (byLetter || tenant.correspondenceChannel !== 'email') return sendByLetter(id, statement.statementNumber, tenant);
 	if (!tenant.email) throw new CodedError('STATEMENT_TENANT_NO_EMAIL', 'The tenant has no e-mail address');

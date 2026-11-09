@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { applyFilterChoice } from '$lib/utils/list-filter';
+	import { applyFilterChoice, showAppliedFilter } from '$lib/utils/list-filter';
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import EarlySelect from '$lib/ui/EarlySelect.svelte';
@@ -29,10 +29,14 @@
 
 	// Bound, so what is typed before hydration is kept; EarlySelect keeps an early building choice
 	let term = $derived(search);
+
+	let form = $state<HTMLFormElement>();
+	showAppliedFilter(() => form);
 </script>
 
 <!-- #733 (Helga P-1): one group for a confirmation (#1113), so it leaves «Suchen» clear while a field has the focus -->
 <form
+	bind:this={form}
 	method="GET"
 	action="/statements"
 	role="search"

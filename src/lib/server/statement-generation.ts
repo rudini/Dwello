@@ -215,6 +215,7 @@ type Difference = {
 	fee: ChangedStatement['fee'];
 	outdated: boolean; // a draft whose invoices changed since (#454): only a draft, the backend decides (H-28, #717)
 	fuelStock: boolean; // a draft whose Tankbestand changed since (#408 point 8)
+	values: boolean; // a draft an apartment or a key changed since (#1328)
 };
 
 /**
@@ -242,7 +243,8 @@ async function changedStatements(
 			profileEdited: found?.profileEdited ? localName(found.profileEdited) : null,
 			fee: found?.fee ?? null,
 			outdated: !!found?.outdated,
-			fuelStock: !!found?.fuelStock
+			fuelStock: !!found?.fuelStock,
+			values: !!found?.values
 		};
 	};
 	return overlapping.flatMap((listed) => {

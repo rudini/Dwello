@@ -77,7 +77,7 @@ describe('Kostenabstimmung der Berichte', () => {
 		expect(notes.map(text)).toEqual([
 			'2 Mietverträge haben für diese Abrechnungsperiode noch keine Abrechnung. Ihr Anteil ist in «davon tragen Sie» enthalten.',
 			'1 Abrechnung ist noch ein Entwurf. Sie zählt schon mit, ist aber noch nicht versendet: Lea Graf.',
-			'2 Abrechnungen dieser Abrechnungsperiode sind nicht aktuell: Seit ihrem Erstellen wurden Rechnungen erfasst, geändert oder gelöscht oder der Tankbestand geändert. Öffnen Sie sie, um zu sehen, ob Sie sie neu berechnen oder berichtigen müssen: Eva Frei, Marc Huber.'
+			'2 Abrechnungen dieser Abrechnungsperiode sind nicht aktuell: Seit ihrem Erstellen wurden Rechnungen erfasst, geändert oder gelöscht, der Tankbestand geändert oder bei einem Entwurf eine Wohnung oder ein Verteilschlüssel so geändert, dass «Neu berechnen» ein anderes Ergebnis ergäbe. Öffnen Sie sie, um zu sehen, ob Sie sie neu berechnen oder berichtigen müssen: Eva Frei, Marc Huber.'
 		]);
 		// PO 05.11.2026 (persona Sven 1126 P-2): the drafts linked as the statements not up to date
 		expect(notes[1].querySelector('a')?.getAttribute('href')).toBe('/statements/s3');
@@ -85,5 +85,17 @@ describe('Kostenabstimmung der Berichte', () => {
 			'/statements/s1',
 			'/statements/s2'
 		]);
+	});
+
+	// #1309 (Fachreview 1309-1): eine Abrechnung mit einem Verteilschlüssel, der sich nicht berechnen lässt, in einer eigenen Zeile
+	it('nennt Abrechnungen mit einem Verteilschlüssel, der sich nicht berechnen lässt, in einer eigenen Zeile', () => {
+		show(ReconciliationPage, {
+			data: { title: 'Kostenabstimmung', reconciliation: { ...reconciliation, keyNotCalculable: [{ id: 's4', tenantName: 'Ina Roth' }] } }
+		} as never);
+		const note = allByTestId('cost-reconciliation-note').at(-1)!;
+		expect(text(note)).toBe(
+			'1 Abrechnung dieser Abrechnungsperiode ist nicht aktuell: Der Verteilschlüssel einiger ihrer Rechnungen lässt sich für die Wohnungen des Gebäudes nicht berechnen. Öffnen Sie sie, um zu sehen, was Sie tun müssen: Ina Roth.'
+		);
+		expect(note.querySelector('a')?.getAttribute('href')).toBe('/statements/s4');
 	});
 });

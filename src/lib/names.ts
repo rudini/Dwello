@@ -17,3 +17,7 @@ export function localName(record: Named) {
 	const key = `name${getLocale().toUpperCase()}` as 'nameDE' | 'nameFR' | 'nameIT' | 'nameEN';
 	return record[key] || germanName(record);
 }
+
+/** The languages an own record has a name in, as FR, IT, EN in that order; an empty name counts as none (#689) */
+export const translatedLanguages = (record: Named) =>
+	(['FR', 'IT', 'EN'] as const).filter((code) => record[`name${code}`]);

@@ -6,6 +6,7 @@
 		"reletApartments": 0,
 		"vacantApartments": 1,
 		"reservedApartments": 0,
+		"discontinuedApartments": 0,
 		"occupancyRate": 50
 	},
 	"financial": { "outstandingStatements": 2, "totalPending": 350, "overdueAmount": 150, "paidThisMonth": 0 },

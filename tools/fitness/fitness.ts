@@ -496,5 +496,6 @@ if (import.meta.main) {
 		console.log('ratchet.json tightened to the measured values');
 	}
 	rmSync(out, { recursive: true, force: true });
+	console.log(`Fitness: ${errors.length} errors, ${warnings.length} warnings`);
 	process.exit(errors.length ? 1 : 0);
 }

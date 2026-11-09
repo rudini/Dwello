@@ -740,6 +740,16 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('existing-statement-2')).toBeNull();
 	});
 
+	// #1328 (Code-Review 1328-1 C-1): auch der Entwurf, den eine geänderte Wohnung oder ein Verteilschlüssel veralten liess
+	it('nennt bei einer leeren Vorschau den Entwurf mit geänderter Wohnung oder geändertem Verteilschlüssel', () => {
+		const draft = { id: '1', statementNumber: 'NK-2024-0001', tenantName: 'Nina Brunner', outdated: false, fuelStock: false, values: true, profile: null, profileEdited: null, fee: null };
+		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2, changed: [draft] }] });
+
+		expect(byTestId('existing-statement-notes-1')!.textContent!.trim()).toBe(
+			'Seit dem Erstellen dieses Entwurfs wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass «Neu berechnen» einen anderen Saldo oder eine andere Position ergäbe.'
+		);
+	});
+
 	// #65: ohne Vorjahr kein Hinweis auf Monate ohne Rechnung; eine Rechnung im Jahr kann vollständig sein
 	it('weist nicht auf Monate ohne Rechnung am Anfang oder Ende der Periode hin', () => {
 		open({
@@ -1116,7 +1126,7 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	const withInvoices = (
-		lists: Partial<Record<'lateInvoices' | 'splitKeys', unknown[]>>
+		lists: Partial<Record<'lateInvoices' | 'splitKeys' | 'uncalculableKeys', unknown[]>>
 	) =>
 		open({
 			preview,
@@ -1143,7 +1153,7 @@ describe('Abrechnungen erstellen', () => {
 		const line = byTestId('split-keys-line')!;
 		expect(line.textContent!.replace(/\s+/g, ' ')).toContain('Ahornhof');
 		expect(line.querySelector('a')!.getAttribute('href')).toBe(
-			`/invoices/i9/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+			`/invoices/i9/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3&from=invoice')}`
 		);
 	});
 
@@ -1158,12 +1168,38 @@ describe('Abrechnungen erstellen', () => {
 			`${late.billingEntityName}: ${late.description}. Rechnungsdatum 20.01.2026, CHF 290.00`
 		);
 		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
-			`/invoices/${late.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+			`/invoices/${late.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3&from=invoice')}`
 		);
 		expect(byTestId('confirm-missing-invoices')).toBeNull();
 		next();
 		await settle();
 		expect(heading()).toBe('Erstellen');
+	});
+
+	// #1315 (Fachreview 1309-1): je Verteilschlüssel und Gebäude ein Satz mit dem Grund, auch ohne einzelne Wohnung
+	it('nennt jeden Verteilschlüssel, der sich nicht berechnen lässt, mit seinem Grund', () => {
+		const [failing] = completeness.uncalculableKeys;
+		withInvoices({
+			uncalculableKeys: [
+				{ ...failing, distributionKeyName: 'Ohne Lift', reason: 'STATEMENT_KEY_REASON_ALL_ZERO', apartment: null },
+				{ ...failing, id: 'i2', reason: 'STATEMENT_KEY_REASON_NEGATIVE' },
+				{ ...failing, id: 'i3', reason: 'STATEMENT_KEY_REASON_NEGATIVE' }
+			]
+		});
+
+		expect(byTestId('uncalculable-keys')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'lässt. Die Formel von «Halbe Zimmer» ergibt für die Wohnung 2.01 im Gebäude «Ahornhof» einen negativen Wert. Die Formel von «Ohne Lift» ergibt für alle Wohnungen des Gebäudes «Ahornhof» 0. Wählen Sie'
+		);
+	});
+
+	// #1323 (Fachreview 1309-1): die Lieferung einer anderen Periode, deren Verteilschlüssel die Veränderung Tankbestand verteilt
+	it('sagt bei einer Lieferung aus einer anderen Abrechnungsperiode, dass sie die Veränderung Tankbestand verteilt', () => {
+		const [failing] = completeness.uncalculableKeys;
+		withInvoices({ uncalculableKeys: [{ ...failing, fuelStock: true }] });
+
+		expect(byTestId('hinted-invoice')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Lieferung aus einer anderen Abrechnungsperiode: Nach ihrem Verteilschlüssel verteilt Dwello die Veränderung Tankbestand. Ändern Sie ihn, kann das auch Abrechnungen ihrer Abrechnungsperiode betreffen.'
+		);
 	});
 
 	// #452 Punkt 4 (#382): Dwello prüft die Vereinbarung über die Kategorie; ohne sie geht es nicht weiter
@@ -1176,7 +1212,7 @@ describe('Abrechnungen erstellen', () => {
 			'Diese umlagefähigen Rechnungen haben keine Kategorie. Dwello rechnet nur Nebenkosten ab, die der Mietvertrag vereinbart, und prüft das über die Kategorie. Ordnen Sie jeder Rechnung eine Kategorie zu oder stellen Sie sie auf «Nicht umlagefähig». Danach geht es weiter.'
 		);
 		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
-			`/invoices/${late.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+			`/invoices/${late.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3&from=invoice')}`
 		);
 		next();
 		await settle();
@@ -1191,15 +1227,18 @@ describe('Abrechnungen erstellen', () => {
 		open({ preview, invoices: [{ ...invoices[0], check: { ...completeness, buildingId: 'b1' } }] });
 		const hint = byTestId('uncalculable-keys')!;
 
+		// #1315 (Entscheid PO, Fachreview 1309-1): wo und warum die Formel scheitert, und zuerst die Rechnung
 		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Diese Rechnungen haben einen Verteilschlüssel, der sich für die Wohnungen ihres Gebäudes nicht berechnen lässt: «Halbe Zimmer». Die Formel muss'
+			'Diese Rechnungen haben einen Verteilschlüssel, der sich für die Wohnungen ihres Gebäudes nicht berechnen lässt. Die Formel von «Halbe Zimmer» teilt für die Wohnung 2.01 im Gebäude «Ahornhof» durch null. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist. Ist ihr Verteilschlüssel schon der vereinbarte, korrigieren Sie seine Formel unter «Einstellungen» › «Verteilschlüssel». Das ändert sie für alle Gebäude. «Formel testen» rechnet nur mit vier Beispielwohnungen. Danach geht es weiter.'
 		);
 		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
-			`/invoices/${failing.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+			`/invoices/${failing.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3&from=invoice')}`
 		);
 		next();
 		await settle();
-		expect(byTestId('form-error')!.textContent).toContain('Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen.');
+		expect(byTestId('form-error')!.textContent).toBe(
+			'Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel.'
+		);
 		expect(heading()).toBe('Vorschau');
 		// persona Helga 1221 P-1: the message takes the focus, not the confirmation further down
 		expect(document.activeElement).toBe(byTestId('form-error'));
@@ -1257,6 +1296,7 @@ describe('Abrechnungen erstellen', () => {
 		tenantName: 'Nina Brunner',
 		outdated: false,
 		fuelStock: false,
+		values: false,
 		profile: null,
 		profileEdited: null,
 		fee: null,
@@ -1267,6 +1307,14 @@ describe('Abrechnungen erstellen', () => {
 	const notesOf = (id: string) => byTestId(`existing-statement-notes-${id}`)!.textContent!.replace(/\s+/g, ' ').trim();
 	const sameSettings =
 		'Damit alle Abrechnungen dieser Abrechnungsperiode gleich gerechnet sind, wählen Sie im Schritt 3 «Heizprofil und Verwaltungspauschale» dasselbe Heizprofil und denselben Satz wie bei den bestehenden Abrechnungen.';
+
+	// #1328 (PO A', Fachreview 1328-1): only when invoices and Tankbestand are unchanged
+	it('nennt einen Entwurf mit danach geänderter Wohnung oder geändertem Verteilschlüssel', () => {
+		withChanged([changed('1', { values: true })]);
+		expect(notesOf('1')).toBe(
+			'Seit dem Erstellen dieses Entwurfs wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass «Neu berechnen» einen anderen Saldo oder eine andere Position ergäbe.'
+		);
+	});
 
 	// #454 (#408 point 8), Fachreview 454-2 V-19: a Tankbestand changed since, alone or with invoices
 	it('nennt einen Entwurf mit danach geändertem Tankbestand', () => {
@@ -1617,6 +1665,31 @@ describe('Zurück vom Erfassen einer Rechnung', () => {
 		// says why this step, so the way back does not look like a mistake
 		expect(byTestId('resume-notice')!.textContent).toContain(
 			'Mit «Weiter» berechnet Dwello die Vorschau mit der neuen Rechnung.'
+		);
+	});
+
+	// #1314 (Personas Helga 1221 P-4, Marco 1221 P-5): back from an invoice a hint of the preview named, edited or not
+	it('spricht nach einer Rechnung aus einem Hinweis der Vorschau nicht von einer neuen Rechnung', async () => {
+		writeDraft(
+			browserStorage(),
+			'statements',
+			{
+				periodStart: '2024-01-01',
+				periodEnd: '2024-12-31',
+				heatingProfileId: 'hp1',
+				managementFeePercent: 3,
+				buildingIds: ['b1']
+			},
+			new Date()
+		);
+		history.replaceState(null, '', '/statements/generate?schritt=3&from=invoice');
+		open();
+		await settle();
+		history.replaceState(null, '', '/');
+
+		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+		expect(byTestId('resume-notice')!.textContent!.trim()).toBe(
+			'Mit «Weiter» berechnet Dwello die Vorschau neu, mit den Rechnungen, wie sie jetzt sind.'
 		);
 	});
 });

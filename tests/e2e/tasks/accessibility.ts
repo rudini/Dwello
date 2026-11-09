@@ -903,6 +903,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'preview-skipped': (example) =>
 		previewOf('2014', `preview-all-skipped-${example.tankBuilding}`)(example, example.tankBuilding),
 	'old-address-task': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Neue Adresse eintragen')))),
+	// #1311: the seeded Ahornweg 8.01 no longer exists: the figure «Aufgehoben» and its explanation
+	'discontinued-figure': () => async (actor) =>
+		actor.attemptsTo(Wait.until(on.text(await say(actor, 'Die Wohnung gibt es ab dem Tag unter «Aufgehoben ab» nicht mehr; ab diesem Tag kann sie nicht vermietet werden.')))),
 	// a draft from an earlier visit whose building and heating profile were deleted since
 	'draft-dropped': () => (actor) =>
 		actor.attemptsTo(

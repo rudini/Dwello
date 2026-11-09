@@ -52,12 +52,13 @@ const availableFrom = sql<string | null>`(
 )`;
 
 /**
- * Occupied while a rental contract runs today; relet when only a future contract is signed;
- * otherwise as the property manager set it (vacant or reserved).
+ * Discontinued from its «Aufgehoben ab» on (#1311; no contract runs then, #1284); occupied while a rental contract runs
+ * today; relet when only a future contract is signed; otherwise as the property manager set it (vacant or reserved).
  * Computed on every read, so it is right on the day a contract starts or ends.
  * The outer columns are named explicitly: drizzle leaves them unqualified in single-table selects.
  */
 export const apartmentStatus = sql<ApartmentStatus>`(case
+	when "apartments"."discontinued_from" <= ${sqlToday} then 'discontinued'
 	when exists (
 		select 1 from rental_contracts c
 		where c.apartment_id = "apartments"."id"
@@ -341,7 +342,7 @@ export async function checkDiscontinued(apartmentId: string, endDate: string | n
 export async function deleteApartment(id: string): Promise<{ success: boolean } & Partial<Refusal>> {
 	// the apartment's row locked first: a contract recorded meanwhile waits, then fails, or is seen (fallback review #1286)
 	return db.transaction(async (tx) => {
-		const [apartment] = await tx.select({ id: apartments.id }).from(apartments).where(eq(apartments.id, id)).for('update');
+		const [apartment] = await tx.select({ id: apartments.id, buildingId: apartments.buildingId }).from(apartments).where(eq(apartments.id, id)).for('update');
 		if (!apartment) return { success: false, error: 'Apartment not found' };
 		const [contract] = await tx
 			.select({ id: rentalContracts.id })
@@ -355,6 +356,8 @@ export async function deleteApartment(id: string): Promise<{ success: boolean } 
 			};
 		}
 		await tx.delete(apartments).where(eq(apartments.id, id));
+		// #1328 (PO): a change of its building, which makes its drafts outdated when they split otherwise now
+		await tx.update(buildings).set({ updatedAt: new Date() }).where(eq(buildings.id, apartment.buildingId));
 		return { success: true };
 	});
 }
@@ -376,6 +379,18 @@ export async function apartmentExists(id: string): Promise<boolean> {
  * earlier values (#1301) */
 export async function apartmentsOf(buildingId: string) {
 	const { apartments } = await listApartments({ buildingId, limit: null });
-	const values = <T extends { area: string; rooms: string }>(row: T) => ({ ...row, area: parseFloat(row.area), rooms: parseFloat(row.rooms) });
-	return apartments.map(({ id, number, area, rooms, discontinuedFrom, earlierSizes }) => ({ ...values({ id, number, area, rooms }), discontinuedFrom, earlierSizes: earlierSizes.map(values) }));
+	return apartments.map(keyValues);
+}
+
+const values = <T extends { area: string; rooms: string }>(row: T) => ({ ...row, area: parseFloat(row.area), rooms: parseFloat(row.rooms) });
+const keyValues = ({ id, number, area, rooms, discontinuedFrom, earlierSizes }: { id: string; number: string; area: string; rooms: string; discontinuedFrom: string | null; earlierSizes: { until: string; area: string; rooms: string }[] }) =>
+	({ ...values({ id, number, area, rooms }), discontinuedFrom, earlierSizes: earlierSizes.map(values) });
+
+/** As apartmentsOf, for every building in one query: a list of statements checks their keys without a query per row (#922) */
+export async function apartmentsByBuilding() {
+	const { id, buildingId, number, area, rooms, discontinuedFrom, earlierSizes } = apartments;
+	const rows = await db.select({ id, buildingId, number, area, rooms, discontinuedFrom, earlierSizes }).from(apartments);
+	const byBuilding = new Map<string, ReturnType<typeof keyValues>[]>();
+	for (const row of rows) byBuilding.set(row.buildingId, [...(byBuilding.get(row.buildingId) ?? []), keyValues(row)]);
+	return byBuilding;
 }

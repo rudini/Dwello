@@ -9,6 +9,7 @@
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import DeleteDialog from '../../DeleteDialog.svelte';
+	import TranslationMarker from '$lib/TranslationMarker.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -60,7 +61,9 @@
 				tone={custom ? 'info' : 'neutral'}
 				label={custom ? m.profiles_custom() : m.profiles_predefined()}
 			/>
-			{#if !custom}
+			{#if custom}
+				<TranslationMarker names={profile} testid="heating-profile-translations" />
+			{:else}
 				<p class="text-ink-muted">{m.profiles_predefined_note()}</p>
 			{/if}
 		</div>

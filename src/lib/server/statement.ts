@@ -7,6 +7,7 @@ import type { Json, StatementLineItem, StatementWithDetails } from '$lib/types';
 import type { SplitKeyHint } from '$lib/types';
 import type { SplitKey } from '../../../backend/src/services/split-keys';
 import type { Recalculated } from '$lib/statement';
+import type { HintedInvoice } from '$lib/statement-wizard';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -198,6 +199,8 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 	const changed: {
 		invoiceIds?: string[];
 		fuelStockChanged?: boolean;
+		uncalculableKeys?: { key: string; reason: string; apartment: string | null; invoices: (HintedInvoice & { fuelStock: boolean })[] }[];
+		valuesChanged?: boolean;
 		correctionDue?: boolean;
 		correctionDeclinable?: boolean;
 		correctionLowers?: boolean;
@@ -208,6 +211,8 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 	return {
 		invoices: changed.invoiceIds?.length ?? 0,
 		fuelStock: !!changed.fuelStockChanged,
+		uncalculableKeys: changed.uncalculableKeys ?? [], // #1309: they hold the recalculation
+		values: !!changed.valuesChanged, // #1328: a draft an apartment or a key changed since
 		correctionDue: !!changed.correctionDue,
 		correctionDeclinable: !!changed.correctionDeclinable,
 		correctionLowers: !!changed.correctionLowers,

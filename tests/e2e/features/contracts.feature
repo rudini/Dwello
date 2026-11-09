@@ -97,6 +97,19 @@ Funktionalität: Mietvertragsliste
   Szenario: Eine Zeile der Mietvertragsliste hat nur einen Link
     Dann führt die Zeile des Mietvertrags von "Anna Keller" nur mit dem Link "Anna Keller" weiter
 
+  # #680: die Suche zeigt immer genau, wonach die Liste gefiltert ist; ein nicht gesuchter Text fällt weg
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn die Mietvertragsliste über die Hauptnavigation wieder geöffnet wird
+    Wenn der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt
+    Dann zeigt die Suche ""
+
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn der Browser die Mietvertragsliste wieder zeigt
+    Wenn der Liegenschaftsverwalter nach dem Mieter "Anna Keller" sucht
+    Und der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet
+    Und der Liegenschaftsverwalter im Browser zurückgeht
+    Dann zeigt die Suche "Anna Keller"
+
   # #658 (Decided): Filter und Zeilen richten sich nach der Breite ihres Bereichs, nicht des Fensters; nichts ist abgeschnitten
   Szenariogrundriss: Die Mietvertragsliste zeigt bei jeder Breite alles ganz
     Angenommen das Browserfenster ist <Breite> Pixel breit

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { applyFilterChoice } from '$lib/utils/list-filter';
+	import { applyFilterChoice, showAppliedFilter } from '$lib/utils/list-filter';
 	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
@@ -49,9 +49,13 @@
 		filters = { search: '', building: '', categoryId: '', validity: '', year: '' };
 		goto('/invoices');
 	}
+
+	let form = $state<HTMLFormElement>();
+	showAppliedFilter(() => form);
 </script>
 
 <form
+	bind:this={form}
 	method="GET"
 	action="/invoices"
 	role="search"

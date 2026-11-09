@@ -25,7 +25,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Fläche | surface | superficie | area |
 | Zimmeranzahl | nombre de pièces | numero di locali | number of rooms |
 | Mietstatus | statut de location | stato di locazione | rental status |
-| Vermietet / Vermietet ab {Datum} / Vermietet bis {Datum} / Leer / Leer seit {Datum} / Gesperrt | loué / loué dès le {date} / loué jusqu’au {date} / vacant / vacant depuis le {date} / bloqué | locato / locato dal {date} / locato fino al {date} / sfitto / sfitto dal {date} / bloccato | let / let from {date} / let until {date} / vacant / vacant since {date} / blocked |
+| Vermietet / Vermietet ab {Datum} / Vermietet bis {Datum} / Leer / Leer seit {Datum} / Gesperrt / Aufgehoben / Aufgehoben seit {Datum} | loué / loué dès le {date} / loué jusqu’au {date} / vacant / vacant depuis le {date} / bloqué / n’existe plus / n’existe plus depuis le {date} | locato / locato dal {date} / locato fino al {date} / sfitto / sfitto dal {date} / bloccato / non esiste più / non esiste più dal {date} | let / let from {date} / let until {date} / vacant / vacant since {date} / blocked / no longer exists / no longer exists since {date} |
 | frei (Wohnung) / wird später frei | libre / sera libre plus tard | libero / si libera più tardi | free / becomes free later |
 | Mieter | locataire | inquilino | tenant |
 | Mieter: aktiv / künftig / ehemalig | actif / futur / ancien | attivo / futuro / ex | active / future / former |

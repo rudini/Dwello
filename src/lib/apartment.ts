@@ -1,5 +1,5 @@
 import { getLocale } from '$lib/paraglide/runtime';
-import type { ApartmentStatus, MoveOut } from './types';
+import type { Apartment, ApartmentListItem, ApartmentStatus, MoveOut } from './types';
 import type { IconName } from './ui/icons';
 import type { Tone } from './ui/tone';
 import { endedSince } from './contract-status';
@@ -60,6 +60,9 @@ export const statusLabels: Record<ApartmentStatus, string> = {
 	},
 	get reserved() {
 		return m.apartments_status_reserved();
+	},
+	get discontinued() {
+		return m.apartments_status_discontinued();
 	}
 };
 
@@ -67,7 +70,8 @@ export const statusTones = {
 	occupied: 'positive',
 	relet: 'info',
 	vacant: 'caution',
-	reserved: 'neutral'
+	reserved: 'neutral',
+	discontinued: 'neutral'
 } as const satisfies Record<ApartmentStatus, Tone>;
 
 /** An empty apartment is no error: an open door instead of the caution tone's warning triangle */
@@ -86,6 +90,9 @@ export const statusHelp: Record<ApartmentStatus, string> = {
 	},
 	get reserved() {
 		return m.apartments_status_help_reserved();
+	},
+	get discontinued() {
+		return m.apartments_status_help_discontinued();
 	}
 };
 
@@ -108,12 +115,13 @@ export const reletStarts = (apartments: { status?: unknown; nextContractStart?: 
 		.map((a) => String(a.nextContractStart))
 		.sort();
 
-/** A building's apartments per Mietstatus so that they add up; relet and reserved only when there are any */
+/** A building's apartments per Mietstatus so that they add up; relet, reserved and discontinued only when there are any */
 export function occupancyParts(b: {
 	occupiedCount: number;
 	reletStarts?: string[];
 	vacantCount: number;
 	reservedCount?: number;
+	discontinuedCount?: number;
 }) {
 	const count = (n: number, one: typeof m.apartments_count_occupied_one, many: typeof one) =>
 		(n === 1 ? one : many)({ count: n });
@@ -125,6 +133,14 @@ export function occupancyParts(b: {
 	if (b.reservedCount)
 		parts.push(
 			count(b.reservedCount, m.apartments_count_reserved_one, m.apartments_count_reserved_many)
+		);
+	if (b.discontinuedCount)
+		parts.push(
+			count(
+				b.discontinuedCount,
+				m.apartments_count_discontinued_one,
+				m.apartments_count_discontinued_many
+			)
 		);
 	return parts;
 }
@@ -147,12 +163,13 @@ function followedOn({
 
 /** Status with the day a relet apartment's next tenant moves in, the last day of the running contract (A-4), or the
  * day an empty apartment's last contract ended after (#145) */
-export function statusText(a: {
-	status: ApartmentStatus;
-	nextContractStart?: string | null;
-	currentContractEnd?: string | null;
-	lastContractEnd?: string | null;
-}) {
+export function statusText(
+	// «Aufgehoben seit» from discontinuedFrom (#1311)
+	a: Pick<Apartment, 'status' | 'nextContractStart' | 'currentContractEnd' | 'lastContractEnd'> &
+		Partial<Pick<ApartmentListItem, 'discontinuedFrom'>>
+) {
+	if (a.status === 'discontinued' && a.discontinuedFrom)
+		return m.apartments_status_discontinued_since({ date: formatDate(a.discontinuedFrom) });
 	if (a.status === 'relet' && a.nextContractStart)
 		return m.apartments_status_relet_from({ date: formatDate(a.nextContractStart) });
 	if (a.status === 'vacant' && a.lastContractEnd)

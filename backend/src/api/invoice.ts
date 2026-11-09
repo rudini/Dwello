@@ -26,7 +26,7 @@ export interface LatestKey {
 export interface InvoiceWithDetails extends Invoice {
 	building: { id: string; name: string; address: string } | null;
 	category: Pick<Category, Names | 'isAllowedUtilityCost' | 'isHeatingCost' | 'type'> | null;
-	distributionKey: Pick<DistributionKey, Names> | null;
+	distributionKey: (Pick<DistributionKey, Names> & { formula?: string | null }) | null; // formula: #1309
 	llmCategory: Pick<Category, Names> | null;
 	beleg: Pick<InvoiceDocument, 'fileName' | 'mimeType' | 'deductedAmount' | 'nonAllocableItems'> | null;
 	inPeriod?: InPeriod; // only in a list filtered by an Abrechnungsperiode (#454)

@@ -337,9 +337,14 @@ const earlier = (a: string, b: string) => (a < b ? a : b);
 // the period's parts, split at each day from which an apartment no longer exists or has other values (#1301) that falls
 // into the tenant's days
 function partsOf(all: CountedApartment[], period: Range, rental: Range) {
-	const days = all.flatMap((a) => [a.discontinuedFrom, ...changeDays(a)]);
-	const cuts = [...new Set(days.filter((day): day is string => !!day && day > rental.start && day <= rental.end))].sort();
+	const cuts = cutDays(all, rental.start, rental.end);
 	return [period.start, ...cuts].map((start, i) => ({ start, end: i < cuts.length ? daysAfter(cuts[i], -1) : period.end }));
+}
+
+/** The days after `start` up to `end` from which an apartment no longer exists or has other values (#1284, #1301) */
+export function cutDays(all: CountedApartment[], start: string, end: string) {
+	const days = all.flatMap((a) => [a.discontinuedFrom, ...changeDays(a)]);
+	return [...new Set(days.filter((day): day is string => !!day && day > start && day <= end))].sort();
 }
 
 // A group's invoices in one part: each with its amount for its days there, heating costs by the Heizprofil's months

@@ -66,7 +66,8 @@ function selectWithDetails() {
 			distributionKey: {
 				id: distributionKeys.id,
 				name: distributionKeys.name,
-				nameDE: distributionKeys.nameDE
+				nameDE: distributionKeys.nameDE,
+				formula: distributionKeys.formula // whether it can be calculated for the building, without a query of its own (#1309)
 			},
 			beleg: {
 				fileName: invoiceDocuments.fileName,
@@ -589,8 +590,13 @@ export const inPeriodOf = (periodStart: string, periodEnd: string) =>
  * or without one, whose Rechnungsdatum lies in it; each with its part in the period. A delivery into the building's
  * tank counts in full in the period of its delivery date, the end of its Leistungszeitraum, never split (#451, M-1)
  */
-export async function getInvoicesForStatement(buildingId: string, periodStart: string, periodEnd: string) {
-	const tank = await periodReadings(buildingId, periodStart, periodEnd);
+export async function getInvoicesForStatement(
+	buildingId: string,
+	periodStart: string,
+	periodEnd: string,
+	readings = periodReadings(buildingId, periodStart, periodEnd) // a list shares them with fuelStockChange (#922)
+) {
+	const tank = await readings;
 	const results = await selectWithDetails()
 		.where(and(eq(invoices.buildingId, buildingId), eq(invoices.isValidUtilityCost, true), inPeriodOf(periodStart, periodEnd)))
 		// invoices of one day in the order they were entered, so the statement's positions keep their order (#759)

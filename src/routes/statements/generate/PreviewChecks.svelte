@@ -11,6 +11,7 @@
 	import TankQuestion from './TankQuestion.svelte';
 	import InvoiceHint from './InvoiceHint.svelte';
 	import SplitKeysHint from '../SplitKeysHint.svelte';
+	import { keyFailuresText } from '$lib/statement';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
@@ -47,19 +48,29 @@
 	// a statement named as outdated or other is a warning (#132, V-6)
 	const existingTone = $derived(existing.some((row) => row.changed.length) ? 'caution' : 'info');
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
-	const hinted = (
-		list: 'lateInvoices' | 'heatingWithoutServicePeriod' | 'uncategorized' | 'uncalculableKeys'
-	) =>
+	const hinted = (list: 'lateInvoices' | 'heatingWithoutServicePeriod' | 'uncategorized') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
 	const late = $derived(hinted('lateInvoices'));
 	const uncategorized = $derived(hinted('uncategorized'));
-	const uncalculable = $derived(hinted('uncalculableKeys'));
-	const uncalculableNames = $derived(
-		[
-			...new Set(
-				rows.flatMap((row) => row.uncalculableKeys.map((i) => `«${i.distributionKeyName}»`))
+	// #1323: a delivery of another period whose key the Veränderung Tankbestand takes says so at its row
+	const uncalculable = $derived(
+		rows
+			.map((row) => ({
+				...row,
+				invoices: row.uncalculableKeys.map((invoice) => ({
+					...invoice,
+					note: invoice.fuelStock ? m.statements_key_not_calculable_fuel_stock() : undefined
+				}))
+			}))
+			.filter((row) => row.invoices.length > 0)
+	);
+	// #1315: where and why each key fails
+	const uncalculableFailures = $derived(
+		keyFailuresText(
+			rows.flatMap((row) =>
+				row.uncalculableKeys.map((i) => ({ ...i, key: i.distributionKeyName, building: row.name }))
 			)
-		].join(', ')
+		)
 	);
 	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
 	const heating = $derived(hinted('heatingWithoutServicePeriod'));
@@ -135,7 +146,7 @@
 <InvoiceHint
 	buildings={uncalculable}
 	title={m.statements_key_not_calculable_title()}
-	text={m.statements_key_not_calculable_text({ keys: uncalculableNames })}
+	text={m.statements_key_not_calculable_text({ failures: uncalculableFailures })}
 	tone="critical"
 	testid="uncalculable-keys"
 />
@@ -167,7 +178,7 @@
 	{splitKeys}
 	end={m.statements_split_keys_preview_end()}
 	testid="statement-preview-split-keys"
-	returnTo="/statements/generate?schritt=3"
+	returnTo="/statements/generate?schritt=3&from=invoice"
 />
 
 <InvoiceHint

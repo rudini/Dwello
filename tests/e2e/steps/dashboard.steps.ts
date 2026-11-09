@@ -227,6 +227,11 @@ Then('nennt die Belegung von {string} {string}', async ({ verwalter, names }, bu
 	await verwalter.sees(occupancyText(names.get(building)!)).toContain(text);
 });
 
+// a negative check: the step before it reads the same building's Belegung
+Then('nennt die Belegung von {string} nicht {string}', async ({ verwalter, names }, building: string, text: string) => {
+	await verwalter.sees(occupancyText(names.get(building)!)).not.toContain(text);
+});
+
 Then('erklärt die Übersicht bei den Kennzahlen {string} mit {string}', async ({ verwalter }, label: string, help: string) => {
 	await verwalter.sees(statusExplained(label)).toEqual([label, help]);
 });

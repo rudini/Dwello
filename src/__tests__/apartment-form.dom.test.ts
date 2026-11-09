@@ -99,6 +99,27 @@ describe('Neue Wohnung', () => {
 		expect(errors).toEqual(['Bitte wählen Sie ein Gebäude aus.', 'Fläche ist erforderlich.']);
 	});
 
+	// #1312 (Decided, Fachreview 1311-1 M-1): wer die Räume selbst nutzt, hebt die Wohnung nicht auf
+	it('rät bei «Aufgehoben ab», eigene Räume nicht aufzuheben, sondern zu sperren', () => {
+		show(EditApartmentPage, { data: { apartment: apartment() }, form: null } as never);
+		expect(helpOf('apartment-discontinued-input')).toContain(
+			'Nutzen Sie die Räume danach selbst, zum Beispiel als Büro, lassen Sie das Feld leer und wählen Sie den Mietstatus «Gesperrt»: Ihren Anteil an den Nebenkosten tragen dann weiterhin Sie, nicht die übrigen Mieter.'
+		);
+	});
+
+	// #1311: der Mietstatus einer aufgehobenen Wohnung folgt aus «Aufgehoben ab» (Fachreview 1311-1, Wortlaut)
+	it('zeigt den Mietstatus einer aufgehobenen Wohnung, ohne ihn ändern zu lassen', () => {
+		show(EditApartmentPage, {
+			data: { apartment: { ...apartment('discontinued'), discontinuedFrom: '2025-07-01' } },
+			form: null
+		} as never);
+		expect(byTestId('apartment-status-rented')!.textContent!.trim()).toBe('Aufgehoben seit 01.07.2025');
+		expect(byTestId('apartment-status-select')).toBeNull();
+		expect(document.body.textContent).toContain(
+			'Der Mietstatus ergibt sich aus dem Feld «Aufgehoben ab» und lässt sich hier nicht ändern.'
+		);
+	});
+
 	it('bestätigt das Speichern mit der Wohnungsnummer', async () => {
 		open('b1');
 		fireEvent(byTestId<HTMLInputElement>('apartment-number-input')!, 'input', '2.01');
@@ -174,8 +195,8 @@ describe('Wohnung bearbeiten', () => {
 		expect(document.activeElement).toBe(input);
 	});
 
-	// #1284, wording of Fachreview 1284-1 (a); #1301: a larger apartment gets its new values from the day (Fachreview 1301-1)
-	it('erklärt «Aufgehoben ab» am Feld, auch wo eine grössere Wohnung ihre neue Fläche ab dem Tag erhält', () => {
+	// #1284, wording of Fachreview 1284-1 (a); #1312 (Fachreview 1311-1); #1301: a larger apartment gets its new values from the day (Fachreview 1301-1)
+	it('erklärt «Aufgehoben ab» am Feld: wann Sie den Anteil tragen, wer ab dem Tag die Kosten teilt und wo eine grössere Wohnung ihre neue Fläche ab dem Tag erhält', () => {
 		show(EditApartmentPage, {
 			data: { apartment: { ...apartment(), discontinuedFrom: '2025-07-01' } },
 			form: null
@@ -183,7 +204,7 @@ describe('Wohnung bearbeiten', () => {
 		expect(labelOf('apartment-discontinued-input')).toBe('Aufgehoben ab (optional)');
 		expect(byTestId<HTMLInputElement>('apartment-discontinued-input')!.value).toBe('01.07.2025');
 		expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Nur ausfüllen, wenn es die Wohnung nach einem Umbau ab diesem Tag nicht mehr gibt. Bis zum Tag davor zählt sie in den Abrechnungen mit, und ihren Anteil tragen Sie. Abrechnungen ab diesem Tag rechnen ohne sie. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit diesem Tag. Solange es die Wohnung gibt, lassen Sie das Feld leer. Wird eine andere Wohnung dadurch grösser, erfassen Sie bei ihr unter «Bearbeiten» die neue Fläche und Zimmeranzahl ab demselben Tag.'
+			'Nur ausfüllen, wenn es die Wohnung nach einem Umbau ab diesem Tag nicht mehr gibt. Bis zum Tag davor zählt sie in den Abrechnungen mit. Solange sie leer steht, tragen Sie ihren Anteil. Ab diesem Tag verteilt Dwello die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit diesem Tag. Solange es die Wohnung gibt, lassen Sie das Feld leer. Wird eine andere Wohnung dadurch grösser, erfassen Sie bei ihr unter «Bearbeiten» die neue Fläche und Zimmeranzahl ab demselben Tag.'
 		);
 	});
 
@@ -202,12 +223,13 @@ describe('Wohnung bearbeiten', () => {
 	});
 
 	// #1301, wording of Fachreview 1301-1 and 1301-2 M-1 (persona Dr. Weber P-3); empty on every visit: the day belongs to one save
+	// #1328 (PO): without the sentence on recalculating drafts, which now say so themselves
 	it('bietet einen Tag an, ab dem neue Fläche und Zimmeranzahl gelten, und erklärt ihn am Feld', () => {
 		show(EditApartmentPage, { data: { apartment: apartment() }, form: null } as never);
 		expect(labelOf('apartment-size-from-input')).toBe('Neue Fläche und Zimmeranzahl gelten ab (optional)');
 		expect(byTestId<HTMLInputElement>('apartment-size-from-input')!.value).toBe('');
 		expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Nur ausfüllen, wenn die Wohnung nach einem Umbau ab diesem Tag eine andere Fläche oder Zimmeranzahl hat, zum Beispiel nach einer Zusammenlegung. Bis zum Tag davor rechnen die Abrechnungen mit den bisherigen Werten, ab diesem Tag mit den neuen. Wollen Sie nur einen Fehler korrigieren, lassen Sie das Feld leer: Die Werte gelten dann für alle Abrechnungen, und wenn schon ein Tag erfasst ist, ab diesem Tag. Entwürfe, die Sie schon erstellt haben, berechnen Sie danach neu. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit den Werten, die Sie hier speichern. Ist die Wohnung vermietet, vereinbaren Sie die Änderung mit dem Mieter, am besten schriftlich, und tragen Sie hier den Tag ein, ab dem sie gilt. Nettomiete und Akonto ändert Dwello nicht. Eine höhere Nettomiete oder ein höheres Akonto teilen Sie mit dem amtlichen Formular mit (Art. 269d OR), sonst ist die Erhöhung nichtig. Erfassen Sie die neuen Beträge danach im Mietvertrag.'
+			'Nur ausfüllen, wenn die Wohnung nach einem Umbau ab diesem Tag eine andere Fläche oder Zimmeranzahl hat, zum Beispiel nach einer Zusammenlegung. Bis zum Tag davor rechnen die Abrechnungen mit den bisherigen Werten, ab diesem Tag mit den neuen. Wollen Sie nur einen Fehler korrigieren, lassen Sie das Feld leer: Die Werte gelten dann für alle Abrechnungen, und wenn schon ein Tag erfasst ist, ab diesem Tag. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit den Werten, die Sie hier speichern. Ist die Wohnung vermietet, vereinbaren Sie die Änderung mit dem Mieter, am besten schriftlich, und tragen Sie hier den Tag ein, ab dem sie gilt. Nettomiete und Akonto ändert Dwello nicht. Eine höhere Nettomiete oder ein höheres Akonto teilen Sie mit dem amtlichen Formular mit (Art. 269d OR), sonst ist die Erhöhung nichtig. Erfassen Sie die neuen Beträge danach im Mietvertrag.'
 		);
 	});
 });

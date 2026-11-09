@@ -26,7 +26,7 @@ import {
 import { agreementsInPeriod } from './agreed-category.service';
 import { calculateBalance, calculateStatementForContract, countingWith, generateStatementNumber, keyValuesAmong } from './calculation.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
-import { getUncategorizedInvoices, uncalculableKeyInvoices } from './held-invoices';
+import { agreedIn, getUncategorizedInvoices, uncalculableKeyInvoices } from './held-invoices';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { apartmentsOf } from './apartment.service';
@@ -471,10 +471,11 @@ async function openReplaced({ contractId, periodStart, periodEnd }: StatementInp
 
 // The Tankbestand readings the statement bills by, only when the contract agrees the tank's category (#91, V-3); a
 // statement from before #91 (agreed: null) billed every category
-export const agreedStock = async (input: { buildingId: string; periodStart: string; periodEnd: string }, agreedCategoryIds: string[] | null) => {
-	const [change] = await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd);
-	return change && (!agreedCategoryIds || agreedCategoryIds.includes(change.categoryId)) ? change.stock : null;
-};
+export const agreedStock = async (input: { buildingId: string; periodStart: string; periodEnd: string }, agreedCategoryIds: string[] | null) =>
+	agreedStockOf(await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd), agreedCategoryIds);
+/** The readings of a period's change of the Tankbestand, if its category is agreed */
+export const agreedStockOf = ([change]: Awaited<ReturnType<typeof fuelStockChange>>, agreedCategoryIds: string[] | null) =>
+	change && (!agreedCategoryIds || agreedCategoryIds.includes(change.categoryId)) ? change.stock : null;
 
 // The columns and positions a calculation gives a statement: shared by a new draft and a recalculated one (#338)
 async function calculatedRows(input: StatementInput & { buildingId: string }) {
@@ -754,6 +755,7 @@ export async function updateStatementStatus(
 		throw new Error(`Invalid status transition from ${existing.status} to ${status}`);
 	}
 
+	if (status === 'sent') await refuseUncalculableKeys(existing.building!.id, existing.periodStart, existing.periodEnd, 'STATEMENT_KEY_THEN_RECALCULATE', existing); // #1333
 	if (status === 'paid' && additionalData?.paidDate !== undefined) checkPaidDate(additionalData.paidDate, existing.periodEnd);
 	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
 	// A Saldo of 0.00, or one below CHF 5 carried over, is «Erledigt» once sent: no payment (#448); a Schlussabrechnung
@@ -845,6 +847,8 @@ export async function replaceStatement(id: string, paidAmount?: string): Promise
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (!['sent', 'overdue', 'paid', 'settled'].includes(existing.status))
 		throw new CodedError('STATEMENT_NOT_REPLACEABLE', 'Only a sent or paid statement can be replaced');
+	// Fachreview 1309-1 V-1: else it would stay «Ersetzt» without a berichtigte Abrechnung until the key is fixed
+	await refuseUncalculableKeys(existing.building!.id, existing.periodStart, existing.periodEnd);
 	const entered = paidAmount === undefined ? undefined : { paidAmount: paidOn(existing, paidAmount) };
 	await db.transaction(async (tx) => {
 		const paid = entered ?? (await offsetOf(existing, tx));
@@ -941,17 +945,30 @@ async function refuseUncategorized(buildingId: string, periodStart: string, peri
 }
 
 // #1221 (product owner): a key that cannot be calculated for the building's apartments holds its invoices, one key at a time
-async function refuseUncalculableKeys(buildingId: string, periodStart: string, periodEnd: string) {
-	const failing = await uncalculableKeyInvoices(buildingId, periodStart, periodEnd);
+// #1333 (product owner): sending a draft refuses too, then says to recalculate it (Fachreview 1333-1 V-1)
+// of a statement only the invoices it bills (Fachreview 1333-1 V-2)
+export async function refuseUncalculableKeys(
+	buildingId: string,
+	periodStart: string,
+	periodEnd: string,
+	then = 'STATEMENT_KEY_THEN_RETRY',
+	statement: { agreedCategoryIds: string[] | null } = { agreedCategoryIds: null }
+) {
+	const failing = agreedIn(statement, await uncalculableKeyInvoices(buildingId, periodStart, periodEnd));
 	if (!failing.length) return;
-	const [{ distributionKeyName, buildingName }] = failing;
+	const [{ distributionKeyName, buildingName, reason, apartment }] = failing;
+	const held = failing.filter((invoice) => invoice.distributionKeyName === distributionKeyName);
+	const delivery = held.find((invoice) => invoice.fuelStock); // of another period, it distributes the Veränderung Tankbestand (#1323)
 	throw new CodedError('STATEMENT_KEY_NOT_CALCULABLE', 'The distribution key cannot be calculated for the apartments of the building', {
 		key: distributionKeyName,
 		building: buildingName,
-		invoices: failing
-			.filter((invoice) => invoice.distributionKeyName === distributionKeyName)
+		invoices: held
 			.map((invoice) => `${invoice.billingEntityName}, ${formatSwissDate(invoice.invoiceDate)}, CHF ${formatCHF(Number(invoice.amount))}`)
-			.join('; ')
+			.join('; '),
+		reason, // #1315: why, and for which apartment
+		...(apartment && { apartment }),
+		...(delivery && { fuelStock: 'STATEMENT_KEY_FUEL_STOCK', date: delivery.invoiceDate }),
+		then
 	});
 }
 
