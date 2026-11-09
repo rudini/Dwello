@@ -56,7 +56,9 @@ const confirmedCode = (client: Queryable) =>
 			rows[0].t
 				? ((
 						await client.query(
-							'SELECT public_key, salt, mac_key, confirmed_at FROM backup_codes WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at DESC LIMIT 1'
+							// mac_key read only where 0046 made it: the Sicherung before that migration runs without it
+							`SELECT public_key, salt, to_jsonb(b) ->> 'mac_key' AS mac_key, confirmed_at FROM backup_codes b
+								WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at DESC LIMIT 1`
 						)
 					).rows[0] as
 						| { public_key: string; salt: string; mac_key: string | null; confirmed_at: Date }
@@ -169,11 +171,12 @@ export async function restoreBackup(
 	code: string,
 	url: string,
 	secretsDir: string,
-	migrations: string
+	migrations: string,
+	confirmUnsigned?: (warning: string) => boolean
 ) {
 	const work = await mkdtemp(join(tmpdir(), 'dwello-restore-'));
 	try {
-		await decryptFile(file, code, join(work, 'plain'));
+		await decryptFile(file, code, join(work, 'plain'), confirmUnsigned);
 		const handle = await open(join(work, 'plain'));
 		const length = Buffer.alloc(4);
 		await handle.read(length, 0, 4, 0);

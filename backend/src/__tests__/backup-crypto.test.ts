@@ -79,4 +79,39 @@ describe('Signatur der Sicherung', () => {
 			'nicht von Ihrer Dwello-Installation erstellt'
 		);
 	});
+
+	// Decided (product owner) #1373: a code confirmed before the signature has no key for it; its Sicherungen stay unsigned
+	const warning =
+		'Diese Sicherung ist nicht signiert; Dwello kann nicht prüfen, wer sie erstellt hat. Stellen Sie sie nur wieder her, wenn sie aus Ihrem eigenen Sicherungsordner stammt.';
+
+	it('stellt eine nicht signierte Sicherung nur nach der Warnung und der Bestätigung wieder her', async () => {
+		const code = generateCode();
+		const file = await forged(await encrypted(code));
+		const shown: string[] = [];
+		await decryptFile(file, code, join(dir, 'unsigned'), (text) => (shown.push(text), true));
+		expect(shown).toEqual([warning]);
+		expect(await readFile(join(dir, 'unsigned'), 'utf8')).toBe('DROP TABLE tenants');
+	});
+
+	it('lehnt eine nicht signierte Sicherung ohne Bestätigung ab und schreibt nichts', async () => {
+		const code = generateCode();
+		const file = await forged(await encrypted(code));
+		await expect(decryptFile(file, code, join(dir, 'refused'), () => false)).rejects.toThrow(
+			'Die Sicherung ist nicht signiert und wurde nicht wiederhergestellt.'
+		);
+		await expect(decryptFile(file, code, join(dir, 'refused'))).rejects.toThrow('nicht signiert');
+		expect(await Bun.file(join(dir, 'refused')).exists()).toBe(false);
+	});
+
+	// 1373 review C-2: the AES-GCM tag still guards an unsigned Sicherung
+	it('lehnt eine veränderte nicht signierte Sicherung auch nach der Bestätigung ab', async () => {
+		const code = generateCode();
+		const file = await forged(await encrypted(code));
+		const bytes = await readFile(file);
+		bytes[bytes.length - 20] ^= 1;
+		await writeFile(file, bytes);
+		await expect(
+			decryptFile(file, code, join(dir, 'changed-unsigned'), () => true)
+		).rejects.toThrow('Die Sicherung ist beschädigt');
+	});
 });

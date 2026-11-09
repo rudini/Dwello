@@ -27,6 +27,14 @@ await restoreBackup(
 	code,
 	url,
 	process.env.SECRETS_DIR,
-	join(import.meta.dir, '..', 'migrations')
+	join(import.meta.dir, '..', 'migrations'),
+	// a Sicherung of a code confirmed before #1373 carries no signature (Decided (product owner) #1373)
+	(warning) => {
+		console.log(warning);
+		return (
+			prompt('Tippen Sie WIEDERHERSTELLEN, um sie trotzdem wiederherzustellen:')?.trim() ===
+			'WIEDERHERSTELLEN'
+		);
+	}
 );
 console.log('Die Sicherung ist wiederhergestellt. Starten Sie Dwello neu.');

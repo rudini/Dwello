@@ -46,9 +46,18 @@ export const generateCode = () =>
 export const normalizedCode = (code: string) => code.toUpperCase().replace(/[^0-9A-Z]/g, '');
 
 const keysOf = (code: string, salt: Buffer) => {
-	const seed = scryptSync(normalizedCode(code), salt, 32, { N: 2 ** 15, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
+	const seed = scryptSync(normalizedCode(code), salt, 32, {
+		N: 2 ** 15,
+		r: 8,
+		p: 1,
+		maxmem: 64 * 1024 * 1024
+	});
 	return {
-		privateKey: createPrivateKey({ key: Buffer.concat([PKCS8_X25519, seed]), format: 'der', type: 'pkcs8' }),
+		privateKey: createPrivateKey({
+			key: Buffer.concat([PKCS8_X25519, seed]),
+			format: 'der',
+			type: 'pkcs8'
+		}),
 		macKey: Buffer.from(hkdfSync('sha256', seed, salt, 'dwello-backup-mac-1', 32))
 	};
 };
@@ -75,7 +84,10 @@ const aesKey = (shared: Buffer, ephemeral: Buffer, recipient: Buffer) =>
 	);
 
 /** The public key and salt that a new code gives; only these are stored */
-export async function recipientOf(code: string, salt = randomBytes(16)): Promise<Required<Recipient>> {
+export async function recipientOf(
+	code: string,
+	salt = randomBytes(16)
+): Promise<Required<Recipient>> {
 	const { privateKey, macKey } = keysOf(code, salt);
 	return { publicKey: raw(privateKey), salt, macKey };
 }
@@ -103,8 +115,17 @@ export async function encryptStream(
 	if (macKey) await appendFile(out, await signatureOf(out, macKey));
 }
 
-/** Writes the content of a Sicherung to out; refuses another code and a changed file */
-export async function decryptFile(file: string, code: string, out: string) {
+const UNSIGNED =
+	'Diese Sicherung ist nicht signiert; Dwello kann nicht prüfen, wer sie erstellt hat. Stellen Sie sie nur wieder her, wenn sie aus Ihrem eigenen Sicherungsordner stammt.';
+
+/** Writes the content of a Sicherung to out; refuses another code, a changed file, and an unsigned one the operator does
+ * not confirm after the warning (Decided (product owner) #1373: a code confirmed before #1373 writes unsigned ones) */
+export async function decryptFile(
+	file: string,
+	code: string,
+	out: string,
+	confirmUnsigned: (warning: string) => boolean = () => false
+) {
 	const handle = await open(file);
 	const { size } = await handle.stat();
 	const head = Buffer.alloc(HEADER);
@@ -129,7 +150,11 @@ export async function decryptFile(file: string, code: string, out: string) {
 		throw new Error('Der Wiederherstellungscode passt nicht zu dieser Sicherung.');
 	// before a single byte is decrypted: the restore drops the database only after this
 	if (signed && !timingSafeEqual(await signatureOf(file, macKey, end - 1), signature))
-		throw new Error('Die Sicherung ist beschädigt, unvollständig oder nicht von Ihrer Dwello-Installation erstellt.');
+		throw new Error(
+			'Die Sicherung ist beschädigt, unvollständig oder nicht von Ihrer Dwello-Installation erstellt.'
+		);
+	if (!signed && !confirmUnsigned(UNSIGNED))
+		throw new Error('Die Sicherung ist nicht signiert und wurde nicht wiederhergestellt.');
 	const decipher = createDecipheriv(
 		'aes-256-gcm',
 		aesKey(diffieHellman({ privateKey, publicKey: publicKey(ephemeral) }), ephemeral, recipient),
