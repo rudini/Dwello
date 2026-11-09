@@ -100,11 +100,12 @@ function perPeriod(): Loaders {
 			once(`keys ${key(s)}`, async () =>
 				uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd, { bills: await invoices(s), change: await change(s), apartments: () => apartments(s) })
 			),
-		// #1395 (PO, P2): from the apartments and the period's invoices it loads anyway; a key only a delivery of another
-		// period bills (#1323) counts as unchanged here, the statement page still names it
+		// #1395 (PO, P2): from the apartments, the period's invoices and its Veränderung Tankbestand it loads anyway, whose
+		// key may be a delivery's of another period (#1323, Code-Review 1395-6 C-1)
 		valuesChangedAt: async (s) => {
 			const at = (await byBuilding()).changedAt.get(s.building.id);
-			const keys = new Map((await invoices(s)).flatMap((bill) => (bill.distributionKey?.updatedAt ? [[bill.distributionKey.id, bill.distributionKey.updatedAt] as const] : [])));
+			const billed = [...(await invoices(s)), ...(await change(s))];
+			const keys = new Map(billed.flatMap(({ distributionKey: key }) => (key?.updatedAt ? [[key.id, key.updatedAt] as const] : [])));
 			return lastValueChange(s, at === undefined ? null : new Date(at), keys);
 		}
 	};

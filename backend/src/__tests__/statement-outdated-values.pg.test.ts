@@ -8,7 +8,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { apartments, buildings, categories, distributionKeys, invoices, utilityStatements } from '../db/schema';
+import { apartments, buildings, categories, distributionKeys, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createDistributionKey, deleteDistributionKey } from '../services/distribution-key.service';
 import { createHeatingProfile, deleteHeatingProfile, updateHeatingProfile } from '../services/heating-profile.service';
@@ -318,4 +318,47 @@ describe('Versendete Abrechnung mit danach geänderten Werten', () => {
 		expect(listed.find((one) => one.id === id)).toMatchObject({ status: 'sent', invoices: 0, values: true });
 	});
 
+});
+
+// Code-Review 1395-6 C-1: the key of the Veränderung Tankbestand, from a delivery of an earlier period (#1323), counts
+// in the Übersicht as on the statement page
+describe('Entwurf nach geänderter Formel des Verteilschlüssels der Veränderung Tankbestand', () => {
+	it('nennt den Entwurf in der Übersicht als nicht aktuell', async () => {
+		const heated = await createRental(`${token}-tank`, { startDate: '2025-01-01', monthlyAdvancePayment: '0' });
+		const second = (await createApartment({ buildingId: heated.building, number: '9.02', floor: 9, area: '70', rooms: '5.5' })).id;
+		const key = await createDistributionKey({ name: `Tank ${token}`, nameDE: `Tank ${token}`, type: 'custom', formula: '{units}' });
+		keys.push(key.id);
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		const [profile] = await db.select().from(heatingProfiles).limit(1);
+		await db.insert(invoices).values({
+			buildingId: heated.building,
+			categoryId: heating.id,
+			distributionKeyId: key.id,
+			billingEntityName: 'Öl AG',
+			description: `Heizöl ${token}`,
+			amount: '800.00',
+			invoiceDate: '2024-10-15',
+			isValidUtilityCost: true
+		});
+		for (const [readingDate, amount] of [['2024-12-31', '600.00'], ['2025-12-31', '100.00']])
+			expect((await sendJson('POST', `/api/v1/buildings/${heated.building}/fuel-stocks`, { readingDate, amount, categoryId: heating.id })).status).toBe(201);
+		const created = await generateStatement({
+			contractId: heated.contract,
+			buildingId: heated.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			managementFeePercent: 0,
+			heatingProfileId: profile.id
+		});
+		await sendJson('PUT', `/api/v1/distribution-keys/${key.id}`, { formula: '{rooms}' });
+
+		const { statements: listed } = (await (await callApi('/api/v1/statements/outdated')).json()) as { statements: { id: string }[] };
+		const found = listed.find((one) => one.id === created.id);
+		await deleteStatement(created.id);
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, heated.building));
+		await db.delete(invoices).where(eq(invoices.buildingId, heated.building));
+		await deleteApartment(second);
+		await heated.remove();
+		expect(found).toMatchObject({ status: 'draft', invoices: 0, fuelStock: false, values: true });
+	});
 });
