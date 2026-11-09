@@ -458,6 +458,21 @@ describe('Abrechnungsliste', () => {
 		expect(calls.map(({ body }) => body)).toEqual([{ paidDate: localToday(), periodEnd: '2024-12-31' }]);
 	});
 
+	// Code-Review 1375b-1 C-1: ein geleerter Betrag geht mit und wird abgelehnt, nicht als ganze Zahlung gespeichert
+	it('schickt aus der Liste einen geleerten Betrag mit, statt die ganze Zahlung zu speichern', async () => {
+		const calls = fakeBff();
+		list([statement({ status: 'sent' })]);
+
+		click('statement-row-mark-paid');
+		fireEvent(byTestId<HTMLInputElement>('paid-amount-input')!, 'input', '');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(calls.map(({ body }) => body)).toEqual([
+			{ paidDate: localToday(), periodEnd: '2024-12-31', paidAmount: '' }
+		]);
+	});
+
 	// #448 (4), Code-Review 448-1 C-6: ein Tag vor dem Abrechnungsdatum wird nach der Frage gespeichert
 	// #959 (Fachreview 959-1, Regel 1): die Zeile nennt nach einer Teilzahlung den bezahlten Teil und den Rest
 	it('nennt in der Liste nach einer Teilzahlung den bezahlten Teil und den offenen Betrag', () => {

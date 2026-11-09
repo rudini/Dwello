@@ -144,7 +144,7 @@
 				body: new URLSearchParams({
 					paidDate,
 					periodEnd: paying!.periodEnd,
-					...(amount && { paidAmount: amount })
+					...(amount !== undefined && { paidAmount: amount })
 				})
 			});
 			if (!response.ok) {
