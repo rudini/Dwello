@@ -76,7 +76,7 @@ describe('Protokoll laden', () => {
 
 	// Code review 746-1 C-3: past the last page, e.g. after deleting its only entry in another tab
 	it('zeigt die erste Seite statt einer Seite nach der letzten', async () => {
-		const fetch = (async () => Response.json({ data: [], total: 6 })) as typeof globalThis.fetch;
+		const fetch = (async () => Response.json({ ...auditLog, data: [] })) as typeof globalThis.fetch;
 
 		await expect(
 			load({ fetch, url: new URL('http://localhost/config/audit-log?page=3') } as never)
