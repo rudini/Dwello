@@ -1311,7 +1311,7 @@ Funktionalität: Abrechnungsdetail
 
   # #1395 (Entscheid PO, Fachreview 1395-1 V-4): eine danach gelöschte leere Wohnung zählt auch bei einer versendeten
   # Abrechnung; ohne 3.02 trägt Eva Frei alle Heizkosten, der Saldo steigt von 221.45 auf 442.90
-  Szenario: Eine versendete Abrechnung nach gelöschter Wohnung nicht berichtigen
+  Szenario: Vor «Nicht berichtigen» einer versendeten Abrechnung nach gelöschter Wohnung nennt Dwello den Unterschied
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet

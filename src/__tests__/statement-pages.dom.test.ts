@@ -1111,6 +1111,14 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-later-correct-button')).not.toBeNull();
 	});
 
+	// #1395 (Code-Review 1395-1 C-1): also after «Nicht berichtigen»
+	it('nennt nach «Nicht berichtigen» die geänderte Wohnung ohne «Neu berechnen»', () => {
+		later(0, 'sent', { values: true }, { correctionDeclined: { on: '2026-10-20' } });
+		expect(laterText()).toContain(
+			'Seit dem Erstellen dieser Abrechnung wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass die Abrechnung neu berechnet einen anderen Saldo oder eine andere Position ergäbe. Am 20.10.2026 haben Sie entschieden'
+		);
+	});
+
 	it('spricht bei einer später erfassten Rechnung in der Einzahl', () => {
 		later(1);
 		expect(byTestId('statement-later-invoices')!.textContent).toContain('Rechnungen seit der Abrechnung geändert');
