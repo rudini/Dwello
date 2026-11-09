@@ -488,19 +488,19 @@ jobs:
 
   review-comment:
     name: Reviewer report
-    # What the pull request changed, with diagrams (#1273): an HTML artifact and a sticky comment, updated on every push.
-    # Never a gate. Pull requests from forks: #1274
+    # What the pull request changed, with diagrams (#1273): an HTML artifact and the text of a sticky comment, which the
+    # workflow «Pull request comments» from main posts (#1274), forks included. Never a gate
     needs: static-checks
-    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]' }}
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # the report diffs against the base
+          persist-credentials: false
       - uses: oven-sh/setup-bun@v2
       - uses: actions/download-artifact@v7
         with:
@@ -521,28 +521,15 @@ jobs:
             build/review/comment.md
             build/review/index.html
           retention-days: 30
-      - name: Comment on pull request
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const body = require('fs').readFileSync('build/review/comment.md', 'utf8');
-            const marker = '<!-- review-report -->';
-            const { owner, repo } = context.repo;
-            const issue_number = context.payload.pull_request.number;
-            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
-            const old = comments.find((c) => c.user.type === 'Bot' && c.body.startsWith(marker));
-            if (old) await github.rest.issues.updateComment({ owner, repo, comment_id: old.id, body });
-            else await github.rest.issues.createComment({ owner, repo, issue_number, body });
-
   ui-screenshots:
     name: UI screenshots
-    # Screenshots of every page a pull request changes, posted as a comment on the pull request
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    # Screenshots of every page a pull request changes, forks included; the workflow «Pull request comments» from main
+    # publishes them and comments (#1274), so this job, which runs the pull request's code, has no write token
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 40  # every page in three looks, and its dialog and wizard states (#697)
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     services:
       postgres:
         image: postgres:16-alpine
@@ -562,6 +549,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+          persist-credentials: false
       - uses: oven-sh/setup-bun@v2
       - name: Find changed pages
         id: routes
@@ -602,71 +590,15 @@ jobs:
           bun tests/ui-screenshots/statement-pdf.ts
         env:
           UI_BASE_DIR: ${{ github.workspace }}/../base
-      - name: Publish screenshots to branch ui-screenshots
+      - name: Upload screenshots
         if: steps.routes.outputs.any == 'true'
-        env:
-          DIR: pr-${{ github.event.pull_request.number }}/${{ github.event.pull_request.head.sha }}
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # every affected page looks as on the base branch: nothing to publish
-          ls ui-screenshots/*.png >/dev/null 2>&1 || exit 0
-          if git fetch origin ui-screenshots; then git worktree add -B ui-screenshots ../shots FETCH_HEAD; else git worktree add --orphan -b ui-screenshots ../shots; fi
-          mkdir -p "../shots/$DIR" && cp ui-screenshots/*.png "../shots/$DIR/"
-          cd ../shots && git add . && git commit -m "chore(ci): screenshots for $DIR"
-          for attempt in 1 2 3; do git push origin ui-screenshots && break; git pull --rebase origin ui-screenshots; done
-      - name: Comment on pull request
-        if: steps.routes.outputs.any == 'true'
-        uses: actions/github-script@v9
+        uses: actions/upload-artifact@v7
         with:
-          script: |
-            const fs = require('fs');
-            const pr = context.payload.pull_request;
-            const base = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/ui-screenshots/pr-${pr.number}/${pr.head.sha}`;
-            const marker = '<!-- ui-screenshots -->';
-            const shot = (title, name) => {
-              const before = fs.existsSync(`ui-screenshots/${name}.before.png`)
-                ? `\n<details><summary>Before</summary>\n\n![${title} before](${base}/${name}.before.png?raw=true)\n</details>`
-                : '\n_New page, nothing to compare with._';
-              return `### ${title}\n![${title}](${base}/${name}.png?raw=true)${before}`;
-            };
-            // the statement PDF (statement-pdf.ts): pdf_<language>_<page>.png
-            const pdfPages = fs.readdirSync('ui-screenshots').filter((file) => /^pdf_\w+_\d+\.png$/.test(file)).sort();
-            // PDF pages that look the same (statement-pdf.ts): pdf_<language>_<page>
-            const samePdfPages = fs.existsSync('ui-screenshots/unchanged.txt')
-              ? fs.readFileSync('ui-screenshots/unchanged.txt', 'utf8').split('\n').filter(Boolean).sort()
-              : [];
-            const pdfTitle = (name) => {
-              const [, language, page] = name.match(/^pdf_(\w+)_(\d+)/);
-              return `Statement PDF (${language}), page ${page}`;
-            };
-            // every shot of a page, its looks and states (screenshots.spec.ts): <file>\t<title> per line;
-            // one that looks the same as on the base branch has no screenshot (looksTheSame)
-            const unchanged = [];
-            const taken = fs.existsSync('ui-screenshots/shots.txt')
-              ? fs.readFileSync('ui-screenshots/shots.txt', 'utf8').split('\n').filter(Boolean).sort()
-              : [];
-            const shots = taken.flatMap((line) => {
-              const [name, title] = line.split('\t');
-              if (!fs.existsSync(`ui-screenshots/${name}.png`)) return (unchanged.push(title), []);
-              return [shot(title, name)];
-            });
-            if (fs.readFileSync('ui-routes.txt', 'utf8').split('\n').includes('pdf')) {
-              unchanged.push(...samePdfPages.map(pdfTitle));
-              shots.push(...pdfPages.map((file) => shot(pdfTitle(file), file.replace('.png', ''))));
-            }
-            const same = unchanged.length ? `\n\nLook the same as on ${pr.base.ref}: ${unchanged.join(', ')}.` : '';
-            // a comment holds 65536 characters: the shots that do not fit are only on the branch
-            let listed = shots.join('\n\n');
-            for (let count = shots.length; listed.length + same.length > 60000; count--)
-              listed = `${shots.slice(0, count).join('\n\n')}\n\n_${shots.length - count} more on [branch ui-screenshots](${base.replace('/blob/', '/tree/')})._`;
-            const body = shots.length
-              ? `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${listed}${same}`
-              : `${marker}\n## UI screenshots\nNo visible changes as of ${pr.head.sha.slice(0, 7)}.${same}`;
-            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
-            const existing = comments.find((comment) => comment.body?.startsWith(marker));
-            if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
-            else await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body });
+          name: ui-screenshots
+          path: |
+            ui-routes.txt
+            ui-screenshots/
+          retention-days: 7
 
   # A red run on main (after a push or nightly) opens the issue "CI auf main ist rot", or comments on it while it is open;
   # the next green run closes it. The session whose merge it was fixes it (skill pull-request, "After the merge").

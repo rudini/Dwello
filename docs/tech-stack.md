@@ -438,7 +438,7 @@ cd backend && bun run test && bun run type-check
 | Unit tests | `bun run test:coverage`; backend `bun run test` if backend changed |
 | E2E tests | `bun run test:e2e`: Chromium and the API driver on pull requests, all browsers on push to `main` and nightly; skipped for docs-only changes |
 | Accessibility (axe) | `bun run test:e2e -- --project=chromium --grep @a11y` on pull requests that change the UI, on push to `main` and nightly |
-| UI screenshots | On PRs: screenshots of changed pages, posted as a PR comment |
+| UI screenshots | On PRs, forks included: screenshots of changed pages as an artifact, without a write token; the workflow «Pull request comments» from `main` publishes them and posts the PR comment (#1274) |
 | Main status | On `main` (push, nightly): a red run opens or comments on the issue «CI auf main ist rot», a green one closes it |
 
 CI builds both Docker images but pushes none.
