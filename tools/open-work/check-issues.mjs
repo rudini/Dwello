@@ -4,7 +4,7 @@
 // waits for a decision («Proposed (confirm before starting)») without the label `needs-decision` (skill `issue-work`), and when
 // it changes a scenario that is not @wip on the base branch without `Spec change approved: #n` (CLAUDE.md, Workflow 1).
 // It also fails when it changes a gate file (a check, its config or the rules) without `Gate change approved: #n`, and
-// when it lowers a coverage floor, approved or not (#1269). CI runs the merge base's copy, so a pull request cannot switch it off.
+// when it lowers a coverage floor, approved or not (#1269). CI runs the target branch's copy, so a pull request cannot switch it off.
 // CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
 // With PR_NUMBER and a token the text comes from the API: the event's PR_BODY is the text from when the run started.
 import { execFileSync } from 'node:child_process';
@@ -112,12 +112,15 @@ const gateChanges = base
 const floorsOf = (rev, file) => {
 	const text = show(rev, file);
 	const [, list = ''] = /(?:thresholds:|MINIMUM =)\s*\{([^}]*)\}/.exec(text) ?? [];
-	return Object.fromEntries([...list.matchAll(/(\w+):\s*([\d.]+)/g)].map(([, key, value]) => [key, +value]));
+	return Object.fromEntries(list.split(',').map((entry) => entry.split(':').map((part) => part.trim())));
 };
+// only a plain number counts, so a floor written as an expression (`60 - 1`, `60e-1`) fails closed
+const number = (text) => (/^\d+(\.\d+)?$/.test(text ?? '') ? +text : NaN);
 for (const file of gateChanges.filter((file) => /^(vitest\.config|backend\/scripts\/coverage-check)\.ts$/.test(file))) {
 	const after = floorsOf('HEAD', file);
 	for (const [key, value] of Object.entries(floorsOf(from, file)))
-		if (!(after[key] >= value)) failures.push(`${file} lowers the coverage floor ${key} from ${value} to ${after[key] ?? 'none'}`);
+		if (key && !(number(after[key]) >= number(value)))
+			failures.push(`${file} lowers the coverage floor ${key} from ${value} to ${after[key] ?? 'none'}`);
 }
 if (!gateApprovals.length)
 	for (const file of gateChanges)
