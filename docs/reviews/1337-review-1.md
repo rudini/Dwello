@@ -1,0 +1,15 @@
+# Review 1337, Runde 1 (21839bf4, Basis 347c8bf9)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Minor | src/__tests__/building-lists-load.test.ts:26 | Der Testtitel «%s bietet bis zu 1000 Gebäude an, nicht nur die ersten 20 des Backends» sagt nach der Änderung etwas Falsches. Die Loads fragen jetzt `limit=all` ab und bieten jedes Gebäude an, und die geänderte Zeile 39 prüft genau das. |
+
+Geprüft: `pageLimit` und `paged()` (null setzt kein Limit; der Destructuring-Default `limit = 20/50/100` greift bei null nicht), die Umstellung von building, tenant und distribution-key auf `paged()` (Reihenfolge und Filter unverändert), die Antwort `limit: null` bei `all` (an der Basis kam NaN, also JSON null), alle 25 BFF-URLs (keine `limit=1000` mehr in `src/lib` und `src/routes`). Jede benannte Stelle aus Punkt 1 hat einen Test mit 1001 Datensätzen: Lauf-Vorschau, Mietvertrag, Übersicht (`overview.ts:234` rechnet 1001 − 1000 = 1, also war der Test vorher rot), `namesById`, Kategorien und Verteilschlüssel der Rechnung, `listDistributionKeys`. Die Picker laden alles auf dieselbe Weise; jede geänderte URL ist durch einen URL-Test oder einen 1001-Test abgedeckt. Der pg-Test hält Verhalten fest, das die Basis schon zeigt (Drizzle lässt `limit NaN` weg); der Commit sagt das, und es ist nicht der Test der Fehlerbehebung (das sind die BFF-Tests). Die Begründung für «No scenario» trägt (über 1000 Datensätze pro Szenario sind im E2E-Stack nicht sinnvoll anzulegen). Keine UI-Texte, keine E2E-Dateien, kein fremder Diff. Ponytail: nichts Ungenutztes, keine kopierte Hilfsfunktion.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet: `bun run lint`, `bun run check`, `bun run fitness -- --base origin/main`, `cd backend && bun run type-check`, `bunx vitest run` (227 Dateien, 4769 Tests), `cd backend && bun test src/__tests__/list-limit-all.pg.test.ts`, `prettier --check` auf den neuen Dateien. Volle Backend-Suite und E2E (chromium+api) liefen bei der Übergabe noch, Ergebnis offen.
+- Rote Läufe der BFF-Tests (1000 statt 1001 vor der URL-Änderung): nur gelesen. Jede Fake-Antwort schneidet bei `limit=1000` auf 1000 ab, also ist das Rot plausibel.
+- Issue #1337 selbst: `gh issue view` gab nichts zurück. Geprüft habe ich gegen den Anforderungstext des Aufrufers.
+- Ausserhalb der 1000er-Stellen der Anforderung bleiben kleinere Limits stehen, nicht Teil dieses Diffs: `src/routes/api/apartments/check-number/+server.ts:24` und `src/routes/buildings/[id]/+page.server.ts:78` (`apartments?buildingId=…&limit=100`), `src/routes/contracts/+page.server.ts:30` (`apartments?limit=100`, Daten in `+page.svelte` nicht benutzt), `contracts?…&limit=100` in `src/lib/server/apartment.ts:76`, `src/routes/tenants/+page.server.ts:25` und `src/routes/tenants/[id]/+page.server.ts:33`. Ob die Anforderung «jede Liste, deren Ergebnis alle Datensätze braucht» auch diese meint, kann ich nicht entscheiden.
+- Contracts- und Invoices-Route nehmen kein `pageLimit`. Kein geänderter BFF-Load ruft sie mit `limit=all` auf, deshalb kein Befund.
