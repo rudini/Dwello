@@ -27,6 +27,7 @@ async function request(path: string, session?: string) {
 	const url = new URL(`http://localhost:3000${path}`);
 	const event = {
 		url,
+		params: {},
 		request: new Request(url),
 		cookies: { get: (name: string) => (name === 'dwello_session' ? session : undefined) },
 		locals: {} as App.Locals
@@ -97,6 +98,7 @@ describe('Sicherung noch nicht eingerichtet', () => {
 		const url = new URL(`http://localhost:3000${path}`);
 		const event = {
 			url,
+			params: {},
 			request: new Request(url),
 			cookies: { get: (name: string) => (name === 'dwello_session' ? session : undefined) },
 			locals: {} as App.Locals,

@@ -212,7 +212,13 @@ export function createBinaryResponse(
 	headers.set('Content-Type', contentType);
 
 	if (filename) {
-		headers.set('Content-Disposition', `attachment; filename="${filename}"`);
+		// as backend/src/routes/file-response.ts: an ASCII name for old clients, the real one per RFC 5987 (#1377)
+		const ascii = filename.replace(/[^\x20-\x7e]|["\\]/g, '_');
+		const utf8 = encodeURIComponent(filename).replace(
+			/['()*]/g,
+			(c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`
+		);
+		headers.set('Content-Disposition', `attachment; filename="${ascii}"; filename*=UTF-8''${utf8}`);
 	}
 
 	return new Response(data, {

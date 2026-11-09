@@ -304,7 +304,16 @@ describe('API Proxy Helper Functions', () => {
 			const response = createBinaryResponse(data, 'application/pdf', 'statement-1.pdf');
 
 			expect(response.headers.get('Content-Disposition')).toBe(
-				'attachment; filename="statement-1.pdf"'
+				`attachment; filename="statement-1.pdf"; filename*=UTF-8''statement-1.pdf`
+			);
+		});
+
+		// #1377: a quote or a line break in the name never ends the header value
+		it('escapes the filename as the backend does, with the real name per RFC 5987', () => {
+			const response = createBinaryResponse(new ArrayBuffer(8), 'application/pdf', 'Müller "a".pdf');
+
+			expect(response.headers.get('Content-Disposition')).toBe(
+				`attachment; filename="M_ller _a_.pdf"; filename*=UTF-8''M%C3%BCller%20%22a%22.pdf`
 			);
 		});
 
