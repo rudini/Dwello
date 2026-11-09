@@ -284,6 +284,14 @@ describe('Skripte der Pakete und die Backend-Testkonfiguration sind Prüfdateien
 		expect(await changeGate(head, '', { 'package.json': manifest(scripts) })).toMatchObject({ code: 0 });
 	});
 
+	// review 1269b-review-1 C-1: a manifest the check cannot read, or one deleted with its scripts, counts too
+	it('meldet ein unlesbares und ein gelöschtes Paket', async () => {
+		const unreadable = await changeGate({ 'package.json': '{ "scripts": ' }, '', { 'package.json': manifest(scripts) });
+		expect(unreadable.out).toContain('package.json changes a check');
+		const deleted = await changeGate({ 'backend/package.json': null }, '', { 'backend/package.json': manifest(scripts) });
+		expect(deleted.out).toContain('backend/package.json changes a check');
+	});
+
 	it('meldet jede Änderung an backend/bunfig.toml', async () => {
 		const result = await changeGate({ 'backend/bunfig.toml': '[test]\ncoverageSkipTestFiles = false\n' });
 		expect(result.out).toContain('backend/bunfig.toml changes a check');
