@@ -128,10 +128,11 @@
 {:else}
 	<!-- A narrow region (and stacked pages at every width) gets the lines one below the other, every amount in view;
 	     a position is keyed by category and key, which a recalculation keeps: its new ids would replace each card, and
-	     WebKit, without a scroll anchor, moved the page by the card for a moment (#1366) -->
+	     WebKit, without a scroll anchor, moved the page by the card for a moment (#1366); a category or key deleted
+	     before #1160/#1255 falls back to the id, so two such positions still differ -->
 	<div class="@container">
 		<ul class="flex flex-col gap-4 {shown.list}" aria-label={m.statements_lines()}>
-			{#each statement.lineItems as item (`${item.categoryId}/${item.distributionKeyId}`)}
+			{#each statement.lineItems as item (`${item.categoryId ?? item.id}/${item.distributionKeyId ?? item.id}`)}
 				<li class="rounded-panel border border-line p-4" data-testid="statement-line-card">
 					<dl class="grid grid-cols-2 gap-x-4 gap-y-2 tabular-nums">
 						<dt class="text-ink-muted">{m.buildings_category()}</dt>
@@ -160,7 +161,7 @@
 
 		<div class={shown.table}>
 			<Table caption={m.statements_lines()} captionHidden {columns}>
-				{#each statement.lineItems as item (`${item.categoryId}/${item.distributionKeyId}`)}
+				{#each statement.lineItems as item (`${item.categoryId ?? item.id}/${item.distributionKeyId ?? item.id}`)}
 					<tr data-testid="statement-line-item">
 						<td class="text-ink">{item.categoryName}</td>
 						<td class="text-ink-muted">{item.distributionKeyName}</td>
