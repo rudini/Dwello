@@ -64,6 +64,8 @@ describe('Kommentare aus Daten eines Forks (Fallback-Review von #1386)', () => {
 	it('kürzt die Liste der gleich gebliebenen Seiten und beendet die Kürzung spätestens bei null Screenshots', () => {
 		expect(comments).toContain("unchanged.join(', ').slice(0, 2000)");
 		expect(comments).toContain('count > 0 && listed.length + same.length > 60000');
+		// one title of shots.txt cannot fill the comment either (review 1274b-review-1 C-1)
+		expect(comments).toContain("const [name, title] = line.split('\\t').map((part) => part.slice(0, 200));");
 	});
 
 	it('macht @-Erwähnungen in beiden Kommentaren unwirksam', () => {
