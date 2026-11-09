@@ -160,6 +160,26 @@ describe('Auth Routes Integration Tests', () => {
 			}
 		);
 
+		// code review 1374-1 C-1: Node 20, which README and package.json still name, has no URL.parse (as #1095)
+		it('merkt sich die verlangte Seite auch ohne URL.parse', async () => {
+			const parse = URL.parse;
+			Reflect.deleteProperty(URL, 'parse');
+			try {
+				const { GET } = await import('$lib/../routes/auth/login/+server');
+				const cookies = createMockCookies();
+				const event = createMockRequestEvent({
+					url: 'http://localhost:3000/auth/login?provider=google&redirectTo=%2Fbuildings',
+					cookies
+				});
+
+				await Promise.resolve(GET(event as never)).catch(() => {});
+
+				expect(JSON.parse(cookies._store.get('dwello_login')!).redirectTo).toBe('/buildings');
+			} finally {
+				URL.parse = parse;
+			}
+		});
+
 		it('zeigt die Anmeldeseite mit Hinweis, wenn der Anbieter nicht eingerichtet ist', async () => {
 			vi.mocked(oauthModule.validateProviderConfig).mockReturnValueOnce(false);
 			const { GET } = await import('$lib/../routes/auth/login/+server');
