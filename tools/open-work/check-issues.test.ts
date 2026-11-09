@@ -403,4 +403,16 @@ Then('sieht der Liegenschaftsverwalter nichts', async ({ verwalter }) => {
 		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main', script });
 		expect(result.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {string}», used by');
 	});
+
+	// review 1270-review-2 C-1: a loop whose list spans several lines
+	it('meldet einen gelöschten Schritt aus der mehrzeiligen Liste einer Schleife', async () => {
+		const loop = "for (const [step, question] of [\n\t['sieht der Liegenschaftsverwalter {string}', listed],\n\t['sieht der Liegenschaftsverwalter nichts', empty]\n] as const)\n\tThen(step, async ({ verwalter }) => {\n\t\tawait verwalter.sees(question);\n\t});\n";
+		const before = `${steps}\n${loop}`;
+		const cwd = gateRepo(
+			{ 'tests/e2e/steps/buildings.steps.ts': before.replace("\t['sieht der Liegenschaftsverwalter {string}', listed],\n", '') },
+			{ ...base, 'tests/e2e/steps/buildings.steps.ts': before }
+		);
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(result.out).toContain('buildings.steps.ts:19 step «sieht der Liegenschaftsverwalter {string} | sieht der Liegenschaftsverwalter nichts», used by');
+	});
 });

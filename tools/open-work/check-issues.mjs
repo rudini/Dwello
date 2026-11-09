@@ -211,9 +211,10 @@ function changedSteps(file) {
 	lines.forEach((line, i) => {
 		const [, indent] = /^(\s*)(?:Given|When|Then)\(/.exec(line) ?? [];
 		if (indent === undefined) return;
-		// an indented one is the body of a loop over its patterns: the definition starts at the loop
+		// an indented one is the body of a loop over its patterns: the definition starts at the loop, as far back as the
+		// statement before it
 		let start = i;
-		while (indent && start > 1 && !/^\S/.test(lines[start])) start--;
+		while (indent && start > 1 && !/^for\b/.test(lines[start]) && !/^\S.*;\s*$/.test(lines[start - 1])) start--;
 		defs.push({ line: start, call: i, end: endOf(lines, i, indent) });
 	});
 	const touched = new Set();
