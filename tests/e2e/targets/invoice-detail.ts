@@ -11,6 +11,8 @@ export const legalNote = target('Hinweis Mietrecht', (page) => page.getByTestId(
 export const editButton = target('Rechnung bearbeiten', (page) => page.getByTestId('invoice-edit-button'));
 export const deleteButton = target('Rechnung löschen', (page) => page.getByTestId('invoice-delete-button'));
 export const deleteConfirm = target('Löschen der Rechnung bestätigen', (page) => page.getByTestId('invoice-delete-confirm'));
+// #1410: until when the invoice must be kept, in the confirmation to delete it
+export const retentionNote = target('Aufbewahrungsfrist beim Löschen', (page) => page.getByTestId('invoice-delete-retention-note'));
 export const buildingLink = target('Gebäude der Rechnung', (page) => page.getByTestId('invoice-building-link'));
 export const recategorizeButton = target('Neu kategorisieren', (page) => page.getByTestId('invoice-recategorize-button'));
 export const recategorizeError = target('Fehler beim Kategorisieren', (page) =>

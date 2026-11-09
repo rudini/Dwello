@@ -215,3 +215,22 @@ Funktionalität: Rechnungsdetail
     Wenn der Liegenschaftsverwalter den Beleg öffnet
     Und der Liegenschaftsverwalter die Fehlerseite verlässt
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnungen"
+
+  # #1410 (Entscheid PO): 10 Jahre ab dem Ende der Abrechnungsperiode der Rechnung; Löschen bleibt nach der Bestätigung möglich
+  @wip
+  Szenario: Vor dem Löschen einer Rechnung nennt Dwello die Aufbewahrungsfrist
+    Angenommen die Rechnung von "Hauswart Huber" ist vom "2024-03-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Wenn der Liegenschaftsverwalter die Rechnung löschen will
+    Dann nennt die Bestätigung zum Löschen der Rechnung die Aufbewahrungsfrist "TEXT_FACHREVIEW mit 31.12.2034 und Art. 958f OR"
+    Wenn der Liegenschaftsverwalter das Löschen der Rechnung bestätigt
+    Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
+    Und die Rechnung von "Hauswart Huber" ist nicht mehr auffindbar
+
+  @wip
+  Szenario: Nach Ablauf der Aufbewahrungsfrist nennt die Bestätigung keine Frist
+    Angenommen die Rechnung von "Hauswart Huber" ist vom "2015-06-30"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Wenn der Liegenschaftsverwalter die Rechnung löschen will
+    Dann beschreibt sich die Bestätigung mit "Die Rechnung von Hauswart Huber über CHF 450.00 wird gelöscht. Sie fliesst dann in keine neue Nebenkostenabrechnung mehr ein. Das lässt sich nicht rückgängig machen."
+    Und nennt die Bestätigung zum Löschen der Rechnung keine Aufbewahrungsfrist
