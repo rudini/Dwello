@@ -285,6 +285,12 @@ describe('Coverage-Untergrenzen sinken nie (#1269)', () => {
 		expect(result.out).toContain('backend/scripts/coverage-check.ts lowers the coverage floor functions from 85 to none');
 	});
 
+	// fallback review of #1357: a floor written as an expression must not read as its leading digits
+	it.each(['60e-1', '60 - 1', '60 * 0.9'])('meldet eine Untergrenze, die als %s geschrieben ist', async (value) => {
+		const head = { 'vitest.config.ts': floors['vitest.config.ts'].replace('branches: 60', `branches: ${value}`) };
+		expect((await changeGate(head, approved, floors)).out).toContain('lowers the coverage floor branches from 60 to');
+	});
+
 	it('lässt eine gehobene Untergrenze mit Freigabe durch', async () => {
 		const head = { 'vitest.config.ts': floors['vitest.config.ts'].replace('lines: 66', 'lines: 70') };
 		expect(await changeGate(head, approved, floors)).toMatchObject({ code: 0 });
