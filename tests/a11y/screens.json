@@ -63,7 +63,7 @@
 		"mark-sent-dialog": "Dokumente, «Als versendet markieren» chosen on a letter (Persona Dr. Weber 534 P-2): the confirmation that names what follows for a reminder and for a new PDF.",
 		"redeliver-dialog": "Sent statement, «Erneut per Brief zustellen» chosen (#534): the confirmation that names the new date and Zahlungsfrist.",
 		"recalculate-dialog": "Draft statement, «Neu berechnen» chosen (#338): the confirmation that names what stays and what changes.",
-		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
+		"reminder-dialog": "The Mahnung dialog of an overdue statement open; while a correction is due it warns with the open amount correcting would claim (#1403).",
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"reminder-undelivered": "A Mahnung just sent by e-mail that the mail server refused (#736): the feedback names the address it went to and leads to the tenant and to «Dokumente»; each look reminds another overdue statement (the last reminder waits to be posted, #449).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
@@ -850,7 +850,8 @@
 			"states": [
 				"default",
 				"mark-paid-dialog",
-				"reset-payment-dialog"
+				"reset-payment-dialog",
+				"reminder-dialog"
 			]
 		},
 		{

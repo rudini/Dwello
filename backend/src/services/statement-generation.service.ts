@@ -212,7 +212,11 @@ export async function recalculation(statement: StatementWithDetails) {
 	const difference = roundToRappen(Number(now.balance) - Number(statement.balance)).toFixed(2);
 	const small = (value: number) => value !== 0 && belowMinimum(value); // either Saldo (code review 546-1 C-2)
 	const belowMin = !statement.final && (small(Number(now.balance)) || small(Number(statement.balance)));
-	return { changes, result, raises: after >= before, lowers: after < before, now: { balance, difference, belowMinimum: belowMin, declineCosts: after >= before && Number(difference) > 0 ? difference : null } };
+	// #1403 (Fachreview 1403-1 V-1, V-2): what the berichtigte Abrechnung would claim after what was paid on this one,
+	// 0 for a refund or a Saldo it carries over
+	const owed = calculateBalance(Number(now.values.totalCosts) + now.carryOver, Number(now.values.totalAdvancePayments) + paidSoFar(statement));
+	const open = (owed > 0 && (statement.final || !belowMinimum(owed)) ? owed : 0).toFixed(2);
+	return { changes, result, raises: after >= before, lowers: after < before, now: { balance, difference, belowMinimum: belowMin, declineCosts: after >= before && Number(difference) > 0 ? difference : null, open } };
 }
 
 /**
