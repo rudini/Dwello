@@ -8,7 +8,7 @@ Closes #
 
 ## Type
 
-<!-- One of: domain, product, bug (functional), or one ISO 25010 category: nfr:security, nfr:reliability, nfr:performance, nfr:usability, nfr:maintainability, nfr:portability, nfr:compatibility. A pull request from a fork closes a ready issue (Closes #n) and names its label. -->
+<!-- Only the category, one of: domain, product, bug (functional), or one ISO 25010 category: nfr:security, nfr:reliability, nfr:performance, nfr:usability, nfr:maintainability, nfr:portability, nfr:compatibility. A pull request from a fork closes a ready issue (Closes #n) and names its label. -->
 
 ## Decisions
 

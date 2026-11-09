@@ -512,20 +512,31 @@ describe('Der Text des Pull Requests nennt Typ, Entscheide und Risiken (#1271)',
 		expect(result.out).toContain('The section «Decisions» of the pull request text is empty');
 	});
 
-	it('meldet einen Typ, der keine Kategorie nennt', async () => {
-		const result = await own(sections('a refactoring'));
-		expect(result.out).toContain('«Type» names none of domain, product, bug or an nfr: category');
+	// review 1271-review-1 C-1 and the fallback review of #1384: «Type» is exactly one category, not prose that mentions
+	// one, so neither the order of words nor a «not a bug» decides it
+	it.each(['a refactoring', 'bug, nfr:security', 'This is not a bug'])('meldet einen Typ «%s»', async (type) => {
+		const result = await own(sections(type));
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('«Type» is exactly one of domain, product, bug or an nfr: category (ISO 25010), nothing else');
 	});
 
-	// review 1271-review-1 C-1: one category, so the order of words cannot decide whether a fork's Type matches
-	it('meldet einen Typ mit mehr als einer Kategorie', async () => {
-		const result = await own(sections('bug, nfr:security'));
-		expect(result.code).toBe(1);
-		expect(result.out).toContain('«Type» names more than one category: bug, nfr:security');
-		// review 1271-review-2 C-4: a fork with such a Type gets that message only, not one claiming Type names nothing
+	it('lässt einen Typ in Backticks durch', async () => {
+		expect(await own(sections('`nfr:security`'))).toMatchObject({ code: 0 });
+	});
+
+	// review 1271-review-2 C-4: a fork with such a Type gets that message only, not one claiming Type names nothing
+	it('meldet beim Fork mit ungültigem Typ keinen zweiten Fehler zum Label', async () => {
 		const forked = await check([], 200, { number: 5, body: 'Closes #7', cwd: process.cwd(), sections: sections('bug, nfr:security'), fork: true, issue: { state: 'open', labels: [{ name: 'bug' }] } });
-		expect(forked.out).toContain('«Type» names more than one category');
-		expect(forked.out).not.toContain('says nothing');
+		expect(forked.out).toContain('«Type» is exactly one of');
+		expect(forked.out).not.toContain('says');
+	});
+
+	// fallback review of #1384: headings inside a comment are no sections
+	it('meldet Abschnitte, die nur in einem Kommentar stehen, als fehlend', async () => {
+		const hidden = '\n\n## Type\n\nbug\n\n<!--\n## Decisions\n\nx\n\n## Risks\n\ny\n-->\n';
+		const result = await own(hidden);
+		expect(result.out).toContain('The pull request text lacks the section «Decisions»');
+		expect(result.out).toContain('The pull request text lacks the section «Risks»');
 	});
 
 	it('lässt Pull Requests von Dependabot ohne Abschnitte durch', async () => {

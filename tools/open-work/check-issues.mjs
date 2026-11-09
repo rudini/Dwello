@@ -67,22 +67,22 @@ for (const [, n] of closing) {
 const typeLabel = /^(domain|product|bug|nfr:(security|reliability|performance|usability|maintainability|portability|compatibility))$/;
 if (pull.user && pull.user.login !== 'dependabot[bot]') {
 	const sections = Object.fromEntries(
-		prBody
+		withoutHints(prBody) // hints first, so a heading inside a comment is no section
 			.split(/^##[ \t]+/m)
 			.slice(1)
-			.map((part) => [part.split('\n')[0].trim(), withoutHints(part.slice(part.indexOf('\n') + 1)).trim()])
+			.map((part) => [part.split('\n')[0].trim(), part.slice(part.indexOf('\n') + 1).trim()])
 	);
 	for (const name of ['Type', 'Decisions', 'Risks']) {
 		if (sections[name] === undefined) failures.push(`The pull request text lacks the section «${name}» (.github/pull_request_template.md)`);
 		else if (!sections[name]) failures.push(`The section «${name}» of the pull request text is empty`);
 	}
-	const types = [...new Set((sections.Type ?? '').match(/\b(?:domain|product|bug|nfr:[a-z]+)\b/g) ?? [])].filter((word) => typeLabel.test(word));
-	const type = types.length === 1 ? types[0] : undefined;
-	if (sections.Type && !types.length) failures.push('«Type» names none of domain, product, bug or an nfr: category (ISO 25010)');
-	if (types.length > 1) failures.push(`«Type» names more than one category: ${types.join(', ')}`);
+	// exactly one category, so prose that mentions one («not a bug») does not count as it
+	const type = (sections.Type ?? '').replace(/`/g, '').trim();
+	if (sections.Type && !typeLabel.test(type))
+		failures.push('«Type» is exactly one of domain, product, bug or an nfr: category (ISO 25010), nothing else');
 	if (pull.head?.repo?.full_name !== pull.base?.repo?.full_name) {
 		if (!closing.length) failures.push('A pull request from a fork closes an issue (Closes #<n>) that is ready');
-		for (const [, n] of closing) failures.push(...(await readiness(n, type)));
+		for (const [, n] of closing) failures.push(...(await readiness(n, typeLabel.test(type) ? type : undefined)));
 	}
 }
 
