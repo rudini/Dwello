@@ -7,24 +7,47 @@ import { describe, expect, it } from 'vitest';
 
 const ci = readFileSync(fileURLToPath(new URL('../../.github/workflows/ci.yml', import.meta.url)), 'utf8');
 
-/** The lines of the job `changes` that write the outputs `shards` and `matrix`, without the redirect to $GITHUB_OUTPUT */
-function selection(): string {
-	const start = ci.indexOf('echo "shards=');
+/** The lines of the job `changes` from the E2E shards to the outputs `shards` and `matrix`, printed instead of written */
+function selection(event: string): string {
+	const start = ci.indexOf('e2e=$(');
 	const end = ci.indexOf('>> "$GITHUB_OUTPUT"', ci.indexOf('echo "matrix=')) + '>> "$GITHUB_OUTPUT"'.length;
-	expect(start, 'the shards output of the job changes').toBeGreaterThan(-1);
-	return ci.slice(start, end).replaceAll('>> "$GITHUB_OUTPUT"', '');
+	expect(start, 'the E2E shards of the job changes').toBeGreaterThan(-1);
+	return ci
+		.slice(start, end)
+		.replaceAll('${{ github.event_name }}', event)
+		.replaceAll('${{ github.base_ref }}', 'main')
+		.replaceAll('node tools/', `node ${fileURLToPath(new URL('../../tools/', import.meta.url))}`)
+		.replaceAll('>> "$GITHUB_OUTPUT"', '')
+		.replace(/^.*GITHUB_OUTPUT.*$/gm, '');
 }
 
-/** The shards and matrix entries the job `changes` selects for a run with these E2E shards and UI flag (#1252) */
-function select(e2e: number, ui: boolean) {
-	const out = spawnSync('bash', ['-c', `e2e=${e2e} filter= ui=${ui}\n${selection()}`], { encoding: 'utf8' });
+/** Directory with stand-ins for commands the step calls: each name runs its shell body */
+function stubs(commands: Record<string, string>): string {
+	const bin = mkdtempSync(join(tmpdir(), 'axe-shards-'));
+	for (const [name, body] of Object.entries(commands)) {
+		writeFileSync(join(bin, name), `#!/bin/sh\n${body}\n`);
+		chmodSync(join(bin, name), 0o755);
+	}
+	return bin;
+}
+
+/** The axe shards the job `changes` selects for a run of this event that changes these files (#1252) */
+function select(event: string, ...files: string[]) {
+	const cwd = mkdtempSync(join(tmpdir(), 'axe-shards-run-'));
+	const out = spawnSync('bash', ['-c', selection(event)], {
+		cwd,
+		encoding: 'utf8',
+		env: {
+			...process.env,
+			PATH: `${stubs({ git: `printf '%s\\n' ${files.map((f) => `'${f}'`).join(' ')}` })}:${process.env.PATH}`
+		}
+	});
 	expect(out.stderr).toBe('');
-	const [shards, matrix] = out.stdout.trim().split('\n');
+	const lines = out.stdout.split('\n');
+	const output = (name: string) => JSON.parse(lines.find((l) => l.startsWith(`${name}=`))!.slice(name.length + 1));
 	return {
-		axeShards: JSON.parse(shards.replace('shards=', ''))['Accessibility (axe)'],
-		axeEntries: JSON.parse(matrix.replace('matrix=', '')).filter(
-			(m: { name: string }) => m.name === 'Accessibility (axe)'
-		).length
+		axeShards: output('shards')['Accessibility (axe)'],
+		axeEntries: output('matrix').filter((m: { name: string }) => m.name === 'Accessibility (axe)').length
 	};
 }
 
@@ -37,32 +60,27 @@ function result(check: string, shards: number): number | null {
 		.replace(/\$\{\{ needs\.changes\.outputs\.app \}\}/g, 'true')
 		.replace(/\$\{\{ needs\.e2e-tests\.result \}\}/g, 'failure')
 		.replace(/\$\{\{ [^}]+ \}\}/g, check);
-	const bin = mkdtempSync(join(tmpdir(), 'axe-shards-'));
-	for (const [name, body] of [
-		['gh', 'echo 0'],
-		['sleep', 'true']
-	]) {
-		writeFileSync(join(bin, name), `#!/bin/sh\n${body}\n`);
-		chmodSync(join(bin, name), 0o755);
-	}
+	const bin = stubs({ gh: 'echo 0', sleep: 'true' });
 	return spawnSync('bash', ['-c', script], {
 		env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, SHARDS: String(shards) }
 	}).status;
 }
 
 describe('Accessibility-Shards nach UI-Änderung (#1252)', () => {
-	it('startet ohne UI-Änderung keinen axe-Shard und erwartet keinen', () => {
-		expect(select(5, false)).toEqual({ axeShards: 0, axeEntries: 0 });
+	it('startet bei einem Pull Request ohne UI-Änderung keinen axe-Shard und erwartet keinen', () => {
+		expect(select('pull_request', 'backend/src/services/statement.service.ts')).toEqual({ axeShards: 0, axeEntries: 0 });
 	});
 
 	it.each([
-		[5, 'Pull Request mit UI-Änderung'],
-		[12, 'main und nächtlicher Lauf']
-	])('startet bei %i E2E-Shards (%s) alle vier axe-Shards', (e2e) => {
-		expect(select(e2e, true)).toEqual({ axeShards: 4, axeEntries: 4 });
+		['pull_request', 'Pull Request mit UI-Änderung'],
+		['push', 'main'],
+		['schedule', 'nächtlicher Lauf']
+	])('startet bei %s (%s) alle vier axe-Shards', (event) => {
+		expect(select(event, 'src/routes/buildings/+page.svelte')).toEqual({ axeShards: 4, axeEntries: 4 });
 	});
 
 	it('meldet «Accessibility (axe)» ohne UI-Änderung als bestanden, auch wenn ein E2E-Shard fehlschlug', () => {
-		expect(result('Accessibility (axe)', select(5, false).axeShards)).toBe(0);
+		const { axeShards } = select('pull_request', 'backend/src/services/statement.service.ts');
+		expect(result('Accessibility (axe)', axeShards)).toBe(0);
 	});
 });
