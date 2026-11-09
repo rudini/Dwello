@@ -71,6 +71,11 @@ describe('pdfAffected', () => {
 		expect(pdfAffected(['backend/src/services/pdf-texts/fr.ts'])).toBe(true);
 	});
 
+	// #1052: the PDF is drawn by pdf.service.ts and its parts pdf-*.ts
+	it('reports a change of a part of the statement PDF in pdf-*.ts', () => {
+		expect(['pdf-layout.ts', 'pdf-cost-table.ts', 'pdf-payment-part.ts', 'pdf-segments.ts', 'pdf-floor.ts'].map((file) => pdfAffected([`backend/src/services/${file}`]))).toEqual([true, true, true, true, true]);
+	});
+
 	it('ignores other backend code and tests', () => {
 		expect(pdfAffected(['backend/src/services/statement.service.ts'])).toBe(false);
 		expect(pdfAffected(['backend/src/__tests__/statement-pdf-render.test.ts'])).toBe(false);

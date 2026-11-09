@@ -1,7 +1,4 @@
-/**
- * Statement Routes
- * API endpoints for utility statement management
- */
+/** Statement routes: the API endpoints of utility statements */
 
 import { Elysia, t } from 'elysia';
 import { swissToday } from '../services/today';
