@@ -146,6 +146,15 @@ describe('Neuer Wiederherstellungscode', () => {
 		expect((await readFile(file)).subarray(0, 16).toString()).toBe('DWELLO-BACKUP-2\n');
 	}, 60_000);
 
+	// fallback review of PR #1393: a code shown before 0046 has no key yet when it is confirmed
+	it('signiert auch mit einem Code, der vor der Migration des Signaturschlüssels angezeigt wurde', async () => {
+		const { code } = (await (await sendJson('GET', '/api/v1/backup')).json()) as { code: string };
+		await db.update(backupCodes).set({ macKey: null });
+		await sendJson('POST', '/api/v1/backup/confirm', { code });
+		const file = await createBackup(DATABASE_URL, dir, {});
+		expect((await readFile(file)).subarray(0, 16).toString()).toBe('DWELLO-BACKUP-2\n');
+	}, 60_000);
+
 	it('vergisst einen neuen Code, der nach 30 Minuten noch nicht bestätigt ist', async () => {
 		await confirmedFirstCode();
 		const token = await localSession();

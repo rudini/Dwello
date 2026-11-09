@@ -6,6 +6,7 @@
 
 import { join } from 'path';
 import { restoreBackup } from '../src/services/backup.service';
+import { typedConfirmation } from '../src/services/restore-confirmation';
 
 const file = process.argv[2];
 if (!file) {
@@ -29,12 +30,6 @@ await restoreBackup(
 	process.env.SECRETS_DIR,
 	join(import.meta.dir, '..', 'migrations'),
 	// a Sicherung of a code confirmed before #1373 carries no signature (Decided (product owner) #1373)
-	(warning) => {
-		console.log(warning);
-		return (
-			prompt('Tippen Sie WIEDERHERSTELLEN, um sie trotzdem wiederherzustellen:')?.trim() ===
-			'WIEDERHERSTELLEN'
-		);
-	}
+	typedConfirmation()
 );
 console.log('Die Sicherung ist wiederhergestellt. Starten Sie Dwello neu.');
