@@ -740,6 +740,16 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('existing-statement-2')).toBeNull();
 	});
 
+	// #1328 (Code-Review 1328-1 C-1): auch der Entwurf, den eine geänderte Wohnung oder ein Verteilschlüssel veralten liess
+	it('nennt bei einer leeren Vorschau den Entwurf mit geänderter Wohnung oder geändertem Verteilschlüssel', () => {
+		const draft = { id: '1', statementNumber: 'NK-2024-0001', tenantName: 'Nina Brunner', outdated: false, fuelStock: false, values: true, profile: null, profileEdited: null, fee: null };
+		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2, changed: [draft] }] });
+
+		expect(byTestId('existing-statement-notes-1')!.textContent!.trim()).toBe(
+			'Seit dem Erstellen dieses Entwurfs wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass «Neu berechnen» einen anderen Saldo oder eine andere Position ergäbe.'
+		);
+	});
+
 	// #65: ohne Vorjahr kein Hinweis auf Monate ohne Rechnung; eine Rechnung im Jahr kann vollständig sein
 	it('weist nicht auf Monate ohne Rechnung am Anfang oder Ende der Periode hin', () => {
 		open({
@@ -1257,6 +1267,7 @@ describe('Abrechnungen erstellen', () => {
 		tenantName: 'Nina Brunner',
 		outdated: false,
 		fuelStock: false,
+		values: false,
 		profile: null,
 		profileEdited: null,
 		fee: null,
@@ -1267,6 +1278,14 @@ describe('Abrechnungen erstellen', () => {
 	const notesOf = (id: string) => byTestId(`existing-statement-notes-${id}`)!.textContent!.replace(/\s+/g, ' ').trim();
 	const sameSettings =
 		'Damit alle Abrechnungen dieser Abrechnungsperiode gleich gerechnet sind, wählen Sie im Schritt 3 «Heizprofil und Verwaltungspauschale» dasselbe Heizprofil und denselben Satz wie bei den bestehenden Abrechnungen.';
+
+	// #1328 (PO A', Fachreview 1328-1): only when invoices and Tankbestand are unchanged
+	it('nennt einen Entwurf mit danach geänderter Wohnung oder geändertem Verteilschlüssel', () => {
+		withChanged([changed('1', { values: true })]);
+		expect(notesOf('1')).toBe(
+			'Seit dem Erstellen dieses Entwurfs wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass «Neu berechnen» einen anderen Saldo oder eine andere Position ergäbe.'
+		);
+	});
 
 	// #454 (#408 point 8), Fachreview 454-2 V-19: a Tankbestand changed since, alone or with invoices
 	it('nennt einen Entwurf mit danach geändertem Tankbestand', () => {

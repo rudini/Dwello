@@ -182,7 +182,8 @@ function outdatedDraftsTask(drafts: Outdated): Task | false {
 }
 
 // What changed since a statement, as the statement page says it (#454, Fachreview 454-1 V-8)
-export function laterText(invoices: number, fuelStock: boolean) {
+export function laterText(invoices: number, fuelStock: boolean, values = false) {
+	if (!invoices && !fuelStock && values) return m.statements_later_values(); // #1328: an apartment or a key
 	const changed = invoices === 1 ? m.statements_later_one() : m.statements_later_many({ count: invoices });
 	if (!fuelStock) return changed;
 	return invoices ? m.statements_later_and_fuel_stock({ later: changed }) : m.statements_later_fuel_stock();
