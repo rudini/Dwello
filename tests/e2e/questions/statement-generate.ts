@@ -2,6 +2,7 @@ import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
 import { Accessible, Checked, Count, CutInChoice, Enabled, Gap, ReachingOut, ShareInViewport, Text, Value, Visibility } from '../screenplay/questions';
 import {
+	resumeNotice,
 	allBuildingsNote,
 	confirmMissingInvoices,
 	existingStatements,
@@ -210,3 +211,5 @@ export const recalculateNotes = Text.ofAll(recalculateNote);
 export const runSummaryText = Text.of(runSummary);
 export const finishedStepText = (label: string) => Text.of(finishedStep(label));
 export const wizardAnnouncement = Text.of(wizardStatus);
+
+export const resumeNoticeText = Text.of(resumeNotice); // #1314

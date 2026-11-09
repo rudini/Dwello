@@ -889,6 +889,16 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter die Rechnung vom "31.03.2024" aus dem Hinweis bearbeitet
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
 
+  # #1314 (Personas Helga 1221 P-4, Marco 1221 P-5): zurück von einer Rechnung aus einem Hinweis der Vorschau sagt der
+  # Assistent, dass er die Vorschau mit den Rechnungen neu berechnet, wie sie jetzt sind, nicht mit einer neuen Rechnung
+  Szenario: Zurück von einer Rechnung aus der Vorschau sagt der Assistent, wie es weitergeht
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter die Rechnung vom "20.01.2025" aus dem Hinweis bearbeitet
+    Und der Liegenschaftsverwalter die Bearbeitung abbricht
+    Dann ist der Assistent im Schritt "Heizprofil und Verwaltungspauschale"
+    Und sagt der Assistent nach der Rückkehr "Mit «Weiter» berechnet Dwello die Vorschau neu, mit den Rechnungen, wie sie jetzt sind."
+
   # #738: der Schritt «Gebäude» sagt, was er nicht laden konnte, statt ein Gebäude ohne Rechnungen zu zeigen
   Szenario: Die Wahl der Gebäude sagt, wenn die Rechnungen nicht gezählt werden konnten
     Angenommen die Rechnungen der Gebäude lassen sich nicht zählen
