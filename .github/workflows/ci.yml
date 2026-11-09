@@ -637,7 +637,7 @@ jobs:
   # the next green run closes it. The session whose merge it was fixes it (skill pull-request, "After the merge").
   main-status:
     name: Main status
-    needs: [changes, build, docker, static-checks, unit-tests, e2e-tests, e2e-results]
+    needs: [changes, build, docker, installer, static-checks, unit-tests, e2e-tests, e2e-results]
     if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:

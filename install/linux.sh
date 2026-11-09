@@ -43,5 +43,6 @@ code=$($docker logs dwello-backend 2>&1 | sed -n 's/.*Einrichtungscode: \([A-Z0-
 url=$(sed -n 's/^PUBLIC_APP_URL=//p' .env 2>/dev/null | tail -1)
 if [ -n "$url" ]; then say "Dwello runs at $url."
 else say "Dwello runs at http://localhost:3000 on this machine only. To open it from another device, put its address into ~/dwello/.env (docs/installation.md, section 7) and paste the line again: Dwello accepts the sign-in only at that address."; fi
-[ -z "$code" ] || say "Einrichtungscode for «Dwello einrichten»: $code"
+# only while the setup is still open: the log keeps an older code after the setup
+[ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/setup)" != 200 ] || [ -z "$code" ] || say "Einrichtungscode for «Dwello einrichten»: $code"
 if command -v xdg-open >/dev/null && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then xdg-open "${url:-http://localhost:3000}" >/dev/null 2>&1 || true; fi

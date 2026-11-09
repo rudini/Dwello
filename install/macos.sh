@@ -41,5 +41,6 @@ docker compose up -d --wait --wait-timeout 600 frontend
 
 code=$(docker logs dwello-backend 2>&1 | sed -n 's/.*Einrichtungscode: \([A-Z0-9-]*\).*/\1/p' | tail -1)
 say "Dwello runs at http://localhost:3000 and opens in the browser."
-[ -z "$code" ] || say "Einrichtungscode for «Dwello einrichten»: $code"
+# only while the setup is still open: the log keeps an older code after the setup
+[ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/setup)" != 200 ] || [ -z "$code" ] || say "Einrichtungscode for «Dwello einrichten»: $code"
 open http://localhost:3000
