@@ -294,7 +294,7 @@ const exceptionSizes = ({ exceptions: x }: Ratchet) => ({
  * Ratchet rule: a threshold never rises and an exception list never grows, compared with the base branch's file. An
  * entry may change (a renamed file, a reformatted line) as long as its list does not grow.
  */
-export function loosened(working: Ratchet, base: Ratchet, onBase: (path: string) => boolean = () => true): Finding[] {
+export function loosened(working: Ratchet, base: Ratchet, added: (path: string) => boolean = () => false): Finding[] {
 	const findings: Finding[] = [];
 	const loose = (message: string) =>
 		findings.push({ check: 'ratchet', message: `tools/fitness/ratchet.json: ${message} The ratchet only tightens; fix the code instead.` });
@@ -311,16 +311,16 @@ export function loosened(working: Ratchet, base: Ratchet, onBase: (path: string)
 		if (before[k] !== undefined && now[k] === undefined) loose(`exceptions.${k} was removed; keep it, empty, so it cannot come back with entries unseen.`);
 		else if (before[k] !== undefined && (now[k] ?? 0) > before[k]) loose(`exceptions.${k} grew from ${before[k]} to ${now[k]}.`);
 	loosenedFat(working.fat, base.fat).forEach(loose);
-	loosenedNewFiles(working.exceptions.newFiles, base.exceptions.newFiles, onBase).forEach(loose);
+	loosenedNewFiles(working.exceptions.newFiles, base.exceptions.newFiles, added).forEach(loose);
 	return findings;
 }
 
 /** #1272 (decided 2026-11-09): an entry may come only with the file the pull request adds */
-function loosenedNewFiles(w: Ratchet['exceptions']['newFiles'], b: Ratchet['exceptions']['newFiles'], onBase: (path: string) => boolean): string[] {
+function loosenedNewFiles(w: Ratchet['exceptions']['newFiles'], b: Ratchet['exceptions']['newFiles'], added: (path: string) => boolean): string[] {
 	if (b && !w) return ['exceptions.newFiles was removed; keep it, empty, so it cannot come back with entries unseen.'];
 	return unlisted(w ?? [], b ?? [], (x) => x.path)
-		.filter((e) => onBase(e.path))
-		.map((e) => `exceptions.newFiles lists ${e.path}, which the merge base already has; only a file this pull request adds may be listed.`);
+		.filter((e) => !added(e.path))
+		.map((e) => `exceptions.newFiles lists ${e.path}, which this pull request does not add; only a file it adds may be listed.`);
 }
 
 /** A fat entry the base does not have (a renamed file included) or one with a higher limit loosens the ratchet. */
@@ -566,7 +566,7 @@ if (import.meta.main) {
 			// the base has no ratchet yet: this change introduces it
 		}
 	}
-	const errors = [...(m ? judge(m, ratchet) : []), ...(baseRatchet ? loosened(ratchet, baseRatchet, (path) => spawnSync('git', ['cat-file', '-e', `${base}:${path}`], { cwd: ROOT }).status === 0) : [])];
+	const errors = [...(m ? judge(m, ratchet) : []), ...(baseRatchet ? loosened(ratchet, baseRatchet, (path) => git(['diff', '--name-only', '--diff-filter=A', base, 'HEAD', '--', path]).trim() === path) : [])];
 	if (base && args.includes('--structure')) {
 		const [before, after] = [structureAt(base), structureAt('HEAD')];
 		errors.push(...structureFindings(before, after, fileChanges(git(['diff', '--name-status', '-M', base, 'HEAD'])), ratchet));
