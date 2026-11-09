@@ -36,6 +36,7 @@ jobs:
     outputs:
       backend: ${{ steps.diff.outputs.backend }}
       docker: ${{ steps.diff.outputs.docker }}
+      installer: ${{ steps.diff.outputs.installer }}
       app: ${{ steps.diff.outputs.app }}
       ui: ${{ steps.diff.outputs.ui }}
       playwright: ${{ steps.diff.outputs.playwright }}
@@ -73,7 +74,7 @@ jobs:
              | to_entries | map(.value + {shard: (.key + 1), shards: $e2e}))
             + [range(1; 5) | {name: "Accessibility (axe)", args: "--project=chromium --grep @a11y --shard=\(.)/4", reports: "a11y-reports", shard: ., shards: 4}]')" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" != pull_request ]; then
-            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && echo "docker=true" >> "$GITHUB_OUTPUT" && exit 0
+            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && echo "installer=true" >> "$GITHUB_OUTPUT" && echo "docker=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
           green=$(gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?event=pull_request&status=success&per_page=100" \
             -f branch="$HEAD_REF" -X GET --jq '.workflow_runs[].head_sha' || true)
@@ -91,6 +92,8 @@ jobs:
           # only in its Vite plugin, #945), the compose files, the migrations and the start that applies them after a
           # Sicherung, the update check; app code the Build and test jobs cover
           echo "docker=$(grep -qE '^(Dockerfile[^/]*|\.dockerignore|compose[^/]*\.ya?ml|docker-compose[^/]*\.ya?ml|package\.json|bun\.lock|vite\.config\.ts|svelte\.config\.js|paraglide\.config\.ts|tsconfig\.json|src/lib/version\.ts|\.github/workflows/ci\.yml)$|^project\.inlang/|^backend/(Dockerfile[^/]*|\.dockerignore|package\.json|bun\.lock|scripts/migrate\.ts|src/db/migrate\.ts|src/services/backup\.service\.ts)$|^(backend/migrations|docker)/|^tools/fitness/(compose-update-check|data-totals)\.sh$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          # The install scripts (#579) and the file the Linux one downloads
+          echo "installer=$(grep -qE '^install/|^compose\.yaml$|^\.github/workflows/ci\.yml$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
@@ -155,6 +158,36 @@ jobs:
       # the negative test: a failing migration stops the update with its cause in the log, after a Sicherung
       - name: Update with a failing migration
         run: tools/fitness/compose-update-check.sh --broken latest
+
+  # The one line a helper pastes on Linux (#579), in a fresh Ubuntu without Docker, as a user with sudo: it installs Docker
+  # (get.docker.com), starts the published images with this commit's compose.yaml and ends at «Dwello einrichten»; run
+  # again, it changes nothing. macOS and Windows are tested by hand (the pull request of #579)
+  installer:
+    name: Installer (Linux)
+    needs: changes
+    if: needs.changes.outputs.installer == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install twice in a fresh container
+        env:
+          DWELLO_SOURCE: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          # an anonymous volume for the inner Docker's data: its overlay storage does not work on the container's overlay
+          docker run --rm --privileged --cgroupns=host -v /var/lib/docker -v "$PWD/install:/install:ro" -e DWELLO_SOURCE ubuntu:24.04 bash -euc '
+            set -o pipefail
+            apt-get update -qq && apt-get install -y -qq curl sudo >/dev/null
+            useradd -m helper && echo "helper ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/helper
+            run() { sudo -u helper -H DWELLO_SOURCE="$DWELLO_SOURCE" bash /install/linux.sh 2>&1 | tee /tmp/out; }
+            run
+            grep -E "Einrichtungscode for .*: [A-Z0-9]{4}-[A-Z0-9]{4}" /tmp/out
+            curl -fsSL http://localhost:3000/ | grep -q "Dwello einrichten"
+            before=$(docker ps --format "{{.ID}} {{.Names}} {{.Status}}" | sort)
+            run
+            after=$(docker ps --format "{{.ID}} {{.Names}} {{.Status}}" | sort)
+            echo "$after"
+            [ "$(echo "$before" | cut -d" " -f1,2)" = "$(echo "$after" | cut -d" " -f1,2)" ] || { echo "::error::the second run replaced containers"; exit 1; }
+          '
 
   # The quick checks share one runner (#1240): runners are the bottleneck when many pull requests are open. Each check
   # runs even after another failed, and the last step names the failed ones in the summary
@@ -449,7 +482,7 @@ jobs:
   # nightly run the share of green push runs on main over 7 days; a report, never a failure (one run's time is noisy)
   ci-duration:
     name: CI duration
-    needs: [changes, build, docker, static-checks, unit-tests, e2e-results]
+    needs: [changes, build, docker, installer, static-checks, unit-tests, e2e-results]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:

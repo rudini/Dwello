@@ -270,6 +270,9 @@ section { padding-block: 96px; }
 .term-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; border-bottom: 1px solid #2a3238; font-size: 0.875rem; color: var(--term-muted); }
 .term-bar button { min-height: 36px; border: 1px solid #3a444c; background: transparent; color: var(--term-ink); border-radius: var(--radius-control); padding: 0 12px; font: 600 0.875rem var(--font); cursor: pointer; }
 .term pre { margin: 0; padding: 20px; overflow-x: auto; font: 500 0.875rem/1.85 var(--mono); }
+.terms { display: grid; gap: 16px; min-width: 0; }
+.term-bar span { margin-right: auto; }
+.term-bar a { color: var(--term-ink); }
 .term .c { color: var(--term-muted); }
 .term .p { color: #86bfda; user-select: none; }
 .term .ok { color: #8fd1a5; }
@@ -569,7 +572,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>L’installation est faite une fois par quelqu’un qui s’y connaît en informatique : un membre de la famille, une connaissance ou votre service informatique. Donnez-lui le guide ; il faut environ une heure. Ensuite, vous travaillez dans le navigateur, sans connaissances techniques. Cette personne fait les mises à jour et les sauvegardes régulières ; le guide les décrit. Sur votre propre PC, Dwello ne tourne que tant qu’il est allumé ; sur un serveur domestique ou un serveur dans le cloud, il est toujours accessible, aussi depuis le téléphone.</p>
 			<div class="actions"><a class="btn btn-primary" href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Guide à transmettre (en anglais)</a></div>
 		</div>
-		<div class="alert" style="margin-bottom:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Connexion avec mot de passe</b>Lors de l’installation, un compte avec adresse e-mail et mot de passe est créé. Qui le souhaite se connecte plutôt avec son compte Google ; le guide montre les deux. Un installateur en une étape est prévu (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 sur GitHub : installateur en une étape">#579</a>).</span></div>
+		<div class="alert" style="margin-bottom:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Connexion avec mot de passe</b>Lors de l’installation, un compte avec adresse e-mail et mot de passe est créé. Qui le souhaite se connecte plutôt avec son compte Google ; le guide montre les deux.</span></div>
 		<details class="helper">
 			<summary class="btn btn-secondary">Pour la personne qui installe : PC, serveur domestique ou cloud, et les commandes</summary>
 			<div class="helper-body">
@@ -580,23 +583,24 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		</div>
 
 		<div class="install" id="panel-pc" role="tabpanel" aria-labelledby="tab-pc">
-			<div class="term">
-				<div class="term-bar"><span>Terminal · Windows, macOS, Linux</span><button type="button" data-copy="code-pc">Copier</button></div>
-<pre id="code-pc" tabindex="0"><span class="c"># 1. Télécharger Dwello</span>
-<span class="c"># Un fichier dans un dossier vide ; sous Windows curl.exe</span>
-<span class="p">$ </span>mkdir dwello
-<span class="p">$ </span>cd dwello
-<span class="p">$ </span>curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
-<span class="c"># 2. Démarrer : application, base de données et IA locale, qui télécharge son modèle elle-même</span>
-<span class="p">$ </span>docker compose up -d
-<span class="c"># 3. Afficher le code de configuration, puis « Configurer Dwello » dans le navigateur</span>
-<span class="p">$ </span>docker logs dwello-backend
-<span class="ok">✓ Dwello tourne sur http://localhost:3000</span></pre>
+			<div class="terms">
+				<div class="term">
+					<div class="term-bar"><span>Windows · PowerShell</span><a href="https://github.com/rudini/Dwello/blob/main/install/windows.ps1" rel="noopener" aria-label="Code source de windows.ps1 sur GitHub">Code source</a><button type="button" data-copy="code-windows">Copier</button></div>
+<pre id="code-windows" tabindex="0"><span class="p">$ </span>irm https://raw.githubusercontent.com/rudini/Dwello/main/install/windows.ps1 | iex</pre>
+				</div>
+				<div class="term">
+					<div class="term-bar"><span>macOS · Terminal</span><a href="https://github.com/rudini/Dwello/blob/main/install/macos.sh" rel="noopener" aria-label="Code source de macos.sh sur GitHub">Code source</a><button type="button" data-copy="code-macos">Copier</button></div>
+<pre id="code-macos" tabindex="0"><span class="p">$ </span>/bin/bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/macos.sh)&quot;</pre>
+				</div>
+				<div class="term">
+					<div class="term-bar"><span>Linux · Terminal</span><a href="https://github.com/rudini/Dwello/blob/main/install/linux.sh" rel="noopener" aria-label="Code source de linux.sh sur GitHub">Code source</a><button type="button" data-copy="code-linux">Copier</button></div>
+<pre id="code-linux" tabindex="0"><span class="p">$ </span>bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/linux.sh)&quot;</pre>
+				</div>
 			</div>
 			<div class="panel needs">
 				<h3>Idéal pour commencer</h3>
 				<dl>
-					<div><dt>Il vous faut</dt><dd>Docker Desktop et 16 Go de mémoire vive pour l’IA locale. Avec moins de mémoire, indiquez une IA externe.</dd></div>
+					<div><dt>Il vous faut</dt><dd>16 Go de mémoire vive pour l’IA locale. Avec moins de mémoire, indiquez une IA externe. Si Docker manque, la ligne l’installe aussi.</dd></div>
 					<div><dt>Durée</dt><dd>Environ une heure, avec le téléchargement du modèle d’IA.</dd></div>
 					<div><dt>Bon à savoir</dt><dd>Dwello ne tourne que si votre PC est allumé. Pour y accéder depuis le téléphone, un serveur domestique convient mieux.</dd></div>
 				</dl>
@@ -605,16 +609,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 
 		<div class="install" id="panel-home" role="tabpanel" aria-labelledby="tab-home" hidden>
 			<div class="term">
-				<div class="term-bar"><span>SSH · Synology, Unraid, Mini-PC</span><button type="button" data-copy="code-home">Copier</button></div>
-<pre id="code-home" tabindex="0"><span class="c"># Sur le serveur domestique, par SSH</span>
-<span class="p">$ </span>mkdir dwello &amp;&amp; cd dwello
-<span class="p">$ </span>curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
-<span class="p">$ </span>curl -fsSL -o .env https://raw.githubusercontent.com/rudini/Dwello/main/.env.example
-<span class="c"># Sans matériel puissant : indiquer une IA externe</span>
-<span class="c"># LLM_BASE_URL=https://votre-fournisseur-ia.example/v1</span>
-<span class="p">$ </span>docker compose up -d
-<span class="c"># Afficher le code de configuration, puis « Configurer Dwello » dans le navigateur</span>
-<span class="p">$ </span>docker logs dwello-backend
+				<div class="term-bar"><span>SSH · Synology, Unraid, Mini-PC</span><a href="https://github.com/rudini/Dwello/blob/main/install/linux.sh" rel="noopener" aria-label="Code source de linux.sh sur GitHub">Code source</a><button type="button" data-copy="code-home">Copier</button></div>
+<pre id="code-home" tabindex="0"><span class="c"># Sur le serveur domestique, par SSH : installer Docker et Dwello</span>
+<span class="p">$ </span>bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/linux.sh)&quot;
 <span class="c"># HTTPS avec votre domaine : voir le guide</span>
 <span class="ok">✓ Dwello tourne sur https://dwello.votre-domaine.ch</span></pre>
 			</div>
@@ -630,14 +627,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 
 		<div class="install" id="panel-cloud" role="tabpanel" aria-labelledby="tab-cloud" hidden>
 			<div class="term">
-				<div class="term-bar"><span>Linux-Server · Infomaniak, Exoscale, Hetzner</span><button type="button" data-copy="code-cloud">Copier</button></div>
-<pre id="code-cloud" tabindex="0"><span class="c"># Sur un serveur Linux neuf avec Docker</span>
-<span class="p">$ </span>mkdir dwello &amp;&amp; cd dwello
-<span class="p">$ </span>curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
-<span class="p">$ </span>curl -fsSL -o .env https://raw.githubusercontent.com/rudini/Dwello/main/.env.example
-<span class="p">$ </span>docker compose up -d
-<span class="c"># Afficher le code de configuration, puis « Configurer Dwello » dans le navigateur</span>
-<span class="p">$ </span>docker logs dwello-backend
+				<div class="term-bar"><span>Linux-Server · Infomaniak, Exoscale, Hetzner</span><a href="https://github.com/rudini/Dwello/blob/main/install/linux.sh" rel="noopener" aria-label="Code source de linux.sh sur GitHub">Code source</a><button type="button" data-copy="code-cloud">Copier</button></div>
+<pre id="code-cloud" tabindex="0"><span class="c"># Sur un serveur Linux neuf : installer Docker et Dwello</span>
+<span class="p">$ </span>bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/linux.sh)&quot;
 <span class="c"># HTTPS avec Caddy : voir le guide</span>
 <span class="ok">✓ Dwello tourne sur https://dwello.votre-domaine.ch</span></pre>
 			</div>
@@ -748,7 +740,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello est développé ouvertement. Ces points sont prévus ; la plupart ont leur ticket sur GitHub, où vous pouvez donner votre avis.</p>
 		</div>
 		<ul class="road">
-			<li><span class="badge plan">Prévu</span><a href="https://github.com/rudini/Dwello/issues/579" rel="noopener">Installateur en une étape</a><span>Une ligne à coller installe Docker et Dwello, la suite se fait dans le navigateur.</span></li>
 			<li><span class="badge plan">Prévu</span><a href="https://github.com/rudini/Dwello/issues/495" rel="noopener">Serveur MCP</a><span>Dwello comme outil pour votre assistant IA, en local et avec votre autorisation.</span></li>
 			<li><span class="badge plan">Prévu</span><b>Rapports et analyses</b><span>Recettes, dépenses et frais accessoires au fil des ans, pour la déclaration d’impôt et la fiduciaire.</span></li>
 		</ul>
