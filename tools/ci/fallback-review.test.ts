@@ -18,10 +18,18 @@ function script() {
 		.join('\n');
 }
 
-// gh answers pull request 7 with head «headsha»; `reviews` holds a real Copilot review when asked for one
+// gh answers pull request 7 with head «headsha»; `reviews` holds a real Copilot review when asked for one; the
+// comments hold the reviewer report, updated at REPORT_AT, from the REPORT_CALL-th call on
 const gh = (copilotReviewed: boolean) => `#!/bin/bash
 echo "gh $*" >> "$LOG"
+report() {
+  echo x >> report-calls
+  if [ "$(wc -l < report-calls)" -lt "$REPORT_CALL" ]; then echo '[]'; return; fi
+  jq -n --arg at "$REPORT_AT" '[{user: {type: "Bot"}, updated_at: $at,
+    body: "<!-- review-report -->\\n## Reviewer report\\nNeue Tabelle: mieter"}]'
+}
 case "$*" in
+  *--paginate\\ repos/rudini/Dwello/issues/7/comments*) report ;;
   *statuses/*|*issues/*/comments*|*reviews\\ -f\\ event*) ;;
   *pulls/7/reviews*) ${copilotReviewed ? `echo '"## Pull request overview"'` : ':'} ;;
   *requested_reviewers*) echo false ;;
@@ -29,12 +37,17 @@ case "$*" in
   *contents/*) exit 1 ;;
   *--jq\\ .draft*) echo false ;;
   *--jq\\ .head.sha*) echo headsha ;;
-  *pulls/7\\ --jq*) echo '# Titel' ;;
+  *pulls/7\\ --jq*) printf '%s\\n' '# Titel' '## Type' 'fix' '## Decisions' 'Keine' '## Risks' 'Keine' ;;
 esac
 `;
 
-/** Runs the step after CI finished and answers the commit statuses it set */
-function statuses({ copilotReviewed = false, apiKey = 'key' } = {}) {
+/** Runs the step after CI finished and returns its folder (request.json) and the gh calls it made */
+function run({
+	copilotReviewed = false,
+	apiKey = 'key',
+	reportCall = 1,
+	reportAt = '2026-11-09T10:02:00Z'
+} = {}) {
 	const dir = mkdtempSync(join(tmpdir(), 'fallback-review-'));
 	const bin = join(dir, 'bin');
 	mkdirSync(bin);
@@ -62,13 +75,18 @@ function statuses({ copilotReviewed = false, apiKey = 'key' } = {}) {
 			MODEL: 'MiniMax',
 			REASONING_EFFORT: 'high',
 			MAX_DIFF_BYTES: '400000',
-			MAX_FILES_BYTES: '200000'
+			MAX_FILES_BYTES: '200000',
+			CI_DONE: '2026-11-09T10:00:00Z',
+			REPORT_CALL: String(reportCall),
+			REPORT_AT: reportAt
 		}
 	});
-	return readFileSync(log, 'utf8')
-		.split('\n')
-		.filter((call) => call.includes('/statuses/'));
+	return { dir, calls: readFileSync(log, 'utf8').split('\n') };
 }
+
+/** The commit statuses the step set */
+const statuses = (options?: Parameters<typeof run>[0]) =>
+	run(options).calls.filter((call) => call.includes('/statuses/'));
 
 const passed = expect.stringMatching(
 	/statuses\/headsha -f state=success -f context=Outside review -f description=/
@@ -86,5 +104,33 @@ describe('fallback-review: Status «Outside review»', () => {
 
 	it('setzt den Status, wenn die Prüfung mit «No review» endet', () => {
 		expect(statuses({ apiKey: '' })).toEqual([passed]);
+	});
+});
+
+// #1275: MiniMax compares the explanation (reviewer report, Type, Decisions, Risks) with the diff
+describe('fallback-review: Erklärung gegen den Diff', () => {
+	const request = (options?: Parameters<typeof run>[0]) =>
+		JSON.parse(readFileSync(join(run(options).dir, 'request.json'), 'utf8'));
+
+	it('gibt MiniMax den Prüfbericht des Pull Requests mit', () => {
+		expect(request().messages[1].content).toContain('## Reviewer report\nNeue Tabelle: mieter');
+	});
+
+	it('wartet auf den Prüfbericht, den «Pull request comments» erst nach CI schreibt', () => {
+		expect(request({ reportCall: 3 }).messages[1].content).toContain('Neue Tabelle: mieter');
+	});
+
+	it('gibt MiniMax keinen Prüfbericht eines früheren CI-Laufs mit', () => {
+		const content = request({ reportAt: '2026-11-09T09:00:00Z' }).messages[1].content;
+		expect(content).not.toContain('Neue Tabelle: mieter');
+		expect(content).toContain('(no reviewer report)');
+	});
+
+	it('gibt MiniMax die Abschnitte Type, Decisions und Risks des PR-Textes mit', () => {
+		expect(request().messages[1].content).toContain('## Type\nfix\n## Decisions\nKeine\n## Risks\nKeine');
+	});
+
+	it('lässt MiniMax Änderungen melden, die die Erklärung nicht nennt', () => {
+		expect(request().messages[0].content).toMatch(/changes? (that )?the explanation does not name/);
 	});
 });
