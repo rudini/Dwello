@@ -37,10 +37,9 @@ export const init: ServerInit = () => {
 // Every route param but the EGID (a number for the Gebäuderegister) is the UUID of a record and goes into a backend
 // address: anything else («x%2Fexport», «..») would point the signed-in request at another path there (#1377)
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const foreignId = (params: Partial<Record<string, string>> = {}) =>
-	Object.entries(params).some(([name, value]) => name !== 'egid' && !UUID.test(value ?? ''));
-const notFound = () =>
-	json({ error: { code: 'NOT_FOUND', message: 'Not found' } }, { status: 404 });
+const foreignId = ({ egid: _egid, ...ids }: Partial<Record<string, string>>) =>
+	!Object.values(ids).map(String).every(UUID.test, UUID);
+const NOT_FOUND = { error: { code: 'NOT_FOUND', message: 'Not found' } };
 
 const redirectTo = (location: string) => new Response(null, { status: 303, headers: { location } });
 
@@ -58,7 +57,6 @@ const session: Handle = async ({ event, resolve }) => {
 		// einrichten»; help, the legal pages and the API stay reachable
 		if (!isPublic(pathname) && !pathname.startsWith('/api/') && !pathname.startsWith('/backup') && (await backupState(event.fetch)).backup === 'setup')
 			return redirectTo('/backup');
-		if (pathname.startsWith('/api/') && foreignId(event.params)) return notFound();
 		return resolve(event);
 	}
 	if (isPublic(pathname)) return resolve(event);
@@ -75,9 +73,12 @@ export const handle: Handle = ({ event, resolve }) =>
 		return session({
 			event,
 			resolve: async (event) => {
-				const response = await resolve(event, {
-					transformPageChunk: ({ html }) => html.replace('%lang%', locale)
-				});
+				const response =
+					event.url.pathname.startsWith('/api/') && foreignId(event.params)
+						? json(NOT_FOUND, { status: 404 })
+						: await resolve(event, {
+								transformPageChunk: ({ html }) => html.replace('%lang%', locale)
+							});
 				// Without a cookie the answer depends on the browser language: no cache may hand it to another
 				response.headers.append('Vary', 'Accept-Language');
 				// A landlord's own app: no page of it (the sign-in page included) belongs in a search engine
@@ -93,11 +94,9 @@ export const handle: Handle = ({ event, resolve }) =>
 
 // Server-side loads and actions call the backend directly; forward the session JWT, but only to the backend.
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
+	if (new URL(request.url).origin !== BACKEND_ORIGIN) return fetch(request);
+	if (foreignId(event.params)) return json(NOT_FOUND, { status: 404 });
 	const jwt = event.cookies.get(cookieConfig.sessionName);
-	const toBackend = new URL(request.url).origin === BACKEND_ORIGIN;
-	if (toBackend && foreignId(event.params)) return notFound();
-	if (jwt && toBackend) {
-		request.headers.set('Authorization', `Bearer ${jwt}`);
-	}
+	if (jwt) request.headers.set('Authorization', `Bearer ${jwt}`);
 	return fetch(request);
 };

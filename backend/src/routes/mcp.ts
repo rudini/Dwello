@@ -30,14 +30,16 @@ const PAGES =
 	'Eine Liste kommt seitenweise: ohne «limit» höchstens 20 Einträge (Wohnungen, Mieter, Mietverträge: 50) ab «offset». «total» nennt, wie viele es gibt; ist «total» grösser, holen Sie die nächsten mit «offset», bevor Sie zählen oder summieren.';
 const PAGE = { limit: 'Wie viele Einträge diese Seite hat', offset: 'Ab welchem Eintrag, 0 für den ersten' };
 const PAGED = ['limit', 'offset'];
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// An ID goes into the API's path: one that is no UUID («..», «latest-keys») would reach another route, so it goes as
+// «no-record», which the API refuses as it refuses every ID that is no UUID (#1377)
+const NOT_UUID = /^(?![0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$).*$/is;
 
 const query = (args: Args, names: string[]) => {
 	const set = names.filter((name) => args[name]).map((name): [string, string] => [name, args[name]!]);
 	return set.length ? `?${new URLSearchParams(set)}` : '';
 };
 const one = (path: string, args: Args, names: string[] = []) =>
-	args.id ? `/api/v1/${path}/${encodeURIComponent(args.id)}` : `/api/v1/${path}${query(args, names)}`;
+	args.id ? `/api/v1/${path}/${args.id.replace(NOT_UUID, 'no-record')}` : `/api/v1/${path}${query(args, names)}`;
 const pageOf = (path: string) => (args: Args) => `/${path}${args.id ? `/${encodeURIComponent(args.id)}` : ''}`;
 
 // In the landlord's words (#817); the glossary terms of UBIQUITOUS_LANGUAGE.md
@@ -118,12 +120,8 @@ export const callApiWith = (handle: typeof api) => {
 	api = handle;
 };
 
-const refusedWith = (refusal: unknown) => ({ content: [{ type: 'text', text: JSON.stringify(refusal) }], isError: true });
-
 /** The tool's answer: the API's JSON and the page in Dwello, or the API's refusal as the tool's error */
 async function callTool(keyId: string, tool: Tool, args: Args) {
-	// an ID goes into the API's path: «..» or «export» would reach another route; the API's answer to an unknown ID (#1377)
-	if (args.id !== undefined && !UUID.test(args.id)) return refusedWith(refusal('NOT_FOUND', 'Not found'));
 	const paths = tool.paths(args);
 	const authorization = `Bearer ${await accessKeyToken(keyId)}`;
 	const get = (path: string) => api(new Request(`http://localhost${path}`, { headers: { authorization } }));
@@ -131,7 +129,7 @@ async function callTool(keyId: string, tool: Tool, args: Args) {
 	const answers = await Promise.all(entries.map(([, path]) => get(path)));
 	const bodies = await Promise.all(answers.map((answer) => answer.json()));
 	const refused = answers.findIndex((answer) => !answer.ok);
-	if (refused >= 0) return refusedWith(bodies[refused]);
+	if (refused >= 0) return { content: [{ type: 'text', text: JSON.stringify(bodies[refused]) }], isError: true };
 	const answer = typeof paths === 'string' ? bodies[0] : Object.fromEntries(entries.map(([key], i) => [key, bodies[i]]));
 	const data = tool.omit ? JSON.parse(JSON.stringify(answer), (key, value) => (tool.omit!.includes(key) ? undefined : value)) : answer;
 	const result = { data, link: `${APP}${tool.page(args)}` };
@@ -166,7 +164,8 @@ export const mcpRoutes = new Elysia().post('/mcp', async ({ headers, body, set }
 		if (method === 'ping') return answer({});
 		if (method === 'tools/list') return answer({ tools: toolList });
 		if (method !== 'tools/call') return error(-32601, `Unknown method ${method}`);
-		const tool = Object.hasOwn(TOOLS, params.name ?? '') ? TOOLS[params.name!] : undefined;
+		const name = String(params.name);
+		const tool = Object.hasOwn(TOOLS, name) ? TOOLS[name] : undefined; // not «constructor» of every object (#1377)
 		if (!tool) return error(-32602, `Unknown tool ${params.name}: Dwello offers only reading tools`);
 		await recordAudit('mcp_call', { tool: params.name, name: key.name });
 		return answer(await callTool(key.id, tool, params.arguments ?? {}));

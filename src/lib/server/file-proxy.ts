@@ -13,8 +13,9 @@ export async function proxyFile(
 ) {
 	const response = await fetch(url);
 	if (!response.ok) return pdfRefusal(request, await response.json().catch(() => null));
-	const kind = response.headers.get('content-type') ?? 'application/octet-stream';
-	// only the kinds an upload may have are shown, sandboxed: a row that came another way (a restore) is saved (#1377)
+	const kind = String(response.headers.get('content-type'));
+	// only the kinds an upload may have are shown: a row that came another way (a restore) is saved; none runs as a
+	// page of the app (#1377)
 	const shown = inline && SHOWN.includes(kind);
 	return new Response(response.body, {
 		status: response.status,
@@ -24,7 +25,7 @@ export async function proxyFile(
 				/^attachment/,
 				shown ? 'inline' : 'attachment'
 			),
-			...(shown && { 'content-security-policy': 'sandbox' })
+			'content-security-policy': 'sandbox'
 		}
 	});
 }

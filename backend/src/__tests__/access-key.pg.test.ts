@@ -301,10 +301,11 @@ describe('MCP-Server', () => {
 	});
 
 	// #1377: «..» or «export» as an ID would reach another path of the API, a name of every object a tool that is none
-	it('lehnt eine ID ab, die keine ist, wie die API eine unbekannte', async () => {
+	it('lehnt eine ID ab, die keine ist, wie die API jede ID, die keine ist', async () => {
 		const { key } = await createKey('Keine ID');
 		const answer = await callTool(key, 'invoices', { id: 'latest-keys' });
-		expect({ isError: answer.isError, code: dataOf(answer).code }).toEqual({ isError: true, code: 'NOT_FOUND' });
+		const api = (await (await callApi('/api/v1/buildings/kein-gebaeude')).json()) as { code: string };
+		expect({ isError: answer.isError, code: dataOf(answer).code }).toEqual({ isError: true, code: api.code });
 	});
 
 	it('kennt kein Werkzeug, das jedes Objekt hat', async () => {

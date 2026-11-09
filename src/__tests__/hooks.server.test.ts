@@ -7,6 +7,7 @@ async function forwarded(url: string, session?: string) {
 	let sent: Request | undefined;
 	await handleFetch({
 		event: {
+			params: {},
 			cookies: { get: (name: string) => (name === 'dwello_session' ? session : undefined) }
 		},
 		request: new Request(url),
