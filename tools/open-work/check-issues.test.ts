@@ -413,6 +413,8 @@ Then('sieht der Liegenschaftsverwalter nichts', async ({ verwalter }) => {
 			{ ...base, 'tests/e2e/steps/buildings.steps.ts': before }
 		);
 		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(result.code).toBe(1);
 		expect(result.out).toContain('buildings.steps.ts:19 step «sieht der Liegenschaftsverwalter {string} | sieht der Liegenschaftsverwalter nichts», used by');
+		expect(result.out).toContain('buildings.feature:3 «Liste zeigt Liegenschaften»');
 	});
 });
