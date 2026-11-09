@@ -609,7 +609,8 @@
 				"reason": "dependency against stability present when the check came; resolve with #1055",
 				"scenario": "Ä1"
 			}
-		]
+		],
+		"newFiles": []
 	},
 	"prSizeWarn": {
 		"files": 31,
