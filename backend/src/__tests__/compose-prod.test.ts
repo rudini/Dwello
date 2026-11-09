@@ -137,6 +137,12 @@ describe('Demo mit deploy/demo/docker-compose.yml', () => {
 		expect(service('backend')).toMatch(/^\s+- BACKUP_DIR=$/m);
 	});
 
+	// #1170: the privacy statement names the controller and the demo notice its contact (Art. 19 Abs. 2 lit. a DSG)
+	it('startet die Demo nicht ohne Namen und Kontakt des Betreibers', () => {
+		expect(service('frontend')).toContain('- OPERATOR_NAME=${OPERATOR_NAME:?');
+		expect(service('frontend')).toContain('- OPERATOR_CONTACT=${OPERATOR_CONTACT:?');
+	});
+
 	// #1372: on the demo every Google account signs in; the operator's LLM_* lock keeps visitors from choosing the address
 	it('legt die KI der Demo fest, so dass Besucher keine Adresse der KI wählen', () => {
 		const settings = readFileSync(join(root, 'deploy/demo/.env.example'), 'utf8');

@@ -10,6 +10,8 @@
 #   SITE_FTP_TLS        optional: "yes" for an FTP-only access (FTP over TLS instead of SFTP)
 #   SITE_FTP_PLAIN      optional: "yes" for a host that offers neither SSH nor TLS (Infomaniak Starter): plain FTP,
 #                       the password crosses the internet unencrypted; use an FTP account limited to the site folder
+# Both stay (#1378, decided by the product owner 2026-11-09): the site's host offers FTP only, so plain FTP is the one
+# way to publish there; for SFTP, SITE_SFTP_KNOWN_HOSTS pins the host key when it is set.
 # Without SITE_SFTP_HOST the job skips the upload. Pages that still contain data-pending (operator not filled in) are left out.
 name: Deploy website
 
@@ -52,7 +54,7 @@ jobs:
           if [ "$FTP_TLS" = "yes" ] && [ "$FTP_PLAIN" = "yes" ]; then echo "::error::Set either SITE_FTP_TLS or SITE_FTP_PLAIN, not both"; exit 1; fi
           echo "ready=yes" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.settings.outputs.ready == 'yes'
 
       - name: Upload marketing/ over SFTP
