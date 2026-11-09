@@ -7,7 +7,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import * as jose from 'jose';
-import { copyFile, mkdtemp, readdir, rm } from 'fs/promises';
+import { copyFile, mkdtemp, readFile, readdir, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { app } from '../app';
@@ -137,6 +137,14 @@ describe('Neuer Wiederherstellungscode', () => {
 		await decryptFile(before, first, join(dir, 'before.plain'));
 		await expect(decryptFile(after!, first, join(dir, 'wrong.plain'))).rejects.toThrow();
 		expect(((await (await call(token, '/api/v1/backup')).json()) as { code?: string }).code).toBeUndefined();
+	}, 60_000);
+
+	// #1373: the key of the signature stays on the server from the confirmation on, the code itself does not
+	it('signiert die Sicherungen, sobald der Code bestätigt ist', async () => {
+		await confirmedFirstCode();
+		const file = await createBackup(DATABASE_URL, dir, {});
+		expect((await readFile(file)).subarray(0, 16).toString()).toBe('DWELLO-BACKUP-2\n');
+		expect(await db.select({ pendingCode: backupCodes.pendingCode }).from(backupCodes)).toEqual([{ pendingCode: null }]);
 	}, 60_000);
 
 	it('vergisst einen neuen Code, der nach 30 Minuten noch nicht bestätigt ist', async () => {

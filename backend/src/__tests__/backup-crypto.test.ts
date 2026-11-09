@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 import { mkdtemp, readFile, rm, writeFile } from 'fs/promises';
 import { createReadStream } from 'fs';
+import { randomBytes } from 'crypto';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { decryptFile, encryptStream, generateCode, recipientOf } from '../services/backup-crypto';
@@ -52,6 +53,30 @@ describe('Verschlüsselung der Sicherung', () => {
 		await writeFile(file, bytes);
 		await expect(decryptFile(file, code, join(dir, 'changed'))).rejects.toThrow(
 			'Die Sicherung ist beschädigt'
+		);
+	});
+});
+
+// #1373: the salt and the public key stand in clear in every file, so anyone can encrypt to them; the signature proves
+// that the Dwello installation that knew the code made the file
+describe('Signatur der Sicherung', () => {
+	const forged = async (real: string, macKey?: Buffer) => {
+		const head = await readFile(real);
+		const file = join(dir, `${crypto.randomUUID()}.backup`);
+		await writeFile(join(dir, 'forged-plain'), 'DROP TABLE tenants');
+		await encryptStream(createReadStream(join(dir, 'forged-plain')), file, {
+			salt: head.subarray(16, 32),
+			publicKey: head.subarray(32, 64),
+			macKey
+		});
+		return file;
+	};
+
+	it('lehnt eine Datei ab, die nur mit Salt und öffentlichem Schlüssel einer echten Sicherung gebaut ist', async () => {
+		const code = generateCode();
+		const file = await forged(await encrypted(code), randomBytes(32));
+		await expect(decryptFile(file, code, join(dir, 'forged'))).rejects.toThrow(
+			'nicht von Ihrer Dwello-Installation erstellt'
 		);
 	});
 });

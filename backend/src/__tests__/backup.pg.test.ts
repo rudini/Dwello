@@ -7,8 +7,10 @@ import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'fs/promise
 import { tmpdir } from 'os';
 import { join } from 'path';
 import pg from 'pg';
+import { randomBytes } from 'crypto';
+import { Readable } from 'stream';
 import { migrate } from '../db/migrate';
-import { generateCode, recipientOf } from '../services/backup-crypto';
+import { encryptStream, generateCode, recipientOf } from '../services/backup-crypto';
 import {
 	backupBeforeMigration,
 	backupIfDue,
@@ -50,11 +52,11 @@ async function folder() {
 async function secured() {
 	const name = await database();
 	const code = generateCode();
-	const { publicKey, salt } = await recipientOf(code);
+	const { publicKey, salt, macKey } = await recipientOf(code);
 	await query(
 		name,
-		'INSERT INTO backup_codes (public_key, salt, confirmed_at) VALUES ($1, $2, now())',
-		[publicKey.toString('base64'), salt.toString('base64')]
+		'INSERT INTO backup_codes (public_key, salt, mac_key, confirmed_at) VALUES ($1, $2, $3, now())',
+		[publicKey.toString('base64'), salt.toString('base64'), macKey.toString('base64')]
 	);
 	await query(
 		name,
@@ -133,16 +135,18 @@ describe('Sicherung', () => {
 		const { name, code } = await secured();
 		const file = await createBackup(`${server}/${name}`, await folder(), secrets);
 		const newer = generateCode();
-		const { publicKey, salt } = await recipientOf(newer);
+		const { publicKey, salt, macKey } = await recipientOf(newer);
 		await query(
 			name,
-			`INSERT INTO backup_codes (public_key, salt, confirmed_at) VALUES ($1, $2, now() + interval '1 minute')`,
-			[publicKey.toString('base64'), salt.toString('base64')]
+			`INSERT INTO backup_codes (public_key, salt, mac_key, confirmed_at) VALUES ($1, $2, $3, now() + interval '1 minute')`,
+			[publicKey.toString('base64'), salt.toString('base64'), macKey.toString('base64')]
 		);
 
 		await restoreBackup(file, code, `${server}/${name}`, await folder(), migrations);
 
 		const after = await createBackup(`${server}/${name}`, await folder(), secrets);
+		// signed as before: the key of the signature stays with the code (#1373)
+		expect((await readFile(after)).subarray(0, 16).toString()).toBe('DWELLO-BACKUP-2\n');
 		const empty = await database();
 		await restoreBackup(after, newer, `${server}/${empty}`, await folder(), migrations);
 		expect(await query(empty, 'SELECT name FROM buildings')).toEqual([{ name: 'Lindenhof' }]);
@@ -290,6 +294,21 @@ describe('Sicherung', () => {
 		expect(await readdir(dir)).toEqual([file.split('/').pop()!]);
 	}, 60_000);
 
+	it('lehnt eine Sicherung ab, die nur aus Salt und öffentlichem Schlüssel einer echten gebaut ist, und lässt die Datenbank, wie sie ist (#1373)', async () => {
+		const { name, code } = await secured();
+		const real = await readFile(await createBackup(`${server}/${name}`, await folder(), secrets));
+		const forged = join(await folder(), 'forged.backup');
+		await encryptStream(Readable.from([Buffer.from('{}')]), forged, {
+			salt: real.subarray(16, 32),
+			publicKey: real.subarray(32, 64),
+			macKey: randomBytes(32)
+		});
+		await expect(restoreBackup(forged, code, `${server}/${name}`, await folder(), migrations)).rejects.toThrow(
+			'nicht von Ihrer Dwello-Installation erstellt'
+		);
+		expect(await query(name, 'SELECT name FROM buildings')).toEqual([{ name: 'Lindenhof' }]);
+	}, 60_000);
+
 	it('lehnt die Wiederherstellung mit einem anderen Code ab und lässt die Datenbank, wie sie ist', async () => {
 		const { name } = await secured();
 		const file = await createBackup(`${server}/${name}`, await folder(), secrets);
@@ -421,7 +440,7 @@ describe('Sicherung vor einer Migration', () => {
 it('beendet db:migrate gleich nach der Migration, auch mit Ordner für die Sicherung', async () => {
 	const older = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
 	dirs.push(older);
-	await cp(migrations, older, { recursive: true, filter: (file) => !file.endsWith('0038_backups.sql') && !file.endsWith('0040_backup_pending_code.sql') });
+	await cp(migrations, older, { recursive: true, filter: (file) => !['0038_backups.sql', '0040_backup_pending_code.sql', '0046_backup_mac_key.sql'].some((later) => file.endsWith(later)) });
 	const name = `dwello_backup_${crypto.randomUUID().replace(/-/g, '')}`;
 	await query('postgres', `CREATE DATABASE "${name}"`);
 	databases.push(name);

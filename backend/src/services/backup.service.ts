@@ -56,9 +56,11 @@ const confirmedCode = (client: Queryable) =>
 			rows[0].t
 				? ((
 						await client.query(
-							'SELECT public_key, salt, confirmed_at FROM backup_codes WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at DESC LIMIT 1'
+							'SELECT public_key, salt, mac_key, confirmed_at FROM backup_codes WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at DESC LIMIT 1'
 						)
-					).rows[0] as { public_key: string; salt: string; confirmed_at: Date } | undefined)
+					).rows[0] as
+						| { public_key: string; salt: string; mac_key: string | null; confirmed_at: Date }
+						| undefined)
 				: undefined
 		);
 
@@ -135,7 +137,8 @@ async function backUp(url: string, dir: string, secrets: Secrets, now: Date) {
 			);
 			await encryptStream(payload, `${file}.part`, {
 				publicKey: Buffer.from(code.public_key, 'base64'),
-				salt: Buffer.from(code.salt, 'base64')
+				salt: Buffer.from(code.salt, 'base64'),
+				macKey: code.mac_key ? Buffer.from(code.mac_key, 'base64') : undefined
 			});
 			if ((await exited) !== 0) throw new Error(`pg_dump: ${stderr.trim()}`);
 			await rename(`${file}.part`, file);
@@ -212,8 +215,8 @@ export async function restoreBackup(
 		if (inForce)
 			await withClient(url, (client) =>
 				client.query(
-					'INSERT INTO backup_codes (public_key, salt, confirmed_at) SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM backup_codes WHERE confirmed_at >= $3)',
-					[inForce.public_key, inForce.salt, inForce.confirmed_at]
+					'INSERT INTO backup_codes (public_key, salt, mac_key, confirmed_at) SELECT $1, $2, $3, $4 WHERE NOT EXISTS (SELECT 1 FROM backup_codes WHERE confirmed_at >= $4)',
+					[inForce.public_key, inForce.salt, inForce.mac_key, inForce.confirmed_at]
 				)
 			);
 	} finally {
@@ -317,10 +320,11 @@ const pendingCode = async () =>
 
 async function savePendingCode() {
 	const code = generateCode();
-	const { publicKey, salt } = await recipientOf(code);
-	await pool.query('INSERT INTO backup_codes (public_key, salt, pending_code) VALUES ($1, $2, $3)', [
+	const { publicKey, salt, macKey } = await recipientOf(code);
+	await pool.query('INSERT INTO backup_codes (public_key, salt, mac_key, pending_code) VALUES ($1, $2, $3, $4)', [
 		publicKey.toString('base64'),
 		salt.toString('base64'),
+		macKey.toString('base64'),
 		code
 	]);
 	return (await pendingCode())!;
