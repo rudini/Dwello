@@ -114,6 +114,18 @@ beforeAll(async () => {
 		servicePeriodStart: '2025-12-01',
 		servicePeriodEnd: '2025-12-15'
 	});
+	// review 1409-2 C-11: a non-allocable invoice without a Kategorie counts too, last
+	await db
+		.insert(invoices)
+		.values({
+			buildingId: rental.building,
+			categoryId: null,
+			billingEntityName: 'Muster AG',
+			description: `Jahresbericht ${token}`,
+			amount: '50.00',
+			invoiceDate: '2025-07-01',
+			isValidUtilityCost: false
+		});
 	await invoice('Mortgage Interest', { amount: '4200.00', isValidUtilityCost: false });
 	await invoice('Capital Improvements', {
 		amount: '15000.00',
@@ -151,9 +163,10 @@ describe('Kosten, die der Vermieter trägt', () => {
 		expect(costs.maintenance).toEqual({
 			categories: [
 				{ categoryId: await category('Caretaker'), amount: 300 },
-				{ categoryId: await category('Repairs'), amount: 800 }
+				{ categoryId: await category('Repairs'), amount: 800 },
+				{ categoryId: null, amount: 50 }
 			],
-			total: 1100
+			total: 1150
 		});
 		expect(costs.capital).toEqual({
 			categories: [{ categoryId: await category('Capital Improvements'), amount: 15000 }],
@@ -178,7 +191,7 @@ describe('Kosten, die der Vermieter trägt', () => {
 			categories: [],
 			total: 0
 		});
-		expect(costs.totalWithoutCapital).toBe(1100);
+		expect(costs.totalWithoutCapital).toBe(1150);
 	});
 
 	it('nimmt bei «Juli – Juni» die Abrechnungsperiode, die im Jahr endet', async () => {
@@ -234,12 +247,23 @@ describe('Kosten, die der Vermieter trägt', () => {
 		expect(costs.utility.total).toBe(reconciliation.total.landlord);
 		expect(costs.utility.billed).toBe(true);
 		expect(costs.totalWithoutCapital).toBe(
-			Math.round((1100 + reconciliation.total.landlord) * 100) / 100
+			Math.round((1150 + reconciliation.total.landlord) * 100) / 100
 		);
 	});
 
 	it('nennt die Hinweise der Kostenabstimmung, hier die Entwürfe', async () => {
 		expect((await report()).costs.utility.notes).toBe(true);
+	});
+
+	// review 1409-2 C-10: sent statements of every contract leave the Kostenabstimmung without notes
+	it('nennt ohne Hinweise der Kostenabstimmung keine', async () => {
+		for (const id of statements)
+			await db
+				.update(utilityStatements)
+				.set({ status: 'sent' })
+				.where(eq(utilityStatements.id, id));
+		const { utility } = (await report()).costs;
+		expect([utility.billed, utility.notes, utility.outside]).toEqual([true, false, false]);
 	});
 
 	it('sagt, wenn ein Mietvertrag in der Periode ausserhalb von Dwello abgerechnet ist', async () => {

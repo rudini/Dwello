@@ -103,7 +103,10 @@ function sectionsOf(report: AnnualReportBody, categories: Map<string, string>): 
 			rows: [
 				...groupRows(costs.utility, m.analytics_group_utility_total(), name),
 				...groupRows(costs.maintenance, m.analytics_group_maintenance_total(), name),
-				{ label: m.analytics_costs_total(), amount: costs.totalWithoutCapital, total: true },
+				// without the share there is no total of the landlord's costs (persona Dr. Weber 1409 P-2)
+				...(costs.utility.billed
+					? [{ label: m.analytics_costs_total(), amount: costs.totalWithoutCapital, total: true }]
+					: []),
 				...groupRows(costs.capital, m.analytics_group_capital_total(), name)
 			]
 		}
@@ -187,7 +190,7 @@ export async function annualReportPdf(fetch: Fetch, url: URL) {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify({
-			title: m.analytics_pdf_title({ year }),
+			title: m.analytics_report_heading({ building: loaded.buildingName, year }),
 			lines: [
 				loaded.buildingAddress,
 				m.analytics_pdf_period({ year }),

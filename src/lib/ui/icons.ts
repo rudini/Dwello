@@ -8,6 +8,7 @@ import {
 	Calculator,
 	Calendar,
 	CalendarX,
+	ChartColumn,
 	Check,
 	ChevronLeft,
 	ChevronRight,
@@ -67,6 +68,7 @@ export const icons = {
 	blocked: Ban,
 	building: Building2,
 	calculate: Calculator,
+	chart: ChartColumn, // #1409: «Auswertungen», the Jahresbericht
 	calendar: Calendar,
 	'calendar-busy': CalendarX,
 	category: Tag,

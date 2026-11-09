@@ -108,7 +108,7 @@ describe('Jahresbericht zum Herunterladen', () => {
 		);
 		expect(posted).toMatchObject([
 			{
-				title: 'Jahresbericht 2025',
+				title: 'Jahresbericht Seeblick 2025',
 				lines: ['Seeblick, Seestrasse 12, 8002 Zürich', 'Zeitraum: 01.01.2025 bis 31.12.2025'],
 				sections: [
 					{
@@ -176,7 +176,9 @@ describe('Hinweise zum Anteil an den Nebenkosten', () => {
 			)
 		]);
 		expect(labels).not.toContain('Total Nebenkosten, die Sie tragen');
-		expect(labels).toContain('Total Kosten ohne wertvermehrende Investitionen');
+		// persona Dr. Weber 1409 P-2: without the share no total of the landlord's costs, which would read as complete
+		expect(labels).not.toContain('Total Kosten ohne wertvermehrende Investitionen');
+		expect(labels).toContain('Total Unterhalt und Verwaltung');
 	});
 
 	it('nennt die Hinweise der Kostenabstimmung und Tage ausserhalb von Dwello', async () => {

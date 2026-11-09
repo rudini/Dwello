@@ -64,7 +64,6 @@ Funktionalität: Auswertungen
       | Position                                        | Betrag     |
       | Reparaturen                                     | CHF 450.00 |
       | Total Unterhalt und Verwaltung                  | CHF 450.00 |
-      | Total Kosten ohne wertvermehrende Investitionen | CHF 450.00 |
     Und nennt der Jahresbericht "Für die Abrechnungsperiode 01.01.2026 – 31.12.2026 gibt es noch keine Abrechnungen. Ihr Anteil an den Nebenkosten ist deshalb nicht enthalten. Erstellen Sie die Abrechnungen und öffnen Sie den Bericht dann erneut."
 
   Szenario: Der Jahresbericht als CSV hat dieselben Zahlen
