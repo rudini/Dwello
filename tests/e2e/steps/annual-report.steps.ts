@@ -38,7 +38,9 @@ Then('nennt der Jahresbericht {string}', async ({ verwalter }, text: string) => 
 Then(
 	'ist die heruntergeladene Datei der Jahresbericht {int} von {string} als {string}',
 	async ({ verwalter, names }, year: number, building: string, extension: string) => {
-		await verwalter.sees(downloadedFileName).toBe(`Jahresbericht ${names.get(building)} ${year}.${extension}`);
+		// #1423: no spaces in the name, WebKit turns them into underscores
+		const name = names.get(building)!.replace(/\s+/g, '-');
+		await verwalter.sees(downloadedFileName).toBe(`Jahresbericht-${name}-${year}.${extension}`);
 	}
 );
 

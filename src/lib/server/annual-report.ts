@@ -158,7 +158,8 @@ const reportOf = async (fetch: Fetch, url: URL) => {
 	return loaded as Required<Loaded> & { report: NonNullable<Loaded['report']> };
 };
 const fileName = (loaded: { buildingName: string; report: { year: number } }, extension: string) =>
-	`${m.analytics_report_heading({ building: loaded.buildingName, year: loaded.report.year })}.${extension}`;
+	// #1423: no spaces (WebKit turns them into underscores): «Jahresbericht-Seeblick-2025.csv»
+	`${m.analytics_report_heading({ building: loaded.buildingName, year: loaded.report.year }).replace(/\s+/g, '-')}.${extension}`;
 
 // a text a spreadsheet would run as a formula gets a leading «'», as in the export of all data (Fachreview 496-1 V-2,
 // fallback review of #1421); the amounts are plain numbers and stay as they are
