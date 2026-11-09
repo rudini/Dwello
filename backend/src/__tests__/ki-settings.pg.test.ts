@@ -270,6 +270,10 @@ describe('KI in den Einstellungen', () => {
 			['http://8.8.8.8/v1', 'KI_ADDRESS_NOT_HTTPS'],
 			['http://172.32.0.1/v1', 'KI_ADDRESS_NOT_HTTPS'],
 			['http://[2001:db8::1]/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			// Codereview 1372-2 C-1: ein Name im Internet, der wie eine private Adresse beginnt
+			['http://10.example.com/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://192.168.1.10.example.com/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://[fc::1]/v1', 'KI_ADDRESS_NOT_HTTPS'],
 			['kein url', 'KI_ADDRESS_INVALID'],
 			['file:///etc/passwd', 'KI_ADDRESS_INVALID']
 		];

@@ -120,7 +120,7 @@ describe('KI speichern', () => {
 	it.each([
 		[
 			'KI_ADDRESS_INVALID',
-			'Diese Adresse kann Dwello nicht verwenden. Geben Sie eine Adresse an, die mit https:// beginnt, zum Beispiel https://api.anbieter.ch/v1.'
+			'Die Adresse beginnt nicht mit https:// oder http://. Geben Sie die ganze Adresse an, zum Beispiel https://api.anbieter.ch/v1 oder für eine KI im eigenen Netz http://192.168.1.10:11434/v1.'
 		],
 		[
 			'KI_ADDRESS_SUFFIX',
@@ -128,7 +128,7 @@ describe('KI speichern', () => {
 		],
 		[
 			'KI_ADDRESS_CREDENTIALS',
-			'Die Adresse enthält vor «@» Anmeldedaten. Löschen Sie diese samt «@». Den API-Schlüssel geben Sie im Feld «API-Schlüssel» ein.'
+			'Die Adresse enthält vor «@» Anmeldedaten. Löschen Sie alles nach «https://» bis und mit «@», zum Beispiel https://api.anbieter.ch/v1. Den API-Schlüssel finden Sie in Ihrem Konto beim Anbieter; geben Sie ihn im Feld «API-Schlüssel» ein.'
 		],
 		[
 			'KI_ADDRESS_NOT_HTTPS',

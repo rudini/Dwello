@@ -137,7 +137,8 @@ async function keyFor(baseUrl: string, entered: string) {
 
 // The landlord's own network, which may answer over http (#580): private and loopback addresses and names without a
 // dot, such as a compose service; a provider on the internet gets the key only over https (decided in #1372)
-const OWN_NETWORK = /^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[::1\]$|\[f[cd])|^[^.[]+$/i;
+const OWN_NETWORK =
+	/^((10|127)(\.\d+){3}|192\.168(\.\d+){2}|172\.(1[6-9]|2\d|3[01])(\.\d+){2}|\[::1\]|\[f[cd][\da-f]{2}:[^\]]*\]|[^.[]+)$/i;
 
 // Dwello appends the path to the address itself: credentials, a query or a fragment in it would send the request
 // elsewhere (#1372); the code says what does not fit (persona Anna 1372 P-1)
