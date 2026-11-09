@@ -19,13 +19,13 @@ When(
 	}
 );
 
-const parts = { Mieteinnahmen: 'income', Kosten: 'costs' } as const;
-Then(/^zeigt der Jahresbericht die (Mieteinnahmen|Kosten):$/, async ({ verwalter }, part: keyof typeof parts, table: DataTable) => {
+const parts = { 'den Mietertrag': 'income', 'die Kosten': 'costs', 'zum Mietertrag': 'income', 'zu den Kosten': 'costs' } as const;
+Then(/^zeigt der Jahresbericht (den Mietertrag|die Kosten):$/, async ({ verwalter }, part: keyof typeof parts, table: DataTable) => {
 	await verwalter.sees(annualReportCellsOf(parts[part])).toEqual(table.raw().flat());
 });
 
 Then(
-	/^erklärt der Jahresbericht zu den (Mieteinnahmen|Kosten) "([^"]*)"$/,
+	/^erklärt der Jahresbericht (zum Mietertrag|zu den Kosten) "([^"]*)"$/,
 	async ({ verwalter }, part: keyof typeof parts, text: string) => {
 		await verwalter.sees(annualReportHelpOf(parts[part])).toBe(text);
 	}
@@ -34,7 +34,7 @@ Then(
 Then(
 	'ist die heruntergeladene Datei der Jahresbericht {int} von {string} als {string}',
 	async ({ verwalter, names }, year: number, building: string, extension: string) => {
-		await verwalter.sees(downloadedFileName).toBe(`Jahresbericht-${names.get(building)}-${year}.${extension}`);
+		await verwalter.sees(downloadedFileName).toBe(`Jahresbericht ${names.get(building)} ${year}.${extension}`);
 	}
 );
 

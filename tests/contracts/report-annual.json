@@ -1,0 +1,11 @@
+{
+	"year": 2025,
+	"firstYear": 2024,
+	"income": {
+		"netRent": 29800,
+		"additionalRent": 0,
+		"advancePayments": 2400,
+		"flatRateUtilityCharge": 475.81,
+		"total": 32675.81
+	}
+}

@@ -380,6 +380,11 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('GET /reports/annual liefert die Felder von report-annual.json', async () => {
+		const actual = await (await callApi(`/api/v1/reports/annual?buildingId=${rental.building}&year=2024`)).json();
+		expect(drift(await sample('report-annual'), actual)).toEqual([]);
+	});
+
 	// H-28: a run of 2025 with a move-in names the heating invoice without Leistungszeitraum beside one with
 	it('GET /statements/run-heating liefert die Felder von statement-run-heating.json', async () => {
 		const apartment = await createApartment({ buildingId: rental.building, number: '2.03', floor: 2, area: '50', rooms: '2' });

@@ -28,3 +28,10 @@ export type ReconciliationBody = {
 	notUpToDate?: Named[];
 	keyNotCalculable?: Named[]; // #1309
 };
+
+/** #1409: the Jahresbericht of a building and a calendar year (`GET /reports/annual`, tests/contracts/report-annual.json) */
+export type AnnualReportBody = {
+	year: number;
+	firstYear: number; // the year of the building's first contract or invoice
+	income: { netRent: number; additionalRent: number; advancePayments: number; flatRateUtilityCharge: number; total: number };
+};

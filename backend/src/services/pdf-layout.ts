@@ -2,7 +2,8 @@
  * The statement PDF's data and its page: A4 geometry, fonts, the table's columns and rows, shared by its parts
  */
 
-import type PDFDocument from 'pdfkit';
+import { once } from 'events';
+import PDFDocument from 'pdfkit';
 import { fileURLToPath } from 'url';
 import type { QRBillConfig } from './qr-bill.service';
 import { formatCHF, formatSwissDate } from './pdf-format';
@@ -148,6 +149,17 @@ export function embedFonts(doc: Doc) {
 	doc.registerFont(FONT.regular, fontFile('LiberationSans-Regular.ttf'));
 	doc.registerFont(FONT.bold, fontFile('LiberationSans-Bold.ttf'));
 	return doc.font(FONT.regular);
+}
+/** An A4 document with the fonts, written by `draw`; its bytes once it ends */
+export async function a4Pdf(options: PDFKit.PDFDocumentOptions, draw: (doc: Doc) => void | Promise<void>) {
+	const doc = embedFonts(new PDFDocument({ size: 'A4', ...options }));
+	const finished = once(doc, 'end');
+	const pages: Buffer[] = [];
+	doc.on('data', (page: Buffer) => pages.push(page));
+	await draw(doc);
+	doc.end();
+	await finished;
+	return Buffer.concat(pages);
 }
 export type Page = { doc: Doc; t: Record<string, string>; data: StatementPDFData; config: QRBillConfig; language: Language };
 

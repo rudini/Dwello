@@ -2,10 +2,10 @@
 @analytics
 Funktionalität: Auswertungen
   Als Liegenschaftsverwalter
-  möchte ich je Gebäude und Kalenderjahr die vereinbarten Mieteinnahmen und die Kosten sehen
+  möchte ich je Gebäude und Kalenderjahr den vereinbarten Mietertrag und die Kosten sehen
   damit ich die Steuererklärung ausfüllen oder der Treuhand die Zahlen geben kann
 
-  # #1409 (PO 09.11.2026): Kalenderjahr; Mieteinnahmen nach den Mietverträgen, angebrochene Monate tageweise, nicht mit
+  # #1409 (PO 09.11.2026): Kalenderjahr; Mietertrag nach den Mietverträgen, angebrochene Monate tageweise, nicht mit
   # den Zahlungen geprüft; nur effektive Kosten, in drei Gruppen. Seeblick 2025:
   # Anna Meier das ganze Jahr: Nettomiete 12 × 1'500 = 18'000.00, Akonto 12 × 200 = 2'400.00.
   # Ben Keller ab 16.03.2025: März 16/31 × 1'240 = 640.00 und 16/31 × 50 = 25.81, April–Dezember 9 × 1'240 = 11'160.00
@@ -30,13 +30,13 @@ Funktionalität: Auswertungen
   @wip
   Szenario: Der Liegenschaftsverwalter sieht den Jahresbericht eines Gebäudes
     Wenn der Liegenschaftsverwalter den Jahresbericht 2025 des Gebäudes "Seeblick" öffnet
-    Dann zeigt der Jahresbericht die Mieteinnahmen:
+    Dann zeigt der Jahresbericht den Mietertrag:
       | Position             | Betrag        |
       | Nettomiete           | CHF 29’800.00 |
       | Zusatzmiete          | CHF 0.00      |
-      | Akonto               | CHF 2’400.00  |
+      | Akontobeiträge       | CHF 2’400.00  |
       | Nebenkostenpauschale | CHF 475.81    |
-      | Total Mieteinnahmen  | CHF 32’675.81 |
+      | Total Mietertrag     | CHF 32’675.81 |
     Und zeigt der Jahresbericht die Kosten:
       | Kategorie                     | Betrag        |
       | Heizung                       | CHF 1’840.00  |
@@ -47,7 +47,7 @@ Funktionalität: Auswertungen
       | Wertvermehrende Investitionen | CHF 15’000.00 |
       | Total wertvermehrend          | CHF 15’000.00 |
       | Total Kosten                  | CHF 18’840.00 |
-    Und erklärt der Jahresbericht zu den Mieteinnahmen "Das sind die Beträge, die die Mietverträge für dieses Jahr vereinbaren, für angebrochene Monate tageweise. Dwello prüft nicht, ob die Mieter sie bezahlt haben; vergleichen Sie sie mit Ihren Kontoauszügen."
+    Und erklärt der Jahresbericht zum Mietertrag "Das sind die Beträge, die die Mietverträge für dieses Jahr vereinbaren; angebrochene Monate zählen nach Tagen. Dwello prüft nicht, ob die Mieter sie bezahlt haben: Vergleichen Sie sie mit Ihren Kontoauszügen. Nachzahlungen und Rückerstattungen aus Nebenkostenabrechnungen sind nicht enthalten. Haben Sie die Nettomiete, die Zusatzmiete oder die Nebenkostenpauschale geändert, rechnet Dwello für das ganze Jahr mit dem heutigen Betrag; nur beim Akonto zählt jeder Betrag ab seinem «Gültig ab»."
     Und erklärt der Jahresbericht zu den Kosten "Das sind die Rechnungen dieses Jahres. Reicht der Leistungszeitraum einer Rechnung über das Jahr hinaus, zählt nur der Anteil der Tage in diesem Jahr; ohne Leistungszeitraum zählt das Rechnungsdatum. Ob Sie in der Steuererklärung diese effektiven Kosten oder einen Pauschalabzug geltend machen, entscheiden Sie dort."
 
   @wip
@@ -57,7 +57,7 @@ Funktionalität: Auswertungen
     Und enthält die CSV-Datei des Jahresberichts die Zeilen:
       | Position                      | Betrag   |
       | Nettomiete                    | 29800.00 |
-      | Total Mieteinnahmen           | 32675.81 |
+      | Total Mietertrag              | 32675.81 |
       | Heizung                       | 1840.00  |
       | Total Nebenkosten             | 3040.00  |
       | Total Unterhalt               | 800.00   |
@@ -68,7 +68,7 @@ Funktionalität: Auswertungen
   Szenario: Der Jahresbericht als PDF hat dieselben Zahlen
     Wenn der Liegenschaftsverwalter den Jahresbericht 2025 des Gebäudes "Seeblick" als PDF herunterlädt
     Dann ist die heruntergeladene Datei der Jahresbericht 2025 von "Seeblick" als "pdf"
-    Und enthält das PDF des Jahresberichts "Total Mieteinnahmen CHF 32’675.81"
+    Und enthält das PDF des Jahresberichts "Total Mietertrag CHF 32’675.81"
     Und enthält das PDF des Jahresberichts "Heizung CHF 1’840.00"
     Und enthält das PDF des Jahresberichts "Total Kosten CHF 18’840.00"
     Und enthält das PDF des Jahresberichts "Dwello prüft nicht, ob die Mieter sie bezahlt haben"
