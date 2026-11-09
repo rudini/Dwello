@@ -57,3 +57,16 @@ describe('Kommentare zu Pull Requests aus Forks (#1274)', () => {
 		expect(comments).not.toContain('pr.head.sha');
 	});
 });
+
+describe('Kommentare aus Daten eines Forks (Fallback-Review von #1386)', () => {
+	const comments = read('.github/workflows/pr-comments.yml');
+
+	it('kürzt die Liste der gleich gebliebenen Seiten und beendet die Kürzung spätestens bei null Screenshots', () => {
+		expect(comments).toContain("unchanged.join(', ').slice(0, 2000)");
+		expect(comments).toContain('count > 0 && listed.length + same.length > 60000');
+	});
+
+	it('macht @-Erwähnungen in beiden Kommentaren unwirksam', () => {
+		expect(comments.split("replace(/@(?=[\\w-])/g, '@\\u200b')").length - 1).toBe(2);
+	});
+});
