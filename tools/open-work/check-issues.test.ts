@@ -267,6 +267,29 @@ describe('Änderungen an Prüfungen brauchen eine Freigabe (#1269)', () => {
 	});
 });
 
+describe('Skripte der Pakete und die Backend-Testkonfiguration sind Prüfdateien (#1269)', () => {
+	const manifest = (scripts: object, devDependencies: object = { vitest: '4.0.0' }) =>
+		`${JSON.stringify({ name: 'dwello', scripts, devDependencies }, null, '\t')}\n`;
+	const scripts = { 'testcheck:ci': 'bun tools/testcheck/src/cli.ts --ci', test: 'bun test --coverage && bun scripts/coverage-check.ts' };
+
+	it.each(['package.json', 'backend/package.json'])('meldet geänderte Skripte in %s', async (file) => {
+		const head = { [file]: manifest({ ...scripts, 'testcheck:ci': 'true' }) };
+		const result = await changeGate(head, '', { [file]: manifest(scripts) });
+		expect(result.code).toBe(1);
+		expect(result.out).toContain(`${file} changes a check`);
+	});
+
+	it('lässt geänderte Abhängigkeiten ohne Freigabe durch', async () => {
+		const head = { 'package.json': manifest(scripts, { vitest: '4.1.0', playwright: '1.60.0' }) };
+		expect(await changeGate(head, '', { 'package.json': manifest(scripts) })).toMatchObject({ code: 0 });
+	});
+
+	it('meldet jede Änderung an backend/bunfig.toml', async () => {
+		const result = await changeGate({ 'backend/bunfig.toml': '[test]\ncoverageSkipTestFiles = false\n' });
+		expect(result.out).toContain('backend/bunfig.toml changes a check');
+	});
+});
+
 describe('Coverage-Untergrenzen sinken nie (#1269)', () => {
 	const floors = {
 		'vitest.config.ts': 'coverage: { thresholds: { statements: 71, branches: 60, functions: 76, lines: 66 } }\n',
