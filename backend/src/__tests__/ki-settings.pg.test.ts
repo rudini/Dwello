@@ -23,9 +23,11 @@ const requests: {
 	image: string;
 }[] = [];
 type Part = { type: string; text?: string; image_url?: { url: string } };
+let modelsAsked = 0; // GET /models, whether the KI answers (#1372)
 const provider = Bun.serve({
 	port: 0,
 	fetch: async (request) => {
+		if (request.method === 'GET') return (modelsAsked++, Response.json({ data: [] }));
 		const { model, messages } = (await request.json()) as {
 			model: string;
 			messages: { content: string | Part[] }[];
@@ -235,6 +237,7 @@ describe('KI in den Einstellungen', () => {
 			const status = await (await callApi('/api/v1/invoices/llm-status')).json();
 
 			expect(requests).toEqual([]);
+			expect(modelsAsked).toBe(0);
 			expect(status).toMatchObject({ llmAvailable: false });
 		}
 	});
