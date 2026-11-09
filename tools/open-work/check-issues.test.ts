@@ -1,5 +1,5 @@
 import { execFile, execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:http';
@@ -17,7 +17,7 @@ afterEach(() => close());
 async function check(
 	open: object[],
 	listStatus = 200,
-	pull?: { number: number; body: string; cwd: string; status?: number; base?: string; issue?: object }
+	pull?: { number: number; body: string; cwd: string; status?: number; base?: string; issue?: object; script?: string }
 ) {
 	// the answer per path: the pull request's text, the list of open issues (one page), else an open issue
 	const answer = (path: string, page: number): [number, unknown] => {
@@ -42,7 +42,7 @@ async function check(
 		PR_NUMBER: pull ? String(pull.number) : '',
 		BASE_REF: pull?.base ?? ''
 	};
-	return promisify(execFile)('node', [SCRIPT], { env, cwd: pull?.cwd }).then(
+	return promisify(execFile)('node', [pull?.script ?? SCRIPT], { env, cwd: pull?.cwd }).then(
 		({ stdout }) => ({ code: 0, out: stdout }),
 		(error) => ({ code: error.code as number, out: `${error.stdout}${error.stderr}` })
 	);
@@ -294,5 +294,136 @@ describe('Coverage-Untergrenzen sinken nie (#1269)', () => {
 	it('lässt eine gehobene Untergrenze mit Freigabe durch', async () => {
 		const head = { 'vitest.config.ts': floors['vitest.config.ts'].replace('lines: 66', 'lines: 70') };
 		expect(await changeGate(head, approved, floors)).toMatchObject({ code: 0 });
+	});
+});
+
+describe('Geänderte Schrittdefinitionen sind eine Änderung der Spezifikation (#1270)', () => {
+	const steps = `import { createBdd } from 'playwright-bdd';
+const { Given, When, Then } = createBdd(test);
+
+Given('eine Liegenschaft {string}', async ({ verwalter }, name: string) => {
+	await verwalter.creates(name);
+});
+
+Then(
+	/^sieht der Liegenschaftsverwalter "([^"]+)"$/,
+	async ({ verwalter }, name: string) => {
+		await verwalter.sees(name);
+	}
+);
+
+Then('sieht der Liegenschaftsverwalter nichts', async ({ verwalter }) => {
+	await verwalter.seesNothing();
+});
+`;
+	const usage = `Funktionalität: Liegenschaften
+
+  Szenario: Liste zeigt Liegenschaften
+    Angenommen eine Liegenschaft "Seeblick"
+    Dann sieht der Liegenschaftsverwalter "Seeblick"
+
+  @wip
+  Szenario: Neue Anforderung
+    Dann sieht der Liegenschaftsverwalter nichts
+`;
+	const base = { 'tests/e2e/steps/buildings.steps.ts': steps, 'tests/e2e/features/buildings.feature': usage };
+	const changeSteps = (text: string, body = '') =>
+		changeGate({ 'tests/e2e/steps/buildings.steps.ts': text }, body, base);
+
+	it('meldet einen geänderten Schritt, den ein Szenario ohne @wip braucht, mit Schritt und Szenario', async () => {
+		const result = await changeSteps(steps.replace('verwalter.sees(name)', 'verwalter.seesSomething()'));
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('tests/e2e/steps/buildings.steps.ts:8 step «/^sieht der Liegenschaftsverwalter "([^"]+)"$/»');
+		expect(result.out).toContain('used by tests/e2e/features/buildings.feature:3 «Liste zeigt Liegenschaften»');
+		expect(result.out).toContain('changes the specification');
+	});
+
+	it('lässt denselben Schritt mit Freigabe durch', async () => {
+		const changed = steps.replace('verwalter.sees(name)', 'verwalter.seesSomething()');
+		expect(await changeSteps(changed, 'Spec change approved: #1270')).toMatchObject({ code: 0 });
+	});
+
+	it('lässt einen Schritt durch, den nur Szenarien mit @wip brauchen', async () => {
+		expect(await changeSteps(steps.replace('seesNothing()', 'seesAnything()'))).toMatchObject({ code: 0 });
+	});
+
+	it('lässt einen neuen Schritt und Änderungen ausserhalb der Schritte durch', async () => {
+		const added = `${steps}\nWhen('der Liegenschaftsverwalter sucht', async ({ verwalter }) => {\n\tawait verwalter.searches();\n});\n`;
+		expect(await changeSteps(added.replace("from 'playwright-bdd';", "from 'playwright-bdd';\n// a note"))).toMatchObject({
+			code: 0
+		});
+	});
+
+	it('meldet einen gelöschten Schritt und einen eingefügten Befehl, auch in der Grundlage', async () => {
+		const removed = await changeSteps(steps.replace(/Given\('eine Liegenschaft[^]*?\n\}\);\n/, ''));
+		expect(removed.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {string}», used by');
+		const background = usage.replace('  Szenario: Liste', '  Grundlage:\n    Angenommen eine Liegenschaft "Lindenhof"\n\n  Szenario: Liste');
+		const cwd = gateRepo(
+			{ 'tests/e2e/steps/buildings.steps.ts': steps.replace('\tawait verwalter.creates(name);\n', '\tawait verwalter.creates(name);\n\treturn;\n') },
+			{ ...base, 'tests/e2e/features/buildings.feature': background }
+		);
+		const inserted = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(inserted.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {string}», used by');
+		expect(inserted.out).toContain('buildings.feature:1 «Funktionalität und Grundlage»');
+	});
+
+	it('meldet einen Schritt, den ein Szenariogrundriss mit Platzhaltern braucht', async () => {
+		const period = "Given(/^das Gebäude rechnet (\\d{4}) ab$/, async ({ verwalter }, year: string) => {\n\tawait verwalter.bills(year);\n});\n";
+		const outline = `${usage}\n  Szenariogrundriss: Abrechnung <Periode>\n    Angenommen das Gebäude rechnet <Periode> ab\n\n    Beispiele:\n      | Periode |\n      | 2025    |\n`;
+		const cwd = gateRepo(
+			{ 'tests/e2e/steps/buildings.steps.ts': `${steps}\n${period.replace('bills(year)', 'bills(2024)')}` },
+			{ 'tests/e2e/steps/buildings.steps.ts': `${steps}\n${period}`, 'tests/e2e/features/buildings.feature': outline }
+		);
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(result.out).toContain('used by tests/e2e/features/buildings.feature:11 «Abrechnung <Periode>»');
+	});
+
+	// review 1270-review-1 C-1: a step defined in a loop over its patterns
+	it('meldet einen Schritt aus einer Schleife, den ein Szenario ohne @wip braucht', async () => {
+		const loop = "for (const step of ['sieht der Liegenschaftsverwalter nichts', 'sieht der Liegenschaftsverwalter {string}'])\n\tThen(step, async ({ verwalter }) => {\n\t\tawait verwalter.seesNothing();\n\t});\n";
+		const before = `${steps}\n${loop}\nThen('danach', async () => {});\n`;
+		const cwd = gateRepo({ 'tests/e2e/steps/buildings.steps.ts': before.replace('\t\tawait verwalter.seesNothing();\n\t', '\t') }, { ...base, 'tests/e2e/steps/buildings.steps.ts': before });
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(result.out).toContain('buildings.steps.ts:19 step «sieht der Liegenschaftsverwalter nichts | sieht der Liegenschaftsverwalter {string}», used by');
+		expect(result.out).toContain('buildings.feature:3 «Liste zeigt Liegenschaften»');
+	});
+
+	// review 1270-review-1 C-2: a step added right after a used one leaves that one unchanged
+	it('lässt einen neuen Schritt direkt nach einem gebrauchten durch', async () => {
+		const added = steps.replace("\tawait verwalter.creates(name);\n});\n", "\tawait verwalter.creates(name);\n});\nWhen('neu', async () => {});\n");
+		expect(await changeSteps(added)).toMatchObject({ code: 0 });
+	});
+
+	// review 1270-review-1 C-3: CI runs a copy from outside the repository, which finds the package from the repository
+	it('liest Cucumber-Ausdrücke auch aus einer Kopie ausserhalb des Repositorys', async () => {
+		const cwd = gateRepo({ 'tests/e2e/steps/buildings.steps.ts': steps.replace('creates(name)', 'creates()') }, base);
+		symlinkSync(join(process.cwd(), 'node_modules'), join(cwd, 'node_modules'));
+		const script = join(mkdtempSync(`${tmpdir()}/check-copy-`), 'check-issues.mjs');
+		copyFileSync(SCRIPT, script);
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main', script });
+		expect(result.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {string}», used by');
+	});
+
+	// review 1270-review-2 C-1: a loop whose list spans several lines
+	it('meldet einen gelöschten Schritt aus der mehrzeiligen Liste einer Schleife', async () => {
+		const loop = "for (const [step, question] of [\n\t['sieht der Liegenschaftsverwalter {string}', listed],\n\t['sieht der Liegenschaftsverwalter nichts', empty]\n] as const)\n\tThen(step, async ({ verwalter }) => {\n\t\tawait verwalter.sees(question);\n\t});\n";
+		const before = `${steps}\n${loop}`;
+		const cwd = gateRepo(
+			{ 'tests/e2e/steps/buildings.steps.ts': before.replace("\t['sieht der Liegenschaftsverwalter {string}', listed],\n", '') },
+			{ ...base, 'tests/e2e/steps/buildings.steps.ts': before }
+		);
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('buildings.steps.ts:19 step «sieht der Liegenschaftsverwalter {string} | sieht der Liegenschaftsverwalter nichts», used by');
+		expect(result.out).toContain('buildings.feature:3 «Liste zeigt Liegenschaften»');
+	});
+
+	// fallback review of #1365: a parameter type the check does not know matches every step instead of stopping the check
+	it('meldet einen Schritt mit unbekanntem Parametertyp mit Schritt und Szenario', async () => {
+		const custom = steps.replace("Given('eine Liegenschaft {string}'", "Given('eine Liegenschaft {liegenschaft}'");
+		const cwd = gateRepo({ 'tests/e2e/steps/buildings.steps.ts': custom.replace('creates(name)', 'creates()') }, { ...base, 'tests/e2e/steps/buildings.steps.ts': custom });
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {liegenschaft}», used by tests/e2e/features/buildings.feature:3');
 	});
 });

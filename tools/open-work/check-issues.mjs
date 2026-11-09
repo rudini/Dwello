@@ -2,12 +2,14 @@
 // pull request closes an issue (`Fixes #n`) that a marker still names (CLAUDE.md, "Open work"), and when it closes an
 // issue and changes what the app does without changing a scenario (CLAUDE.md, "Workflow" step 1), and when an open issue
 // waits for a decision («Proposed (confirm before starting)») without the label `needs-decision` (skill `issue-work`), and when
-// it changes a scenario that is not @wip on the base branch without `Spec change approved: #n` (CLAUDE.md, Workflow 1).
+// it changes a scenario that is not @wip on the base branch, or a step definition such a scenario uses (#1270), without
+// `Spec change approved: #n` (CLAUDE.md, Workflow 1).
 // It also fails when it changes a gate file (a check, its config or the rules) without `Gate change approved: #n`, and
 // when it lowers a coverage floor, approved or not (#1269). CI runs the target branch's copy, so a pull request cannot switch it off.
 // CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
 // With PR_NUMBER and a token the text comes from the API: the event's PR_BODY is the text from when the run started.
 import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 
 const repo = process.env.GITHUB_REPOSITORY ?? 'rudini/Dwello';
 const api = process.env.GITHUB_API_URL ?? 'https://api.github.com';
@@ -93,6 +95,16 @@ if (base) {
 		for (const scenario of changed) if (scenario && !scenario.wip) specChanges.push(`${file}:${scenario.line} «${scenario.name}»`);
 	}
 }
+// a changed or removed step definition that a scenario without @wip on the base uses changes that scenario (#1270)
+if (base)
+	for (const file of git('diff', '--name-only', '--no-renames', from, 'HEAD', '--', 'tests/e2e/steps/').split('\n')) {
+		if (!file.endsWith('.ts')) continue;
+		for (const step of changedSteps(file)) {
+			const users = specSteps().filter(({ texts }) => texts.some(step.matches));
+			const named = [...new Set(users.map(({ file, scenario }) => `${file}:${scenario.line} «${scenario.name}»`))];
+			if (named.length) specChanges.push(`${file}:${step.line} step «${step.pattern}», used by ${named.join(', ')},`);
+		}
+	}
 if (!approvals.length)
 	for (const place of specChanges)
 		failures.push(
@@ -190,6 +202,118 @@ function examplesOnly(lines, after, body) {
 	while (/^\s*\|/.test(lines[row])) row--;
 	const [heading, ...rows] = /^\s*Beispiele:/.test(body[0]) ? body : [lines[row], ...body];
 	return /^\s*Beispiele:/.test(heading) && rows.every((line) => /^\s*\|/.test(line));
+}
+
+/** The step definitions of a step file on the base that the pull request changes or removes, each with its matcher */
+function changedSteps(file) {
+	const lines = ['', ...show(from, file).split('\n')];
+	const defs = [];
+	lines.forEach((line, i) => {
+		const [, indent] = /^(\s*)(?:Given|When|Then)\(/.exec(line) ?? [];
+		if (indent === undefined) return;
+		// an indented one is the body of a loop over its patterns: the definition starts at the loop, as far back as the
+		// statement before it
+		let start = i;
+		while (indent && start > 1 && !/^for\b/.test(lines[start]) && !/^\S.*;\s*$/.test(lines[start - 1])) start--;
+		defs.push({ line: start, call: i, end: endOf(lines, i, indent) });
+	});
+	const touched = new Set();
+	for (const [, start, count = '1'] of git('diff', '-U0', from, 'HEAD', '--', file).matchAll(/^@@ -(\d+)(?:,(\d+))? /gm)) {
+		// an insertion lies after line `start`: it changes the definition it falls inside of
+		const [first, last] = count === '0' ? [+start + 0.5, +start + 0.5] : [+start, +start + +count - 1];
+		for (const def of defs) if (def.line <= last && first <= def.end) touched.add(def);
+	}
+	return [...touched].map((def) => ({
+		...def,
+		...matcher(lines.slice(def.line, def.call).join('\n'), lines.slice(def.call, def.end + 1).join('\n'))
+	}));
+}
+
+/** The last line of the step definition called at line `start`: its own line for a one-liner, else the closing one */
+function endOf(lines, start, indent) {
+	if (/\);\s*$/.test(lines[start])) return start;
+	let end = start + 1;
+	while (end < lines.length - 1 && !lines[end].startsWith(`${indent})`) && !lines[end].startsWith(`${indent}}`)) end++;
+	return end;
+}
+
+/**
+ * The patterns of a step definition, Cucumber or regular expressions, and whether a step text matches one: the literal it
+ * is called with, else the strings of the loop around it; a pattern it cannot read matches every step (fails closed)
+ */
+function matcher(loop, call) {
+	const literal = /^\s*(?:Given|When|Then)\(\s*('(?:[^'\\]|\\.)*'|\/(?:[^/\\\n]|\\.)+\/[a-z]*)/.exec(call)?.[1];
+	const literals = literal ? [literal] : (loop.match(/'(?:[^'\\]|\\.)*'/g) ?? []);
+	const tests = literals.map(test);
+	return {
+		pattern: literals.map((text) => (text.startsWith('/') ? text : text.slice(1, -1))).join(' | ') || call.split('\n')[0].trim(),
+		matches: (text) => !tests.length || tests.some((matches) => matches(text))
+	};
+}
+
+/** Whether a step text matches one pattern literal */
+function test(literal) {
+	if (literal.startsWith('/')) {
+		const regex = new RegExp(literal.slice(1, literal.lastIndexOf('/')), literal.slice(literal.lastIndexOf('/') + 1));
+		return (text) => regex.test(text);
+	}
+	const { CucumberExpression, ParameterTypeRegistry } = cucumber();
+	try {
+		const expression = new CucumberExpression(literal.slice(1, -1).replace(/\\(.)/g, '$1'), new ParameterTypeRegistry());
+		return (text) => expression.match(text) !== null;
+	} catch {
+		return () => true; // a parameter type this check does not know: fails closed
+	}
+}
+
+/** The Cucumber expressions of the repository: CI runs this script from outside it, so it is looked up from both places */
+function cucumber() {
+	for (const from of [import.meta.url, `${process.cwd()}/`]) {
+		try {
+			return createRequire(from)('@cucumber/cucumber-expressions');
+		} catch {
+			// not installed next to this copy of the script
+		}
+	}
+	throw new Error('Cannot load @cucumber/cucumber-expressions: run bun install');
+}
+
+/** Every step of a scenario without @wip on the base, with its feature file and scenario (read once) */
+function specSteps() {
+	specSteps.all ??= git('ls-tree', '-r', '--name-only', from, 'tests/e2e/features/')
+		.split('\n')
+		.filter((file) => file.endsWith('.feature'))
+		.flatMap((file) => {
+			const lines = show(from, file).split('\n');
+			const owner = scenarios(lines.join('\n'));
+			const rows = examples(lines, owner);
+			return lines.flatMap((line, i) => {
+				const [, step] = /^\s*(?:Angenommen|Gegeben seien?|Wenn|Dann|Und|Aber|\*)\s+(.*?)\s*$/.exec(line) ?? [];
+				const scenario = owner[i + 1];
+				if (!step || scenario.wip) return [];
+				// an outline's step reads as it runs, once per row of its «Beispiele:»
+				const texts = (rows.get(scenario) ?? [{}]).map((row) => step.replace(/<([^>]+)>/g, (all, name) => row[name] ?? all));
+				return [{ file, texts, scenario }];
+			});
+		});
+	return specSteps.all;
+}
+
+/** The rows of each outline's «Beispiele:» tables, as objects keyed by the header of their table */
+function examples(lines, owner) {
+	const rows = new Map();
+	let header = null; // null outside a table, [] right after «Beispiele:»
+	lines.forEach((line, i) => {
+		const cells = /^\s*\|(.*)\|\s*$/.exec(line)?.[1].split('|').map((cell) => cell.trim());
+		if (/^\s*Beispiele:/.test(line)) header = [];
+		else if (!cells) header = /^\s*(#.*)?$/.test(line) ? header : null;
+		else if (header?.length === 0) header = cells;
+		else if (header) {
+			const scenario = owner[i + 1];
+			rows.set(scenario, [...(rows.get(scenario) ?? []), Object.fromEntries(header.map((name, n) => [name, cells[n]]))]);
+		}
+	});
+	return rows;
 }
 
 /** The scenario each line of a feature file belongs to (index = line number); the header and Background count for all */
