@@ -1,6 +1,5 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { POST as markPaid } from '../routes/statements/[id]/mark-paid/+server';
-import { POST as sendReminder } from '../routes/statements/[id]/send-reminder/+server';
 import { GET as getPdf } from '../routes/statements/[id]/pdf/+server';
 import { GET as getListPdf } from '../routes/api/statements/[id]/pdf/+server';
 import { GET as getBilled } from '../routes/api/statements/billed/+server';
@@ -11,11 +10,13 @@ import { GET as getZip } from '../routes/statements/zip/+server';
 import { unzipSync } from 'fflate';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
 import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
-import reminderPaid from '../../tests/contracts/reminder-paid-refused.json';
 import { localToday } from '$lib/contract-status';
 import { load as refusedPage } from '../routes/documents/refused/+page.server';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
+// the double-submit pair the app's own button sends (#1375)
+const cookies = { get: (name: string) => (name === 'dwello_xsrf' ? 'x1' : undefined) };
+const XSRF = { 'X-XSRF-TOKEN': 'x1' };
 
 /** The app's refusal page a refused PDF leads to in its tab (#734) */
 function refusalOf(response: Response) {
@@ -34,7 +35,8 @@ function call(handler: unknown, status: number, answer: object) {
 	const result = (handler as (event: never) => Promise<Response>)({
 		params: { id: 's1' },
 		fetch,
-		request: new Request('http://localhost/', { method: 'POST' }) // no body: the defaults apply
+		cookies,
+		request: new Request('http://localhost/', { method: 'POST', headers: XSRF }) // no body: the defaults apply
 	} as never);
 	return { calls, result };
 }
@@ -46,9 +48,15 @@ describe('POST /statements/[id]/mark-paid', () => {
 		const fetch = async (url: string) => (calls.push(url), Response.json({}));
 		const request = new Request('http://localhost/', {
 			method: 'POST',
+			headers: XSRF,
 			body: JSON.stringify({ paidDate: '2024-12-30', periodEnd: '2024-12-31' })
 		});
-		const response = await (markPaid as (event: never) => Promise<Response>)({ params: { id: 's1' }, fetch, request } as never);
+		const response = await (markPaid as (event: never) => Promise<Response>)({
+			params: { id: 's1' },
+			fetch,
+			cookies,
+			request
+		} as never);
 
 		expect(response.status).toBe(400);
 		expect((await response.json()).message).toContain('vor dem Ende der Abrechnungsperiode am 31.12.2024');
@@ -81,25 +89,21 @@ describe('POST /statements/[id]/mark-paid (Ablehnung)', () => {
 	});
 });
 
-describe('POST /statements/[id]/send-reminder', () => {
-	it('versendet die nächste Mahnung über den Korrespondenzkanal des Mieters', async () => {
-		const document = { reminderLevel: 2, channel: 'letter', status: 'to_send' };
-		const { calls, result } = call(sendReminder, 201, { document });
+describe('POST /statements/[id]/mark-paid (fremde Seite)', () => {
+	// #1375: another page can post without the content type the origin check covers, but not with the token
+	it('lehnt eine Anfrage ohne XSRF-Token ab, ohne die Zahlung zu speichern', async () => {
+		const calls: unknown[] = [];
+		const fetch = async (url: string) => (calls.push(url), Response.json({}));
+		const request = new Request('http://localhost/', { method: 'POST', body: '{}' });
+		const response = await (markPaid as (event: never) => Promise<Response>)({
+			params: { id: 's1' },
+			fetch,
+			cookies,
+			request
+		} as never);
 
-		const response = await result;
-		expect(response.status).toBe(201);
-		expect(await response.json()).toEqual({ document });
-		expect(calls).toEqual([{ method: 'POST', url: `${API}/reminders`, body: undefined }]);
-	});
-
-	it('gibt die Ablehnung des Backends weiter', async () => {
-		const { result } = call(sendReminder, 409, reminderPaid);
-
-		const response = await result;
-		expect(response.status).toBe(409);
-		expect(await response.json()).toEqual({
-			error: 'Die Abrechnung ist bereits bezahlt. Schicken Sie diese Mahnung nicht mehr ab.'
-		});
+		expect(response.status).toBe(403);
+		expect(calls).toEqual([]);
 	});
 });
 

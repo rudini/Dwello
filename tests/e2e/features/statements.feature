@@ -69,6 +69,12 @@ Funktionalität: Nebenkostenabrechnungen
     Wenn der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"
 
+  Szenario: Zahlungseingang direkt aus der Liste festhalten
+    Angenommen die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Abrechnungsliste
+    Wenn der Liegenschaftsverwalter in der Liste festhält, dass "Anna Keller" die Abrechnung bezahlt hat
+    Dann sieht der Liegenschaftsverwalter die Abrechnung von "Anna Keller" mit dem Status "Bezahlt"
+
   Szenario: PDF einer Abrechnung herunterladen
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für die Abrechnung 2024 von "Anna Keller" gibt es ein PDF

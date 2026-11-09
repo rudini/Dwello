@@ -15,6 +15,7 @@
 	} from '$lib/statement';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
+	import { getXsrfTokenFromCookie } from '$lib/api';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
@@ -139,6 +140,7 @@
 		try {
 			const response = await fetch(`/statements/${paying!.id}/mark-paid`, {
 				method: 'POST',
+				headers: { 'X-XSRF-TOKEN': getXsrfTokenFromCookie() ?? '' },
 				body: JSON.stringify({
 					paidDate,
 					periodEnd: paying!.periodEnd,

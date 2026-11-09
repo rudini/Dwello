@@ -428,6 +428,25 @@ describe('Abrechnungsliste', () => {
 		expect(invalidateAll).toHaveBeenCalled();
 	});
 
+	// #1375: die Route prüft das Token, sonst lehnt sie den Zahlungseingang ab
+	it('schickt beim Zahlungseingang aus der Liste das XSRF-Token mit', async () => {
+		fakeBff();
+		const bff = globalThis.fetch;
+		const tokens: (string | null)[] = [];
+		globalThis.fetch = ((url: string, init?: RequestInit) => {
+			tokens.push(new Headers(init?.headers).get('X-XSRF-TOKEN'));
+			return bff(url, init);
+		}) as typeof fetch;
+		document.cookie = 'dwello_xsrf=x1';
+		list([statement({ status: 'sent' })]);
+
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(tokens).toEqual(['x1']);
+	});
+
 	// #448 (4), Code-Review 448-1 C-6: ein Tag vor dem Abrechnungsdatum wird nach der Frage gespeichert
 	// #959 (Fachreview 959-1, Regel 1): die Zeile nennt nach einer Teilzahlung den bezahlten Teil und den Rest
 	it('nennt in der Liste nach einer Teilzahlung den bezahlten Teil und den offenen Betrag', () => {
