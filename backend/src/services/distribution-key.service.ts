@@ -268,19 +268,6 @@ export async function deleteDistributionKey(
 }
 
 /**
- * Check if a distribution key exists
- */
-export async function distributionKeyExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: distributionKeys.id })
-		.from(distributionKeys)
-		.where(eq(distributionKeys.id, id))
-		.limit(1);
-
-	return !!result;
-}
-
-/**
  * Test a formula with sample apartment data
  */
 export function testFormulaWithSamples(formula: string): {

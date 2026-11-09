@@ -17,11 +17,23 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { validateIBAN } from './qr-bill.service';
-import { configuration, type Configuration } from '../db/schema';
+import { configuration, distributionKeys, type Configuration } from '../db/schema';
 import { heatingProfileExists } from './heating-profile.service';
-import { distributionKeyExists } from './distribution-key.service';
 import { recordAudit } from './audit-log.service';
 import { CodedError, type ErrorCode } from './coded-error';
+
+/**
+ * Check if a distribution key exists
+ */
+async function distributionKeyExists(id: string): Promise<boolean> {
+	const [result] = await db
+		.select({ id: distributionKeys.id })
+		.from(distributionKeys)
+		.where(eq(distributionKeys.id, id))
+		.limit(1);
+
+	return !!result;
+}
 
 /**
  * Configuration keys with their types and validators
