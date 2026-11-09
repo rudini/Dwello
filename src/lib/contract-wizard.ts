@@ -1,5 +1,4 @@
 import { m } from '$lib/paraglide/messages';
-import { plainAmount } from './invoice';
 import {
 	apartmentName,
 	apartmentOption,
@@ -15,7 +14,7 @@ import {
 } from './contract-form';
 import type { AvailabilityInfo, ContractForAvailability } from './utils/contract-availability';
 import type { RentalContract } from './types';
-import { formatCurrency, formatDateLong } from './utils/format';
+import { formatCurrency, formatDateLong, plainAmount } from './utils/format';
 import { apiCall } from './api';
 import { isDay } from './contract-status';
 import { browserStorage, readDraft } from './wizard-draft';
