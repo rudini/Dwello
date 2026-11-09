@@ -4,7 +4,7 @@
  */
 
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
-import { containing, literal, db } from '../db/connection';
+import { containing, literal, db, paged } from '../db/connection';
 import { distributionKeys, utilityStatementLineItems, type DistributionKey, type NewDistributionKey } from '../db/schema';
 import {
 	SAMPLE_APARTMENTS,
@@ -20,7 +20,7 @@ import type { DistributionKeyWithUsage, MasterDataType } from '../api/distributi
 export interface DistributionKeyFilters {
 	search?: string;
 	type?: MasterDataType;
-	limit?: number;
+	limit?: number | null; // null: every key (#1337)
 	offset?: number;
 }
 
@@ -65,14 +65,11 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 		})
 		.from(distributionKeys)
 		.orderBy(asc(distributionKeys.sortOrder), asc(distributionKeys.name))
-		.limit(limit)
-		.offset(offset);
+		.$dynamic();
 
 	// Apply conditions if any
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause
-		? await keysQuery.where(whereClause)
-		: await keysQuery;
+	const results = await paged(keysQuery.where(whereClause), limit, offset);
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(distributionKeys);
@@ -265,19 +262,6 @@ export async function deleteDistributionKey(
 	await db.delete(distributionKeys).where(eq(distributionKeys.id, id));
 
 	return { success: true };
-}
-
-/**
- * Check if a distribution key exists
- */
-export async function distributionKeyExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: distributionKeys.id })
-		.from(distributionKeys)
-		.where(eq(distributionKeys.id, id))
-		.limit(1);
-
-	return !!result;
 }
 
 /**

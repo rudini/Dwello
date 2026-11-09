@@ -44,7 +44,7 @@
 	aria-label={m.list_search_label()}
 	data-testid="statement-search-form"
 	data-focus-row
-	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 md:flex-row md:items-end"
+	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 @2xl:flex-row @2xl:items-end"
 >
 	{#if status}<input type="hidden" name="status" value={status} />{/if}
 	{#if contract}<input type="hidden" name="contract" value={contract} />{/if}

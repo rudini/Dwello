@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 
 		const [contractsRes, buildingsRes, apartmentsRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/contracts?${params}`),
-			fetch(`${BACKEND_URL}/api/v1/buildings?limit=1000`),
+			fetch(`${BACKEND_URL}/api/v1/buildings?limit=all`),
 			fetch(`${BACKEND_URL}/api/v1/apartments?limit=100`)
 		]);
 

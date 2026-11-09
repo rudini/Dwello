@@ -53,7 +53,7 @@
 	id="correspondenceChannel"
 	name="correspondenceChannel"
 	label={m.tenants_channel()}
-	help={m.tenants_channel_help()}
+	help="{m.glossary_channel_text()} {m.tenants_channel_help_more()}"
 	options={channels}
 	bind:value={channel}
 	onchange={() => (channelChangedFor = errors)}

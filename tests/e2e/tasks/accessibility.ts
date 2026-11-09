@@ -682,6 +682,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'send-refused': () => (actor) => actor.attemptsTo(PostFormAction('?/send'), Wait.until(on.shown('send-feedback'))),
 	// #338: the confirmation of «Neu berechnen» names what stays and what changes
 	'recalculate-dialog': () => openDialog(on.recalculateButton),
+	// #658: the table of the positions shows only where its panel is 64rem wide, wider than every viewport of the check
+	'cost-table': () => (actor) => actor.attemptsTo(Browser.resizeTo({ width: 1600, height: 900 }), Wait.until(on.costTableRow)),
 	'redeliver-dialog': () => openDialog(on.redeliverButton),
 	'new-pdf-sent-dialog': () => openDialog(on.newPdfSentButton),
 	'mark-sent-dialog': () => openDialog(on.markSentButton),

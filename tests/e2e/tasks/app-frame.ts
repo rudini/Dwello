@@ -1,5 +1,6 @@
 import type { Activity } from '../screenplay/actor';
 import { Browser, Click, FailRequests, Navigate, Press, Wait } from '../screenplay/interactions';
+import { Text } from '../screenplay/questions';
 import { mobileMenuButton, text } from '../targets/accessibility';
 import {
 	errorPageToOverview,
@@ -15,7 +16,8 @@ import {
 	privacySectionLinkInTerms,
 	termsLinkOnLogin,
 	userMenuButton,
-	userMenuSettings
+	userMenuSettings,
+	glossaryExplanation
 } from '../targets/app-frame';
 
 export const chooseInMainNav = (label: string) => Click.on(mainNavLink(label));
@@ -51,3 +53,10 @@ export const goToOverviewWhileItFails: Activity = (actor) =>
 export const goBackInBrowser = Browser.back;
 // typed into the address bar: a full page load, so going back loads the page again or restores it (#680)
 export const openOtherPageByAddress = Navigate.to('/');
+
+/** #698: what the help's glossary says about a term, for a later comparison with a field's help */
+export const GLOSSARY = 'glossary';
+export const readInGlossary = (term: string): Activity => async (actor) => {
+	await Navigate.to('/help')(actor);
+	actor.remember(GLOSSARY, await actor.answer(Text.of(glossaryExplanation(term))));
+};

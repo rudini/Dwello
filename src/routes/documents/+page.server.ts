@@ -10,7 +10,7 @@ const API = `${BACKEND}/documents`;
 
 // the choice of the filter «Mieter» (#677): every tenant, by name as the backend sorts them; without it only «Alle Mieter»
 async function loadTenantChoices(fetch: typeof globalThis.fetch) {
-	const response = await fetch(`${BACKEND}/tenants?limit=1000`); // far more than a small portfolio has
+	const response = await fetch(`${BACKEND}/tenants?limit=all`);
 	return response.ok ? ((await response.json()).tenants ?? []).map(toTenantChoice) : [];
 }
 

@@ -31,8 +31,8 @@ async function agreedOf(fetch: typeof globalThis.fetch, contractId: string | nul
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	// Fetch tenants and apartments in parallel
 	const [tenantsRes, apartmentsRes] = await Promise.all([
-		fetch(`${BACKEND_URL}/api/v1/tenants?limit=1000`), // far more than a small portfolio has
-		fetch(`${BACKEND_URL}/api/v1/apartments?limit=1000`)
+		fetch(`${BACKEND_URL}/api/v1/tenants?limit=all`),
+		fetch(`${BACKEND_URL}/api/v1/apartments?limit=all`)
 	]).catch((err) => {
 		console.error('Failed to load data for contract form:', err);
 		return [];

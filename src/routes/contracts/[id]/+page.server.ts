@@ -150,7 +150,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 
 		const contract = toContract(data);
 
-		const statements = await rows(fetch, `statements?contractId=${data.id}&limit=1000`);
+		const statements = await rows(fetch, `statements?contractId=${data.id}&limit=all`);
 		return {
 			today: localToday(),
 			missingStatements: await missingStatements(fetch, data),

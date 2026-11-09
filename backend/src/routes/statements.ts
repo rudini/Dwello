@@ -25,6 +25,7 @@ import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '..
 import { declineCorrection, outdatedStatements, statementChanges } from '../services/statement-invoices.service';
 import { keepNewPdf, redeliverByLetter, sendStatement } from '../services/statement-send.service';
 import { generateInPeriod, runDefaultsOf, runDifferencesOf, runHeatingHintsOf, runPlan } from '../services/statement-run.service';
+import { pageLimit } from './page-limit';
 
 // A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
 function pdfFailure(error: unknown, set: { status?: number | string }) {
@@ -99,14 +100,14 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				status: query.status,
 				periodStart: query.periodStart,
 				periodEnd: query.periodEnd,
-				limit: query.limit ? parseInt(query.limit) : undefined,
+				limit: pageLimit(query.limit),
 				offset: query.offset ? parseInt(query.offset) : undefined
 			});
 
 			return {
 				data: statements,
 				total,
-				limit: query.limit ? parseInt(query.limit) : 20,
+				limit: query.limit ? pageLimit(query.limit) : 20,
 				offset: query.offset ? parseInt(query.offset) : 0
 			};
 		},

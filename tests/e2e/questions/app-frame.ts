@@ -42,6 +42,7 @@ export const pageOverflowsSideways = question(
 );
 export const userMenuCount = Count.of(userMenuButton);
 export const tabIcon = ThePage.tabIcon;
+export const homeScreenIcons = ThePage.homeScreenIcons;
 export const footerVersionText = Text.of(footerVersion);
 export const glossaryExplanationText = (term: string) => Text.of(glossaryExplanation(term));
 /** The anchor of the page address, e.g. «#glossary», or '' without one */
@@ -75,3 +76,8 @@ export const focusedText = Text.of(focusedPart);
 /** #657: the first item of the menu in a narrow window, and how much of an item shows without scrolling (1: all) */
 export const firstMobileNavItem = Text.of(firstMobileNavLink);
 export const mobileNavItemShare = (label: string) => ShareInViewport.of(mobileNavLink(label));
+/** #658: text and choices the page cuts off; [] when everything shows whole */
+export const cutOffOnPage = question('what the page cuts off', async (actor) => [
+	...(await actor.answer(ThePage.cutOffText)),
+	...(await actor.answer(ThePage.cutChoices))
+]);

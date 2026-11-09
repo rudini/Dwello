@@ -4,7 +4,7 @@
  */
 
 import { eq, ilike, or, sql, desc, and, inArray } from 'drizzle-orm';
-import { containing, db } from '../db/connection';
+import { containing, db, paged } from '../db/connection';
 import {
 	tenants,
 	rentalContracts,
@@ -22,7 +22,7 @@ export interface TenantFilters {
 	search?: string;
 	language?: string;
 	status?: 'active' | 'future' | 'inactive';
-	limit?: number;
+	limit?: number | null; // null: every record (#1337)
 	offset?: number;
 }
 
@@ -102,13 +102,16 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 	const whereClause = and(...conditions);
 
 	// Query with current occupancy
-	const results = await db
-		.select({ ...tenantFields, isActive, isFuture })
-		.from(tenants)
-		.where(whereClause)
-		.orderBy(tenants.lastName, tenants.firstName, tenants.id)
-		.limit(limit)
-		.offset(offset);
+	const results = await paged(
+		db
+			.select({ ...tenantFields, isActive, isFuture })
+			.from(tenants)
+			.where(whereClause)
+			.orderBy(tenants.lastName, tenants.firstName, tenants.id)
+			.$dynamic(),
+		limit,
+		offset
+	);
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(tenants);

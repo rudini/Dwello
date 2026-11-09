@@ -20,7 +20,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<BuildingsLis
 		const [response, apartmentsData] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/buildings?${params}`),
 			// only for the counts: failing, it leaves them at 0 instead of emptying the list
-			fetch(`${BACKEND_URL}/api/v1/apartments?limit=1000`)
+			fetch(`${BACKEND_URL}/api/v1/apartments?limit=all`)
 				.then((res) => (res.ok ? res.json() : { apartments: [] }))
 				.catch(() => ({ apartments: [] }))
 		]);

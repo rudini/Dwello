@@ -13,7 +13,8 @@
 		overlapRefusal,
 		overlapError,
 		validateContract,
-		billedUntilError
+		billedUntilError,
+		advanceHelp as glossaryAdvanceHelp
 	} from '$lib/contract-form';
 	import {
 		endedSince,
@@ -90,7 +91,7 @@
 		fixedTerm ? m.contracts_advance_change_help_fixed_term() : m.contracts_advance_change_help()
 	);
 	const advanceHelp = $derived(
-		running ? `${m.contracts_advance_help()} ${changeHelp}` : m.contracts_advance_help()
+		running ? `${glossaryAdvanceHelp()} ${changeHelp}` : glossaryAdvanceHelp()
 	);
 	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143); it stays during a
 	// retry, so «Erneut versuchen» keeps the focus (review b15-merge M-1)

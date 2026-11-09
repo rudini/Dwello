@@ -3,7 +3,9 @@
  * Swiss utility cost validation and compliance checking
  */
 
-import { getCategory, listCategories } from './category.service';
+import { asc, eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { categories as categoryTable } from '../db/schema';
 
 /**
  * Customary management fee percentage (a guideline, not a cap)
@@ -24,7 +26,10 @@ export interface UtilityCostRules {
  * Get Swiss utility cost compliance rules; the categories as the master data holds them
  */
 export async function getUtilityCostRules(): Promise<UtilityCostRules> {
-	const { categories } = await listCategories({ limit: null });
+	const categories = await db
+		.select({ name: categoryTable.name, nameDE: categoryTable.nameDE, isAllowedUtilityCost: categoryTable.isAllowedUtilityCost })
+		.from(categoryTable)
+		.orderBy(asc(categoryTable.sortOrder), asc(categoryTable.name));
 	const names = (allowed: boolean) =>
 		categories.filter((c) => c.isAllowedUtilityCost === allowed).map((c) => c.nameDE || c.name);
 	return {
@@ -69,7 +74,10 @@ export async function validateInvoiceForUtilityStatement(invoice: {
 		errors.push('Rechnung hat keine Kategorie zugewiesen');
 	} else {
 		// Check if category allows utility cost inclusion (an unknown category does not)
-		const category = await getCategory(invoice.categoryId);
+		const [category] = await db
+			.select({ isAllowedUtilityCost: categoryTable.isAllowedUtilityCost })
+			.from(categoryTable)
+			.where(eq(categoryTable.id, invoice.categoryId));
 		if (!category?.isAllowedUtilityCost) {
 			errors.push('Die Kategorie dieser Rechnung ist nicht umlagefähig gemäss Schweizer Mietrecht');
 		}

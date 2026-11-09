@@ -258,3 +258,28 @@ Funktionalität: Nebenkostenabrechnungen
     Und der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet
     Und der Liegenschaftsverwalter im Browser zurückgeht
     Dann zeigt die Suche "Anna Keller"
+
+  # #658 (Decided): Filter und Zeilen richten sich nach der Breite ihres Bereichs, nicht des Fensters; nichts ist abgeschnitten
+  Szenariogrundriss: Die Abrechnungsliste zeigt bei jeder Breite alles ganz
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Dann zeigt die Seite nichts abgeschnitten
+
+    Beispiele:
+      | Breite |
+      | 853    |
+      | 1024   |
+      | 1280   |
+      | 1440   |
+
+  # #658 (Persona Helga 658 P-1): «Filter aufheben» bleibt in der Kachel des gewählten Status, auch in schmalen Spalten
+  Szenariogrundriss: Der gewählte Status zeigt alles innerhalb seiner Kachel
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Wenn der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Dann ragt nichts aus dem Statusfilter "Entwurf"
+
+    Beispiele:
+      | Breite |
+      | 640    |
+      | 960    |
+      | 1168   |
+      | 1440   |

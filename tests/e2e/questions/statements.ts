@@ -1,7 +1,7 @@
 import type { TestData } from '../fixtures/backend';
 import { question } from '../screenplay/actor';
 import { roomBesideConfirmation } from './app-frame';
-import { Attribute, Count, DownloadedFile, FocusedElement, ShareInViewport, Text, ThePage, Value, Visibility } from '../screenplay/questions';
+import { Attribute, Count, DownloadedFile, FocusedElement, HiddenSideways, ShareInViewport, Text, ThePage, Value, Visibility } from '../screenplay/questions';
 import {
 	draftFilter,
 	resetFiltersButton,
@@ -67,3 +67,5 @@ export const focusedElement = FocusedElement;
 export const statusFilterResultText = Text.of(statusFilterResult);
 export const statusFilterResultShareInWindow = ShareInViewport.of(statusFilterResult);
 export const emptyListText = Text.of(statementsEmptyNotice);
+/** #658: how far the content of a status filter reaches past its tile; 0 when all of it is inside */
+export const statusFilterOverflow = (status: string) => HiddenSideways.within(statusFilter(status));

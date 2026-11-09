@@ -18,6 +18,7 @@ import category from '../../tests/contracts/category.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import contractHasStatements from '../../tests/contracts/contract-delete-refused.json';
 import contractMissing from '../../tests/contracts/contract-missing-statements.json';
+import { overLimit, page as listPage } from './helpers/paged-list';
 import contractsMissing from '../../tests/contracts/contracts-missing-statements.json';
 
 describe('Vertragsstatus', () => {
@@ -172,7 +173,7 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 			if (url.includes('/statements?')) {
 				const contractId = new URL(url).searchParams.get('contractId');
 				const data = statements.filter((s) => !contractId || s.contractId === contractId);
-				return Response.json({ data, total: data.length });
+				return Response.json({ data: listPage(url, data), total: data.length });
 			}
 			return Response.json({ ...contractDetail, endDate: null, terminated: false });
 		}) as typeof globalThis.fetch;
@@ -216,6 +217,15 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 				status: 'paid'
 			}
 		]);
+	});
+
+	// #1337: the statement history grows every year; the dialog names every one, also above 1000
+	it('nennt alle 1001 Abrechnungen des Mietvertrags', async () => {
+		const statements = overLimit((i) => statementOf('c1', 1000 + i));
+		const data = (await load({ params: { id: 'c1' }, fetch: backend(statements) } as never)) as {
+			billedBy: unknown[];
+		};
+		expect(data.billedBy).toHaveLength(1001);
 	});
 
 	// Review C-1: unbekannt ist nicht «keine»

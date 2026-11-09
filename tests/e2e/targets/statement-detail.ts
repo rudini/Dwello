@@ -2,24 +2,39 @@ import { target } from '../screenplay/target';
 
 export const statementStatus = target('Status der Abrechnung', (page) => page.getByTestId('statement-status'));
 export const costBreakdown = target('Kostenaufstellung', (page) => page.getByTestId('statement-cost-breakdown'));
+// #658: the table of the positions, a region that scrolls sideways when the table is wider than it
+export const costTableRegion = target('Tabelle der Kostenaufstellung', (page) =>
+	page.getByTestId('statement-cost-breakdown').getByRole('region').filter({ visible: true })
+);
+// A position as shown: a row of the table, or a card where the region is too narrow for the table (#658); the card's
+// first value is the category
 export const statementLineItem = (category: string) =>
 	target(`Position «${category}» der Abrechnung`, (page) =>
-		page.getByTestId('statement-line-item').filter({ hasText: category })
+		page
+			.getByTestId('statement-line-item')
+			.filter({ hasText: category })
+			.or(page.getByTestId('statement-line-card').filter({ has: page.locator('dl > dd:first-of-type', { hasText: category }) }))
+			.filter({ visible: true })
 	);
-// Columns of a position: Kategorie, Schlüssel, Kosten Gebäude, Wohnungsanteil, Zeitanteil, Anteil, Betrag
+// Columns of a position: Kategorie, Schlüssel, Kosten Gebäude, Wohnungsanteil, Zeitanteil, Anteil, Betrag; a card lists
+// the same values in the same order
 const lineItemCell = (category: string, column: number, name: string) =>
 	target(`${name} der Position «${category}»`, (page) =>
-		statementLineItem(category).locate(page).locator('td').nth(column)
+		statementLineItem(category).locate(page).locator('td, dl > dd').nth(column)
 	);
 export const lineItemApartmentShare = (category: string) => lineItemCell(category, 3, 'Wohnungsanteil');
 export const lineItemTimeShare = (category: string) => lineItemCell(category, 4, 'Zeitanteil');
 export const lineItemShare = (category: string) => lineItemCell(category, 5, 'Anteil');
 export const lineItemAmount = (category: string) => lineItemCell(category, 6, 'Betrag');
-// The invoices of a position, in the row below it
+// The invoices of a position: in the table in the row below it, in a card below its values
 export const lineItemInvoices = (category: string) =>
-	target(`Rechnungen der Position «${category}»`, (page) =>
-		statementLineItem(category).locate(page).locator('xpath=following-sibling::tr[1]').getByTestId('statement-line-invoices')
-	);
+	target(`Rechnungen der Position «${category}»`, (page) => {
+		const position = statementLineItem(category).locate(page);
+		return position
+			.locator('xpath=following-sibling::tr[1]')
+			.getByTestId('statement-line-invoices')
+			.or(position.getByTestId('statement-line-invoices'));
+	});
 export const lineItemInvoice = (category: string, description: string) =>
 	target(`Rechnung «${description}» der Position «${category}»`, (page) =>
 		lineItemInvoices(category).locate(page).getByTestId('statement-line-invoice').filter({ hasText: description })

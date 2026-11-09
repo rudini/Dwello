@@ -84,7 +84,7 @@ describe('Verteilschlüssel', () => {
 	it('erklärt Verteilschlüssel und Formeln in Alltagssprache', () => {
 		show(KeysPage, { data: { keys }, form: null } as never);
 
-		expect(text()).toContain('wie die Kosten eines Gebäudes auf die einzelnen Wohnungen');
+		expect(text()).toContain('die Kosten eines Gebäudes auf die Wohnungen aufgeteilt werden'); // the glossary's text (#698)
 		expect(text()).toContain('Jede Wohnung trägt den Teil der Kosten');
 		expect(text()).toContain('* mal');
 	});

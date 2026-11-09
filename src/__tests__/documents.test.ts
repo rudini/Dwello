@@ -10,7 +10,7 @@ import notFound from '../../tests/contracts/document-not-found.json';
 import tenantList from '../../tests/contracts/tenants.json';
 
 const API = 'http://localhost:3001/api/v1/documents';
-const TENANTS = 'http://localhost:3001/api/v1/tenants?limit=1000';
+const TENANTS = 'http://localhost:3001/api/v1/tenants?limit=all';
 
 function backend(answer: Response) {
 	const urls: string[] = [];

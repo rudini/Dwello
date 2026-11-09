@@ -19,6 +19,7 @@ import {
 } from '../services/distribution-key.service';
 import { parseFormula, validateFormulaForDistribution } from '../services/formula.service';
 import type { MasterDataType } from '../api/distribution-key';
+import { pageLimit } from './page-limit';
 
 export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-keys' })
 	// List all distribution keys
@@ -28,14 +29,14 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 			const { distributionKeys, total } = await listDistributionKeys({
 				search: query.search,
 				type: query.type as MasterDataType | undefined,
-				limit: query.limit ? parseInt(query.limit) : undefined,
+				limit: pageLimit(query.limit),
 				offset: query.offset ? parseInt(query.offset) : undefined
 			});
 
 			return {
 				data: distributionKeys,
 				total,
-				limit: query.limit ? parseInt(query.limit) : 100,
+				limit: query.limit ? pageLimit(query.limit) : 100,
 				offset: query.offset ? parseInt(query.offset) : 0
 			};
 		},

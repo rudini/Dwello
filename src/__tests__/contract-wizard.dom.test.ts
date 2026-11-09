@@ -221,7 +221,8 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(document.body.textContent).toContain(
-			'Monatlicher Vorschuss des Mieters für die im Mietvertrag vereinbarten Nebenkosten'
+			// #698: after the glossary's text (fachreview 698-1)
+			'Das Akonto leistet der Mieter nur für die im Mietvertrag vereinbarten Nebenkosten, zum Beispiel Heizung und Wasser.'
 		);
 		vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] }); // the total is announced after a pause
 		type('contract-base-rent-input', '950');

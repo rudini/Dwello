@@ -212,7 +212,7 @@ describe('Rechnungsliste', () => {
 		const action = row.querySelector('[data-testid="invoice-edit-button"]')!.parentElement!;
 
 		expect(row.className).not.toMatch(/col-span|grid-cols/);
-		expect(action.className).toMatch(/(^| )xl:shrink-0( |$)/);
+		expect(action.className).toMatch(/(^| )@4xl:shrink-0( |$)/);
 	});
 
 	it('zählt die Rechnungen in Einzahl und Mehrzahl richtig', () => {

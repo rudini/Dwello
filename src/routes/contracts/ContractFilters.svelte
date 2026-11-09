@@ -54,9 +54,9 @@
 	role="search"
 	onchange={applyFilterChoice}
 	aria-label={m.list_search_label()}
-	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 lg:flex-row lg:items-end"
+	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 @3xl:flex-row @3xl:items-end"
 >
-	<div class="lg:flex-1">
+	<div class="@3xl:flex-1">
 		<Field id="search" label={m.buildings_search()} help={m.contracts_search_help()}>
 			{#snippet children(control)}
 				<input
