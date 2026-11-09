@@ -322,6 +322,7 @@ Funktionalität: Barrierefreiheit
       | audit-log              | empty               |
       | audit-log              | delete-dialog       |
       | audit-log              | paged               |
+      | audit-log              | paged-older         |
       | categories             | default             |
       | category-new           | default             |
       | category-new           | submit-empty        |

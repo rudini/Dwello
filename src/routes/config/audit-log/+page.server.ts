@@ -13,6 +13,8 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const response = await fetch(`${API}?limit=${pageSize}&offset=${(page - 1) * pageSize}`);
 	if (!response.ok) throw error(response.status, m.record_not_loaded({ record: m.audit_title() }));
 	const { data, total } = await response.json();
+	// past the last page there is nothing to show but the empty Protokoll, which it is not (code review 746-1 C-3)
+	if (!data.length && page > 1) throw redirect(303, '/config/audit-log');
 	return { entries: toAuditEntries(data), page, pageSize, total };
 };
 

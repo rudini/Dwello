@@ -73,4 +73,13 @@ describe('Protokoll laden', () => {
 		expect(asked).toEqual([`${API}?limit=50&offset=50`]);
 		expect([data.entries.length, data.page, data.pageSize, data.total]).toEqual([6, 2, 50, 6]);
 	});
+
+	// Code review 746-1 C-3: past the last page, e.g. after deleting its only entry in another tab
+	it('zeigt die erste Seite statt einer Seite nach der letzten', async () => {
+		const fetch = (async () => Response.json({ data: [], total: 6 })) as typeof globalThis.fetch;
+
+		await expect(
+			load({ fetch, url: new URL('http://localhost/config/audit-log?page=3') } as never)
+		).rejects.toMatchObject({ status: 303, location: '/config/audit-log' });
+	});
 });
