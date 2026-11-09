@@ -143,7 +143,7 @@ const OWN_NETWORK =
 
 // Dwello appends the path to the address itself: credentials, a query or a fragment in it would send the request
 // elsewhere (#1372); the code says what does not fit (persona Anna 1372 P-1)
-function addressProblem(baseUrl: string) {
+export function addressProblem(baseUrl: string) {
 	const url = URL.parse(baseUrl);
 	if (!url || !['http:', 'https:'].includes(url.protocol)) return 'KI_ADDRESS_INVALID';
 	if (/[?#]/.test(baseUrl)) return 'KI_ADDRESS_SUFFIX';

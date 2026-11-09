@@ -7,7 +7,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { auditLog } from '../db/schema';
+import { auditLog, kiSettings } from '../db/schema';
 import { modelState } from '../services/ki-model.service';
 import { callApi, sendJson } from './helpers/auth';
 
@@ -221,6 +221,21 @@ describe('KI in den Einstellungen', () => {
 		} finally {
 			redirecting.stop(true);
 			target.stop(true);
+		}
+	});
+
+	// Entschieden in #1372: ein vor dem Update gespeicherter Anbieter mit einer Adresse, die die Regel verweigert, erhält
+	// nichts, auch keinen Schlüssel; die KI gilt als nicht erreichbar
+	it('schickt nichts an eine früher gespeicherte Adresse, die Dwello heute verweigert', async () => {
+		for (const baseUrl of [`${address}?x=1`, address.replace('://', '://nutzer:geheim@')]) {
+			await db.execute(sql`DELETE FROM ki_settings`);
+			await db.insert(kiSettings).values({ mode: 'provider', baseUrl, model: 'bild-modell', provider: 'Alt AG', providerCountry: 'Schweiz' });
+
+			await sendJson('POST', '/api/v1/categories/propose', { name: 'Treppenhausreinigung', description: '' });
+			const status = await (await callApi('/api/v1/invoices/llm-status')).json();
+
+			expect(requests).toEqual([]);
+			expect(status).toMatchObject({ llmAvailable: false });
 		}
 	});
 
