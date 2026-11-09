@@ -600,7 +600,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Ideal to get started</h3>
 				<dl>
-					<div><dt>You need</dt><dd>16 GB of memory for the local AI. With less memory, enter an external AI. If Docker is missing, the line installs it too.</dd></div>
+					<div><dt>You need</dt><dd>A PC with Windows 10 or 11, macOS or Linux, administrator rights and about 10 GB of free disk space. For the local AI: 16 GB of memory. With less, later choose «AI of a provider» under «Settings» › «AI». The line also installs Docker if it is missing.</dd></div>
 					<div><dt>Time needed</dt><dd>About an hour, including the download of the AI model.</dd></div>
 					<div><dt>Good to know</dt><dd>Dwello only runs while your PC is on. For access from your phone, a home server is a better fit.</dd></div>
 				</dl>
@@ -610,15 +610,15 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="install" id="panel-home" role="tabpanel" aria-labelledby="tab-home" hidden>
 			<div class="term">
 				<div class="term-bar"><span>SSH · Synology, Unraid, Mini-PC</span><a href="https://github.com/rudini/Dwello/blob/main/install/linux.sh" rel="noopener" aria-label="Source of linux.sh on GitHub">Source</a><button type="button" data-copy="code-home">Copy</button></div>
-<pre id="code-home" tabindex="0"><span class="c"># On the home server, over SSH: install Docker and Dwello</span>
+<pre id="code-home" tabindex="0"><span class="c"># First, put Dwello’s address into ~/dwello/.env: guide, section 7</span>
+<span class="c"># Then, over SSH: install Docker (if needed) and Dwello</span>
 <span class="p">$ </span>bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/linux.sh)&quot;
-<span class="c"># HTTPS with your domain: see the guide</span>
 <span class="ok">✓ Dwello is running at https://dwello.your-domain.ch</span></pre>
 			</div>
 			<div class="panel needs">
 				<h3>Always reachable, in your own home</h3>
 				<dl>
-					<div><dt>You need</dt><dd>A NAS or mini PC with Docker. Recommended for access from other devices: your own domain with HTTPS. For the local AI, 16 GB of memory.</dd></div>
+					<div><dt>You need</dt><dd>A mini PC with Linux, or a NAS that already runs Docker. Recommended for access from other devices: a domain of your own with HTTPS. For the local AI, 16 GB of memory.</dd></div>
 					<div><dt>Access on the go</dt><dd>Through your VPN or a tunnel such as Tailscale. Dwello does not need to face the open internet.</dd></div>
 					<div><dt>Good to know</dt><dd>Small devices are better off with an external AI. What then goes out is listed under Privacy.</dd></div>
 				</dl>
@@ -628,15 +628,15 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="install" id="panel-cloud" role="tabpanel" aria-labelledby="tab-cloud" hidden>
 			<div class="term">
 				<div class="term-bar"><span>Linux-Server · Infomaniak, Exoscale, Hetzner</span><a href="https://github.com/rudini/Dwello/blob/main/install/linux.sh" rel="noopener" aria-label="Source of linux.sh on GitHub">Source</a><button type="button" data-copy="code-cloud">Copy</button></div>
-<pre id="code-cloud" tabindex="0"><span class="c"># On a fresh Linux server: install Docker and Dwello</span>
+<pre id="code-cloud" tabindex="0"><span class="c"># First, put the domain and HTTPS into ~/dwello/.env: guide, section 7</span>
+<span class="c"># Then, on the fresh Linux server: install Docker and Dwello</span>
 <span class="p">$ </span>bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/linux.sh)&quot;
-<span class="c"># HTTPS with Caddy: see the guide</span>
 <span class="ok">✓ Dwello is running at https://dwello.your-domain.ch</span></pre>
 			</div>
 			<div class="panel needs">
 				<h3>Reachable from anywhere</h3>
 				<dl>
-					<div><dt>You need</dt><dd>A Linux server with Docker and a domain of your own.</dd></div>
+					<div><dt>You need</dt><dd>A Linux server and a domain of your own. The line also installs Docker.</dd></div>
 					<div><dt>Data in Switzerland</dt><dd>Choose a data centre in Switzerland. Our demo runs in Zurich.</dd></div>
 					<div><dt>Good to know</dt><dd>The guide shows how Caddy sets up HTTPS automatically.</dd></div>
 				</dl>
@@ -737,7 +737,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Roadmap</span>
 			<h2>What comes next.</h2>
-			<p>Dwello is developed in the open. These points are planned; most have an issue on GitHub where you can have your say.</p>
+			<p>Dwello is developed in the open. These points are planned. Where an issue on GitHub is linked, you can have your say there.</p>
 		</div>
 		<ul class="road">
 			<li><span class="badge plan">Planned</span><a href="https://github.com/rudini/Dwello/issues/495" rel="noopener">MCP server</a><span>Dwello as a tool for your AI assistant, local and with your permission.</span></li>

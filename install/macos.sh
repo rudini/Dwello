@@ -23,7 +23,7 @@ if ! docker info >/dev/null 2>&1; then
 		say "Installing Docker Desktop with Homebrew. It may ask for your Mac password."
 		brew install --cask docker-desktop
 	fi
-	say "Starting Docker Desktop. The first time, accept its terms in its window (no account needed); this script waits."
+	say "Starting Docker Desktop. The first time, accept its terms in its window (no account needed; it may ask for your Mac password); this script waits."
 	open -a Docker
 	for _ in $(seq 300); do docker info >/dev/null 2>&1 && break; sleep 2; done
 	docker info >/dev/null 2>&1 || fail "Docker Desktop does not run after 10 minutes." "open Docker Desktop, accept its terms and wait until it says «Engine running», then paste the line again."
@@ -34,7 +34,7 @@ say "Downloading Dwello into $dir."
 mkdir -p "$dir" && cd "$dir"
 curl -fsSLO "$source_url/compose.yaml"
 
-say "Starting Dwello. The first time this downloads about 3 GB and takes a few minutes."
+say "Starting Dwello. The first time this downloads about 4 GB and takes a few minutes."
 docker compose pull --quiet
 docker compose up -d
 docker compose up -d --wait --wait-timeout 600 frontend

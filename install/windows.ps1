@@ -45,7 +45,7 @@
 		Set-Location $dir -ErrorAction Stop
 		Invoke-WebRequest -UseBasicParsing "$source/compose.yaml" -OutFile compose.yaml -ErrorAction Stop
 
-		Say 'Starting Dwello. The first time this downloads about 3 GB and takes a few minutes.'
+		Say 'Starting Dwello. The first time this downloads about 4 GB and takes a few minutes.'
 		Invoke-Docker compose pull --quiet
 		Invoke-Docker compose up -d
 		Invoke-Docker compose up -d --wait --wait-timeout 600 frontend
@@ -55,6 +55,8 @@
 		if ($code) { Say "Einrichtungscode for «Dwello einrichten»: $($code.Matches[0].Groups[1].Value)" }
 		Start-Process 'http://localhost:3000'
 	} catch {
-		Write-Host "`nDwello installation stopped: $($_.Exception.Message)`nHelp: https://github.com/rudini/Dwello/blob/main/docs/installation.md" -ForegroundColor Red
+		$text = $_.Exception.Message
+		if ($text -notmatch 'What to do:') { $text += "`nWhat to do: fix what the message names (for example the internet connection), then paste the line again." }
+		Write-Host "`nDwello installation stopped: $text`nHelp: https://github.com/rudini/Dwello/blob/main/docs/installation.md" -ForegroundColor Red
 	}
 }

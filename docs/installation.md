@@ -19,7 +19,7 @@ Paste one line into a terminal (PowerShell on Windows, the Terminal app on a Mac
 
 - **Windows:** without WSL2 the script installs it and asks for a restart; paste the line again afterwards and it continues.
 - **Windows and macOS:** Docker Desktop opens once; accept its terms (no account needed) and the script goes on.
-- **Linux:** on a server without a browser, open `http://<the server's address>:3000` on another device. For HTTPS, Google sign-in or an external AI, add the settings of sections 3, 4, 6 and 7 to `~/dwello/.env` and paste the line again.
+- **Linux server:** Dwello accepts the setup and the sign-in only at the address in `PUBLIC_APP_URL`, which is `http://localhost:3000` by default. On a server you open from other devices, first create `~/dwello/.env` with the settings of section 7 (and of sections 3, 4 and 6 if you need them), then paste the line; it keeps the file. After a later change to `.env`, paste the line again.
 
 The script does sections 1, 2 and 5 below; read on for what it does by hand.
 
@@ -77,7 +77,7 @@ docker compose up -d
 docker logs dwello-backend
 ```
 
-The first start downloads the images (about 1 GB, without the AI model). Only the web app (port 3000) is reachable from outside the containers; the backend, the database and the AI stay inside Docker (#719).
+The first start downloads the images (about 4 GB, most of it the local AI's runtime, without its model). Only the web app (port 3000) is reachable from outside the containers; the backend, the database and the AI stay inside Docker (#719).
 
 The log of the backend shows the **Einrichtungscode** (setup code), e.g. `[setup] Einrichtungscode: K7QF-2MXD`. Open `http://localhost:3000`: Dwello shows «Dwello einrichten». The landlord enters the code, their e-mail address and a password twice (at least 8 characters, best a long one used nowhere else), chooses «Lokale KI auf diesem Server» or «Später entscheiden» (then no KI reads invoices and no model is downloaded until a KI is chosen under «Einstellungen» › «KI», section 6), and is then signed in. Only who knows the code can set Dwello up; a new code is made on each start until the account exists, and 5 wrong codes lock the setup for 15 minutes.
 
