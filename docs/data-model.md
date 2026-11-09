@@ -546,6 +546,8 @@ public_key   TEXT NOT NULL      -- X25519 public key derived from the code (base
 salt         TEXT NOT NULL      -- salt of the derivation (base64)
 confirmed_at TIMESTAMPTZ        -- the landlord typed the code again; Sicherungen use the newest confirmed row
 pending_code TEXT               -- the code shown on «Sicherung einrichten», only until the confirmation (0040)
+mac_key      TEXT               -- key derived from the code that signs each Sicherung (base64, 0046, #1373); none for a
+                                -- code confirmed before, whose Sicherungen stay unsigned
 created_at   TIMESTAMPTZ NOT NULL
 
 -- backup_runs: one row per run
@@ -558,7 +560,7 @@ error        TEXT               -- why it failed
 
 `backend/src/services/backup.service.ts` makes the Sicherung (a `pg_dump` and the keys, encrypted) daily, at start when
 the last one is older than a day, and before a migration; `/health` names it stale after a day without one. Migrations
-`0038_backups.sql`, `0040_backup_pending_code.sql`.
+`0038_backups.sql`, `0040_backup_pending_code.sql`, `0046_backup_mac_key.sql`.
 
 ---
 
