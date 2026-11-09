@@ -1,6 +1,6 @@
 import { question } from '../screenplay/actor';
 import { Count, DownloadedFile, Text } from '../screenplay/questions';
-import { annualReportCells, annualReportDownloads, annualReportHeading, annualReportHelp, annualReportNotes, annualReportPart } from '../targets/annual-report';
+import { annualReportBuildingOptions, annualReportCells, annualReportDownloads, annualReportHeading, annualReportHelp, annualReportNotes, annualReportPart } from '../targets/annual-report';
 
 // #1409: what the Jahresbericht shows, and what its CSV says
 export const annualReportCellsOf = (part: 'income' | 'costs') => Text.ofAll(annualReportCells(annualReportPart(part)));
@@ -21,3 +21,9 @@ export const csvAmountsOf = (positions: string[]) =>
 			.map((line) => line.split(';'));
 		return positions.map((position) => `${position} ${rows.find((row) => row.at(-2) === position)?.at(-1) ?? '(missing)'}`);
 	});
+
+/** The named buildings in the order the choice lists them; the list holds parallel scenarios' buildings too */
+export const buildingsInOrder = (names: string[]) =>
+	question('the order of the buildings to choose', async (actor) =>
+		(await actor.answer(Text.ofAll(annualReportBuildingOptions))).filter((label) => names.includes(label))
+	);

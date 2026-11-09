@@ -10,7 +10,8 @@ import { apartments, rentalContracts } from '../db/schema';
 import { advanceLines } from './advance-payment.service';
 import { roundToRappen } from './pdf-format';
 
-const sum = (values: number[]) => roundToRappen(values.reduce((total, value) => total + value, 0));
+/** Amounts added up, to the Rappen */
+export const sum = (values: number[]) => roundToRappen(values.reduce((total, value) => total + value, 0));
 
 export async function incomeOf(buildingId: string, start: string, end: string) {
 	const contracts = await db

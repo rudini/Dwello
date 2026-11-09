@@ -9,14 +9,12 @@
 import { and, asc, eq, gte, isNull, lte, min, ne, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { apartments, buildings, categories, invoices, rentalContracts } from '../db/schema';
-import { incomeOf } from './annual-income';
+import { incomeOf, sum } from './annual-income';
 import { reportReconciliation, validStatements } from './cost-reconciliation.service';
-import { roundToRappen } from './pdf-format';
 import { lastCompletedPeriod } from './period-types';
 import type { AnnualReportBody } from '../api/report';
 
 type Row = { categoryId: string | null; amount: number };
-const sum = (values: number[]) => roundToRappen(values.reduce((total, value) => total + value, 0));
 const group = (rows: Row[]) => ({ categories: rows, total: sum(rows.map(({ amount }) => amount)) });
 
 /** The amounts of the rows of one category added up, in the order of their first row */

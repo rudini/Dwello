@@ -1,7 +1,7 @@
 import type { DataTable } from 'playwright-bdd';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { annualReportCellsOf, annualReportDownloadCount, annualReportHelpOf, annualReportNotesText, annualReportTitle, csvAmountsOf } from '../questions/annual-report';
+import { annualReportCellsOf, annualReportDownloadCount, annualReportHelpOf, annualReportNotesText, annualReportTitle, buildingsInOrder, csvAmountsOf } from '../questions/annual-report';
 import { downloadedFileName, downloadedPdfText } from '../questions/download';
 import { chooseReportBuilding, downloadAnnualReport, openAnnualReport } from '../tasks/annual-report';
 
@@ -61,4 +61,9 @@ Then('heisst der angezeigte Jahresbericht {string}', async ({ verwalter, names }
 
 Then('bietet der Jahresbericht keine Datei zum Herunterladen an', async ({ verwalter }) => {
 	await verwalter.sees(annualReportDownloadCount).toBe(0);
+});
+
+Then('nennt der Jahresbericht die Gebäude {string} und {string} in dieser Reihenfolge', async ({ verwalter, names }, first: string, second: string) => {
+	const named = [first, second].map((building) => names.get(building)!);
+	await verwalter.sees(buildingsInOrder(named)).toEqual(named);
 });

@@ -92,10 +92,12 @@ Funktionalität: Auswertungen
     Und enthält das PDF des Jahresberichts "Dwello prüft nicht, ob die Mieter sie bezahlt haben"
     Und enthält das PDF des Jahresberichts "Abrechnungsperiode 01.01.2025 – 31.12.2025"
 
-  # Personas Helga P-1, Sven P-3, Marco P-5 (1409-2): eine Datei gehört zum angezeigten Bericht, nicht zur neuen Wahl
+  # Personas Helga P-1, Sven P-3, Marco P-5 (1409-2): die Gebäude nach Namen; eine Datei gehört zum angezeigten Bericht,
+  # nicht zur neuen Wahl
   Szenario: Der Jahresbericht bietet die Dateien erst für den angezeigten Bericht an
-    Angenommen das Gebäude "Bergsicht" in "Winterthur" existiert
+    Angenommen das Gebäude "Waldhof" in "Winterthur" existiert
     Wenn der Liegenschaftsverwalter den Jahresbericht 2025 des Gebäudes "Seeblick" öffnet
-    Und der Liegenschaftsverwalter für den Jahresbericht das Gebäude "Bergsicht" wählt
+    Dann nennt der Jahresbericht die Gebäude "Seeblick" und "Waldhof" in dieser Reihenfolge
+    Wenn der Liegenschaftsverwalter für den Jahresbericht das Gebäude "Waldhof" wählt
     Dann heisst der angezeigte Jahresbericht "Jahresbericht Seeblick 2025"
     Aber bietet der Jahresbericht keine Datei zum Herunterladen an

@@ -18,3 +18,4 @@ export const annualReportNotes = target('Hinweise des Jahresberichts', (page) =>
 // the heading of the report shown, and its download links
 export const annualReportHeading = target('Überschrift des Jahresberichts', (page) => page.getByTestId('annual-report-heading'));
 export const annualReportDownloads = target('Dateien des Jahresberichts', (page) => page.getByTestId(/^annual-report-(csv|pdf)$/));
+export const annualReportBuildingOptions = target('Gebäude zur Wahl', (page) => page.getByTestId('annual-report-building').locator('option'));
