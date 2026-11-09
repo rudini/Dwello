@@ -124,6 +124,21 @@ describe('Ablauf pro geänderter Route im Prüfbericht (#1273)', () => {
 		expect(d.nodes).toHaveLength(6);
 	});
 
+	it('erkennt Aufrufe über eine Konstante mit /api/v1 und Elysia-Routen mit dem Präfix /api/v1 allein', () => {
+		const t = tree(
+			{
+				[page]: "const API = `${BACKEND_URL}/api/v1`;\nfetch(`${API}/reports/1`);",
+				'backend/src/routes/reports.ts': "new Elysia({ prefix: '/api/v1' }).get('/reports/:id', x)"
+			},
+			[]
+		);
+		expect(flowDiagram(tree({}, []), t, page).mermaid).toContain('p1->>p2: /api/v1/reports (new)');
+	});
+
+	it('markiert bei einer neuen Route auch den Aufruf aus dem Browser als neu', () => {
+		expect(flowDiagram(tree({}, []), tree(files, imports), page).mermaid).toContain('p0->>p1: request (new)');
+	});
+
 	it('findet zu einer geänderten Elysia-Route die BFF-Dateien, die sie aufrufen', () => {
 		expect(flowsFor(tree(files, imports), [route])).toEqual([page]);
 		expect(flowsFor(tree(files, imports), ['src/lib/ui/Button.svelte'])).toEqual([]);

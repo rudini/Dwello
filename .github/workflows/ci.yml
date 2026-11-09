@@ -251,6 +251,7 @@ jobs:
         id: fitness
         if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
         run: |
+          set -o pipefail # the fitness result, not tee's, decides the step
           case "${{ github.event_name }}" in
             pull_request) mkdir -p build/review && REVIEW_DIR=build/review bun tools/fitness/fitness.ts --base "origin/${{ github.base_ref }}" --structure --format github | tee build/review/fitness.txt ;;
             push) bun tools/fitness/fitness.ts --base "${{ github.event.before }}" --format github ;;

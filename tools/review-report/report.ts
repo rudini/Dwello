@@ -74,13 +74,25 @@ const callKey = (c: Call) => `${c.from}\t${c.to}\t${c.label}`;
 function calls(t: Tree, bff: string): Call[] {
 	const helpers = [bff];
 	for (const f of helpers) for (const e of t.imports) if (e.from === f && e.to.startsWith('src/lib/server/') && !helpers.includes(e.to)) helpers.push(e.to);
-	const prefixes = [...new Set(helpers.flatMap((f) => [...(t.read(f) ?? '').matchAll(/\/api\/v1\/[a-z0-9-]+/g)].map((m) => m[0])))];
+	if (t.read(bff) === undefined) return [];
+	const prefixes = [...new Set(helpers.flatMap((f) => endpoints(t.read(f) ?? '')))];
 	return [{ from: 'Browser', to: bff, label: 'request' }, ...prefixes.flatMap((prefix) => backendCalls(t, bff, prefix))];
+}
+
+/** Backend prefixes a file calls: `/api/v1/<name>` written out, or `${API}/<name>` with a constant API that ends in /api/v1 */
+function endpoints(text: string): string[] {
+	const constants = [...text.matchAll(/const (\w+) = `[^`]*\/api\/v1`/g)].map((m) => m[1]);
+	const viaConstant = constants.flatMap((name) => [...text.matchAll(new RegExp(`\\$\\{${name}\\}/([a-z0-9-]+)`, 'g'))].map((m) => `/api/v1/${m[1]}`));
+	return [...[...text.matchAll(/\/api\/v1\/[a-z0-9-]+/g)].map((m) => m[0]), ...viaConstant];
 }
 
 /** The Elysia route with this prefix, its services and the schema tables each imports */
 function backendCalls(t: Tree, bff: string, prefix: string): Call[] {
-	const route = t.files.find((f) => f.startsWith('backend/src/routes/') && t.read(f)?.includes(`prefix: '${prefix}'`));
+	const routes = t.files.filter((f) => f.startsWith('backend/src/routes/'));
+	// an Elysia route with the prefix itself, or with the prefix /api/v1 alone and the rest in its paths
+	const route =
+		routes.find((f) => t.read(f)?.includes(`prefix: '${prefix}'`)) ??
+		routes.find((f) => t.read(f)?.includes("prefix: '/api/v1'") && t.read(f)?.includes(`'${prefix.slice('/api/v1'.length)}`));
 	if (!route) return [];
 	const services = t.imports.filter((e) => e.from === route && e.to.startsWith('backend/src/services/')).map((e) => e.to);
 	const tables = (service: string) => (/import \{([^}]*)\} from '\.\.\/db\/schema'/.exec(t.read(service) ?? '')?.[1] ?? '').split(',').map((n) => n.trim()).filter((n) => /^[a-z]\w*$/.test(n));
@@ -230,13 +242,15 @@ if (import.meta.main) {
 	const prod = (m: string) => /^(fe|bff|be|db|shared):/.test(m);
 	const graph = (side: string) => ({
 		edges: rows(side, 'imports-module.csv').filter((e) => prod(e.from) && prod(e.to)).map((e) => ({ from: e.from, to: e.to, weight: +e.file_edges })),
-		cycles: rows(side, 'cycles-module.csv').map((c) => c.modules)
+		cycles: rows(side, 'cycles-module.csv')
+			.map((c) => c.modules)
+			.filter((c) => c.split(' ').every(prod))
 	});
 	const [baseGraph, headGraph] = [graph('base'), graph('head')];
 	const modules = [...new Set([...rows('base', 'files.csv'), ...rows('head', 'files.csv')].filter((f) => changed.includes(f.path) && prod(f.module)).map((f) => f.module))];
 	const body = process.env.PR_BODY ?? '';
 	const labels: string[] = [];
-	for (const [, n] of body.matchAll(/\b(?:fixes|closes|resolves)\s+#(\d+)/gi)) {
+	for (const [, n] of body.matchAll(/\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?)\s+#(\d+)/gi)) {
 		const response = process.env.GITHUB_TOKEN ? await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/issues/${n}`, { headers: { authorization: `Bearer ${process.env.GITHUB_TOKEN}` } }) : undefined;
 		if (response?.ok) labels.push(...((await response.json()) as { labels: { name: string }[] }).labels.map((l) => `#${n} ${l.name}`));
 	}

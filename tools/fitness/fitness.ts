@@ -3,7 +3,7 @@
 import { spawnSync } from 'node:child_process';
 import { appendFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { ANCHORED_RE, ARCH_LAYERS, ROOT, STATUS_CMP, changedFiles, classify, git, median, quantile, tablesOf } from '../arch-baseline/lib';
 import { LIMITS, analyze, type Input, type Kpi } from '../arch-baseline/structure';
 
@@ -571,7 +571,7 @@ if (import.meta.main) {
 	if (base && args.includes('--structure')) {
 		// REVIEW_DIR: keep both measurements and the table for the reviewer report (tools/review-report, #1273)
 		const review = process.env.REVIEW_DIR;
-		const [before, after] = [structureAt(base, review && join(review, 'base')), structureAt('HEAD', review && join(review, 'head'))];
+		const [before, after] = [structureAt(base, review && resolve(review, 'base')), structureAt('HEAD', review && resolve(review, 'head'))];
 		errors.push(...structureFindings(before, after, fileChanges(git(['diff', '--name-status', '-M', base, 'HEAD'])), ratchet));
 		const table = `### Structure: base → pull request\n\n${structureTable(before, after)}\n`;
 		console.log(table);
