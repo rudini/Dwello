@@ -210,7 +210,9 @@ describe('HTML-Bericht (#1273)', () => {
 		expect(page).not.toContain('too many for the comment');
 		expect(page).toContain('| fe:d | fe:a | 0 | 1 |');
 		// HTML in the pull request text stays text: marked renders raw HTML escaped
-		expect(page).toContain("marked.use({ renderer: { html: (html) => html.replace(/</g, '&lt;') } });");
+		expect(page).toContain("html: (html) => html.replace(/</g, '&lt;')");
+		// a link only to http(s) or an anchor, so a javascript: link of a fork's text cannot run (review 1273-review-3 C-1)
+		expect(page).toContain("link: (href, title, text) => (/^(https?:\\/\\/|#)/i.test(href) ? `<a href=\"${href.replace(/\"/g, '&quot;')}\">${text}</a>` : text)");
 	});
 });
 

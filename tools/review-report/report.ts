@@ -205,7 +205,10 @@ export function html(r: Report): string {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script></head><body><main id="report"></main><script>
 const report = document.getElementById('report');
-marked.use({ renderer: { html: (html) => html.replace(/</g, '&lt;') } });
+marked.use({ renderer: {
+  html: (html) => html.replace(/</g, '&lt;'),
+  link: (href, title, text) => (/^(https?:\\/\\/|#)/i.test(href) ? \`<a href="\${href.replace(/"/g, '&quot;')}">\${text}</a>\` : text)
+} });
 report.innerHTML = marked.parse(${JSON.stringify(markdown).replace(/</g, '\\u003c')});
 for (const code of report.querySelectorAll('code.language-mermaid')) { const div = document.createElement('div'); div.className = 'mermaid'; div.textContent = code.textContent; code.parentElement.replaceWith(div); }
 mermaid.run();
