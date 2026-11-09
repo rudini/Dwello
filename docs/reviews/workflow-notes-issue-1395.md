@@ -1,0 +1,6 @@
+# Workflow notes: #1395
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, Workflow 1 («Texts a `fach-reviewer` report already gives word for word in all four languages need no review of their own: pin them in a test»), and agent `fach-reviewer` | The French texts of `docs/reviews/1395-fachreview-1.md` had plain spaces inside « » and before «:», while `messages/fr.json` uses U+00A0 there. I pinned and wrote them with U+00A0, so the pinned text is not the report's word for word. | The `fach-reviewer` agent writes French with U+00A0 inside « » and before : ; ! ?, as `messages/fr.json` does, or the rule says that typographic spaces may follow the language file. |
+| Agent `fach-reviewer` (scenario lines it proposes) | Its V-3 proposed the step «weist die Abrechnung darauf hin: "Neu berechnet ergibt sich für Eva Frei …"». The step compares against the page as is, and `seed.names` gives Eva Frei a 12-digit suffix there, so the line failed until it checked only the amount part. | The agent's prompt or definition says that names in a quoted page text carry the suffix of `seed.names` (`tests/e2e/CLAUDE.md`, «Isolation»), so a proposed check quotes the part after the name. |
