@@ -259,16 +259,26 @@ describe('KI in den Einstellungen', () => {
 	});
 
 	// #1372: Dwello hängt den Pfad an die Adresse selbst; Anmeldedaten, Abfrage oder Sprungmarke darin lenken die Anfrage um.
-	// Ein Anbieter im Internet bekommt den Schlüssel nur verschlüsselt (entschieden in #1372)
+	// Ein Anbieter im Internet bekommt den Schlüssel nur verschlüsselt (entschieden in #1372); Persona Anna 1372 P-1: der
+	// Code sagt, was an der Adresse nicht passt
 	it('verweigert eine Adresse mit Anmeldedaten, Abfrage, Sprungmarke oder ohne https im Internet beim Speichern und Prüfen', async () => {
-		const refused = [`${address}?x=1`, `${address}#x`, address.replace('://', '://nutzer:geheim@'), 'kein url'];
-		const publicHttp = ['http://api.example.ch/v1', 'http://8.8.8.8/v1', 'http://172.32.0.1/v1', 'http://[2001:db8::1]/v1'];
-		for (const baseUrl of [...refused, ...publicHttp, 'file:///etc/passwd']) {
+		const refused: [string, string][] = [
+			[`${address}?x=1`, 'KI_ADDRESS_SUFFIX'],
+			[`${address}#x`, 'KI_ADDRESS_SUFFIX'],
+			[address.replace('://', '://nutzer:geheim@'), 'KI_ADDRESS_CREDENTIALS'],
+			['http://api.example.ch/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://8.8.8.8/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://172.32.0.1/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://[2001:db8::1]/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['kein url', 'KI_ADDRESS_INVALID'],
+			['file:///etc/passwd', 'KI_ADDRESS_INVALID']
+		];
+		for (const [baseUrl, code] of refused) {
 			for (const send of [save, check]) {
 				const response = await send({ ...muster, baseUrl });
 
 				expect(response.status).toBe(422);
-				expect(await response.json()).toMatchObject({ code: 'KI_ADDRESS_INVALID' });
+				expect(await response.json()).toMatchObject({ code });
 			}
 		}
 		expect(requests).toEqual([]);

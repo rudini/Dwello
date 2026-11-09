@@ -116,18 +116,28 @@ describe('KI speichern', () => {
 		});
 	});
 
-	// #1372
-	it('nennt eine Adresse, die Dwello nicht verwenden kann, beim Feld der Adresse', async () => {
-		const { result } = runAction(actions.save, '', 422, { ...provider, baseUrl: 'https://api.example.ch/v1?x=1' }, addressInvalid);
+	// #1372, Persona Anna 1372 P-1: was an der Adresse nicht passt, beim Feld der Adresse
+	it.each([
+		[
+			'KI_ADDRESS_INVALID',
+			'Diese Adresse kann Dwello nicht verwenden. Geben Sie eine Adresse an, die mit https:// beginnt, zum Beispiel https://api.anbieter.ch/v1.'
+		],
+		[
+			'KI_ADDRESS_SUFFIX',
+			'Die Adresse enthält einen Zusatz ab «?» oder «#». Löschen Sie ihn; die Adresse der KI endet davor, zum Beispiel https://api.anbieter.ch/v1.'
+		],
+		[
+			'KI_ADDRESS_CREDENTIALS',
+			'Die Adresse enthält vor «@» Anmeldedaten. Löschen Sie diese samt «@». Den API-Schlüssel geben Sie im Feld «API-Schlüssel» ein.'
+		],
+		[
+			'KI_ADDRESS_NOT_HTTPS',
+			'Ein Anbieter im Internet erhält die Daten nur verschlüsselt. Schreiben Sie https:// statt http:// an den Anfang der Adresse.'
+		]
+	])('nennt bei %s beim Feld der Adresse, was nicht passt', async (code, text) => {
+		const { result } = runAction(actions.save, '', 422, provider, { ...addressInvalid, code });
 
-		expect(await result).toMatchObject({
-			data: {
-				errors: {
-					baseUrl:
-						'Diese Adresse kann Dwello nicht verwenden. Geben Sie die Adresse der KI an, die Ihnen der Anbieter nennt, zum Beispiel https://api.anbieter.ch/v1.'
-				}
-			}
-		});
+		expect(await result).toMatchObject({ data: { errors: { baseUrl: text } } });
 	});
 
 	it('sagt, wenn der Betreiber die KI festgelegt hat', async () => {

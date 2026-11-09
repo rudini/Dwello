@@ -148,19 +148,20 @@ Funktionalität: KI in den Einstellungen wählen
   Szenariogrundriss: Eine Adresse mit <Zusatz> wird weder gespeichert noch geprüft
     Angenommen Dwello ist eingerichtet
     Wenn der Liegenschaftsverwalter einen Anbieter der KI mit einer Adresse mit <Zusatz> speichert
-    Dann sieht der Liegenschaftsverwalter auf der Seite "KI" den Fehler "Diese Adresse kann Dwello nicht verwenden. Geben Sie die Adresse der KI an, die Ihnen der Anbieter nennt, zum Beispiel https://api.anbieter.ch/v1."
+    Dann sieht der Liegenschaftsverwalter auf der Seite "KI" den Fehler "<Fehler>"
     Wenn der Liegenschaftsverwalter die Datenschutzerklärung der frischen Installation liest
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Muster KI AG"
     Wenn der Liegenschaftsverwalter die Verbindung zu einer Adresse mit <Zusatz> prüft
-    Dann sagt die Prüfung der Verbindung "Diese Adresse kann Dwello nicht verwenden. Geben Sie die Adresse der KI an, die Ihnen der Anbieter nennt, zum Beispiel https://api.anbieter.ch/v1."
+    Dann sagt die Prüfung der Verbindung "<Fehler>"
 
+    # Persona Anna 1372 P-1: jede Meldung sagt, was an der Adresse nicht passt
     Beispiele:
-      | Zusatz           |
-      | Abfrage          |
-      | Sprungmarke      |
-      | Anmeldedaten     |
+      | Zusatz           | Fehler                                                                                                                       |
+      | Abfrage          | Die Adresse enthält einen Zusatz ab «?» oder «#». Löschen Sie ihn; die Adresse der KI endet davor, zum Beispiel https://api.anbieter.ch/v1. |
+      | Sprungmarke      | Die Adresse enthält einen Zusatz ab «?» oder «#». Löschen Sie ihn; die Adresse der KI endet davor, zum Beispiel https://api.anbieter.ch/v1. |
+      | Anmeldedaten     | Die Adresse enthält vor «@» Anmeldedaten. Löschen Sie diese samt «@». Den API-Schlüssel geben Sie im Feld «API-Schlüssel» ein. |
       # entschieden in #1372: im Internet nur verschlüsselt; im eigenen Netz auch http (#580)
-      | http im Internet |
+      | http im Internet | Ein Anbieter im Internet erhält die Daten nur verschlüsselt. Schreiben Sie https:// statt http:// an den Anfang der Adresse. |
 
   # Fachreview 580 F-3: die Prüfung schickt nur ein festes Testbild und einen festen Text, nie erfasste Daten
   Szenariogrundriss: Die Verbindung zur KI prüfen

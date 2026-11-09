@@ -140,12 +140,19 @@ async function keyFor(baseUrl: string, entered: string) {
 const OWN_NETWORK = /^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[::1\]$|\[f[cd])|^[^.[]+$/i;
 
 // Dwello appends the path to the address itself: credentials, a query or a fragment in it would send the request
-// elsewhere (#1372)
-function checkAddress(baseUrl: string) {
+// elsewhere (#1372); the code says what does not fit (persona Anna 1372 P-1)
+function addressProblem(baseUrl: string) {
 	const url = URL.parse(baseUrl);
-	const scheme = url?.protocol === 'https:' || (url?.protocol === 'http:' && OWN_NETWORK.test(url.hostname));
-	if (!url || !scheme || url.username || url.password || /[?#]/.test(baseUrl))
-		throw new CodedError('KI_ADDRESS_INVALID', 'Diese Adresse kann Dwello nicht verwenden.');
+	if (!url || !['http:', 'https:'].includes(url.protocol)) return 'KI_ADDRESS_INVALID';
+	if (/[?#]/.test(baseUrl)) return 'KI_ADDRESS_SUFFIX';
+	if (url.username || url.password) return 'KI_ADDRESS_CREDENTIALS';
+	if (url.protocol === 'http:' && !OWN_NETWORK.test(url.hostname)) return 'KI_ADDRESS_NOT_HTTPS';
+	return null;
+}
+
+function checkAddress(baseUrl: string) {
+	const problem = addressProblem(baseUrl);
+	if (problem) throw new CodedError(problem, 'Diese Adresse kann Dwello nicht verwenden.');
 }
 
 const locked = () => new CodedError('KI_SET_BY_OPERATOR', 'Die KI ist vom Betreiber festgelegt.');

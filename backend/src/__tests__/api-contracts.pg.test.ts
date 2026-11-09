@@ -1294,7 +1294,7 @@ describe('API-Verträge der Berichtigung', () => {
 		try {
 			const incomplete = await sendJson('PUT', '/api/v1/ki-settings', { ...provider, providerCountry: 'Deutschland' });
 			expect(drift(await sample('ki-settings-incomplete'), await incomplete.json())).toEqual([]);
-			const invalid = await sendJson('POST', '/api/v1/ki-settings/check', { ...provider, baseUrl: 'http://127.0.0.1:9/v1?x=1' });
+			const invalid = await sendJson('POST', '/api/v1/ki-settings/check', { ...provider, baseUrl: 'ftp://127.0.0.1:9/v1' });
 			expect(drift(await sample('ki-settings-address-invalid'), await invalid.json())).toEqual([]);
 			await sendJson('PUT', '/api/v1/ki-settings', { ...provider, provider: 'Muster KI AG', providerCountry: 'Deutschland', confirmed: true });
 			expect(drift(await sample('ki-settings'), await (await callApi('/api/v1/ki-settings')).json())).toEqual([]);
