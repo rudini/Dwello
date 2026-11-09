@@ -39,7 +39,7 @@ const query = (args: Args, names: string[]) => {
 	return set.length ? `?${new URLSearchParams(set)}` : '';
 };
 const one = (path: string, args: Args, names: string[] = []) =>
-	args.id ? `/api/v1/${path}/${args.id.replace(NOT_UUID, 'no-record')}` : `/api/v1/${path}${query(args, names)}`;
+	args.id ? `/api/v1/${path}/${String(args.id).replace(NOT_UUID, 'no-record')}` : `/api/v1/${path}${query(args, names)}`;
 const pageOf = (path: string) => (args: Args) => `/${path}${args.id ? `/${encodeURIComponent(args.id)}` : ''}`;
 
 // In the landlord's words (#817); the glossary terms of UBIQUITOUS_LANGUAGE.md

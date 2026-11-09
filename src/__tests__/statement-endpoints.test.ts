@@ -288,7 +288,7 @@ describe('GET /api/statements/[id]/pdf (PDF aus der Liste)', () => {
 				})
 		);
 		expect((await get()).headers.get('Content-Disposition')).toBe(
-			'attachment; filename="NK-1A2B3C4D-2025-0001.pdf"'
+			`attachment; filename="NK-1A2B3C4D-2025-0001.pdf"; filename*=UTF-8''NK-1A2B3C4D-2025-0001.pdf`
 		);
 	});
 

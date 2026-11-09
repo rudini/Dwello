@@ -308,6 +308,12 @@ describe('MCP-Server', () => {
 		expect({ isError: answer.isError, code: dataOf(answer).code }).toEqual({ isError: true, code: api.code });
 	});
 
+	it('lehnt eine ID, die eine Zahl ist, wie die API ab, statt abzustürzen', async () => {
+		const { key } = await createKey('Zahl als ID');
+		const answer = await callTool(key, 'tenants', { id: 5 });
+		expect({ isError: answer.isError, code: dataOf(answer).code }).toEqual({ isError: true, code: 'NOT_FOUND' });
+	});
+
 	it('kennt kein Werkzeug, das jedes Objekt hat', async () => {
 		const { key } = await createKey('Kein constructor');
 		const answer = await mcp(key, 'tools/call', { name: 'constructor', arguments: {} });

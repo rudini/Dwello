@@ -1,0 +1,15 @@
+# Review 3 (Schlussrunde) – #1377, Delta 06306671..5f4bb2f4
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Minor | backend/src/routes/mcp.ts:42 | `args.id.replace(NOT_UUID, …)` setzt eine Zeichenkette voraus; der Body wird nur gecastet (`as Call`), nicht geprüft. Ein KI-Programm, das `{"id": 5}` (oder ein Array/Objekt) schickt, löst einen TypeError aus. Den fängt `onError` in `backend/src/app.ts:75` nicht ab (nur `NOT_FOUND`/`VALIDATION`), also kommt HTTP 500 ohne JSON-RPC-Hülle zurück. Auf 06306671 hat `UUID.test(5)` die ID in einen String umgewandelt und mit NOT_FOUND abgelehnt, auf origin/main hat `encodeURIComponent(5)` die API angefragt. Behebung: `String(args.id).replace(…)`. |
+
+Keine Blocker/Major.
+
+Geprüft: Die MCP-Ersetzung durch «no-record» stimmt für jeden Pfad mit `args.id`. Alle sechs Werkzeuge bauen den Pfad über `one()`. `buildings`, `apartments`, `tenants`, `contracts`, `invoices` und `statements` haben je eine `GET /:id`-Route, deren Parameter auf `id` endet. `onTransform` (app.ts:85) wirft deshalb NotFoundError, und daraus wird `refusal('NOT_FOUND')`. Den zweiten Pfad von `statements` (`documents?statementId=`) baut `URLSearchParams` mit Kodierung, und die abgelehnte Statement-Antwort hat Vorrang (`findIndex`). `pageOf` kodiert weiterhin. Die Regex mit `s`-Flag ersetzt auch eine UUID mit angehängtem Zeilenumbruch, denn `$` greift ohne `m` nur am Ende. Der Lookup über `Object.hasOwn(TOOLS, String(name))` ist korrekt. Der neue MCP-Test ist gegen origin/main rot, weil `invoices/latest-keys` dort mit 200 antwortet. In den Hooks bekommt ein abgemeldeter `/api`-Aufruf weiterhin 401, weil `session` vor `resolve` antwortet. Ein angemeldeter Aufruf mit falscher ID bekommt 404, ohne `resolve`; das deckt `hooks.server.test.ts:166ff` ab. Keine öffentliche Route beginnt mit `/api/`, und unter `src/routes/api` gibt es keine Catch-all- oder optionalen Parameter. Die Header Vary, noindex, no-store und nosniff hängen weiterhin an der 404. `handleFetch` verhält sich wie vorher: ein fremder Origin wird ohne Prüfung und ohne Token weitergereicht, ein Backend-Aufruf mit falscher ID bekommt 404, sonst wird das JWT angehängt. Die Hooks-Tests decken das ab (Z. 22–35, 151–164). `file-proxy`: CSP `sandbox` steht jetzt auch auf Anhängen, was der Anforderung nicht widerspricht. `String(null)` ergibt «null» und damit attachment mit octet-stream. Die `params: {}` in den Test-Mocks entsprechen echten SvelteKit-Events. Der Diff enthält nichts, was nicht zur Anforderung gehört.
+
+## Nicht bestätigt
+
+- bun run lint, bun run check, vitest (629 Tests, die hooks.server importieren, dazu pdf-refusal, tests/unit/api-proxy, tools/fitness), backend `access-key.pg.test.ts` (24 grün, die zwei neuen MCP-Tests gegen origin/main rot), backend type-check, `bun run fitness -- --structure --base origin/main`: vom Aufrufer gemeldet.
+- E2E der berührten Features: läuft laut Aufrufer separat; kein Ergebnis gesehen.
+- Ob die Maintainability-Werte von fallow jetzt mindestens auf dem Stand der Basis liegen: nur über den gemeldeten Fitness-Lauf, nicht selbst gemessen.
