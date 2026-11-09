@@ -204,8 +204,7 @@ const sources = {
 };
 
 /** One file of the tenant's export by its source («document/<id>» …); null when there is none of the tenant's */
-export async function exportFile(tenantId: string, kind: string, id: string) {
-	const read = sources[kind as keyof typeof sources];
-	const [row] = read ? await read(tenantId, id) : [];
+export async function exportFile(tenantId: string, kind: keyof typeof sources, id: string) {
+	const [row] = await sources[kind](tenantId, id);
 	return row?.content ? Buffer.from(row.content, 'base64') : null;
 }

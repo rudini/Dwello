@@ -85,7 +85,7 @@ describe('GET /tenants/[id]/export', () => {
 		const reader = response.body!.getReader();
 
 		expect(calls).toHaveLength(1);
-		while (calls.length < 2) await reader.read();
+		while (calls.length < 2 && !(await reader.read()).done);
 		expect(calls).toHaveLength(2);
 	});
 });
