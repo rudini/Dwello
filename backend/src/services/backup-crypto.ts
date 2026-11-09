@@ -64,8 +64,8 @@ const keysOf = (code: string, salt: Buffer) => {
 
 const signatureOf = async (file: string, macKey: Buffer, end?: number) => {
 	const hmac = createHmac('sha256', macKey);
-	for await (const chunk of createReadStream(file, { end })) hmac.update(chunk);
-	return hmac.digest();
+	await pipeline(createReadStream(file, { end }), hmac);
+	return hmac.read() as Buffer;
 };
 
 const raw = (key: KeyObject) =>
@@ -115,8 +115,31 @@ export async function encryptStream(
 	if (macKey) await appendFile(out, await signatureOf(out, macKey));
 }
 
+const FORGED =
+	'Die Sicherung ist beschädigt, unvollständig oder nicht von Ihrer Dwello-Installation erstellt.';
+const REFUSED = 'Die Sicherung ist nicht signiert und wurde nicht wiederhergestellt.';
 const UNSIGNED =
 	'Diese Sicherung ist nicht signiert; Dwello kann nicht prüfen, wer sie erstellt hat. Stellen Sie sie nur wieder her, wenn sie aus Ihrem eigenen Sicherungsordner stammt.';
+
+/** The parts of a Sicherung; end: where the signature starts (the file's end for an unsigned one) */
+async function partsOf(file: string) {
+	const handle = await open(file);
+	const { size } = await handle.stat();
+	const head = Buffer.alloc(HEADER);
+	const tail = Buffer.alloc(TAG + SIGNATURE); // tag and signature, or the last bytes and the tag
+	await handle.read(head, 0, HEADER, 0);
+	await handle.read(tail, 0, tail.length, Math.max(0, size - tail.length));
+	await handle.close();
+	const format = [MAGIC, SIGNED].map(String).indexOf(head.subarray(0, MAGIC.length).toString());
+	const end = size - format * SIGNATURE;
+	if (format < 0 || end < HEADER + TAG) throw new Error('Die Datei ist keine Sicherung von Dwello.');
+	let at = MAGIC.length;
+	const [salt, recipient, ephemeral, iv] = [16, 32, 32, 12].map((length) =>
+		head.subarray(at, (at += length))
+	);
+	const tag = tail.subarray(end - size + SIGNATURE, end - size + SIGNATURE + TAG);
+	return { format, end, salt, recipient, ephemeral, iv, tag, signature: tail.subarray(TAG) };
+}
 
 /** Writes the content of a Sicherung to out; refuses another code, a changed file, and an unsigned one the operator does
  * not confirm after the warning (Decided (product owner) #1373: a code confirmed before #1373 writes unsigned ones) */
@@ -126,35 +149,15 @@ export async function decryptFile(
 	out: string,
 	confirmUnsigned: (warning: string) => boolean = () => false
 ) {
-	const handle = await open(file);
-	const { size } = await handle.stat();
-	const head = Buffer.alloc(HEADER);
-	if (size >= HEADER) await handle.read(head, 0, HEADER, 0);
-	const signed = head.subarray(0, SIGNED.length).equals(SIGNED);
-	const end = size - (signed ? SIGNATURE : 0);
-	const tag = Buffer.alloc(TAG);
-	const signature = Buffer.alloc(SIGNATURE);
-	if (end >= HEADER + TAG) {
-		await handle.read(tag, 0, TAG, end - TAG);
-		await handle.read(signature, 0, SIGNATURE, end);
-	}
-	await handle.close();
-	if ((!signed && !head.subarray(0, MAGIC.length).equals(MAGIC)) || end < HEADER + TAG)
-		throw new Error('Die Datei ist keine Sicherung von Dwello.');
-	let at = MAGIC.length;
-	const [salt, recipient, ephemeral, iv] = [16, 32, 32, 12].map((length) =>
-		head.subarray(at, (at += length))
-	);
+	const { format, end, salt, recipient, ephemeral, iv, tag, signature } = await partsOf(file);
 	const { privateKey, macKey } = keysOf(code, salt);
 	if (!raw(privateKey).equals(recipient))
 		throw new Error('Der Wiederherstellungscode passt nicht zu dieser Sicherung.');
 	// before a single byte is decrypted: the restore drops the database only after this
-	if (signed && !timingSafeEqual(await signatureOf(file, macKey, end - 1), signature))
-		throw new Error(
-			'Die Sicherung ist beschädigt, unvollständig oder nicht von Ihrer Dwello-Installation erstellt.'
-		);
-	if (!signed && !confirmUnsigned(UNSIGNED))
-		throw new Error('Die Sicherung ist nicht signiert und wurde nicht wiederhergestellt.');
+	const authentic = format
+		? timingSafeEqual(await signatureOf(file, macKey, end - 1), signature)
+		: confirmUnsigned(UNSIGNED);
+	if (!authentic) throw new Error([REFUSED, FORGED][format]);
 	const decipher = createDecipheriv(
 		'aes-256-gcm',
 		aesKey(diffieHellman({ privateKey, publicKey: publicKey(ephemeral) }), ephemeral, recipient),
