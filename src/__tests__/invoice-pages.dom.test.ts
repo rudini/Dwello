@@ -1328,6 +1328,22 @@ describe('Beleg einer Rechnung', () => {
 		expect(byTestId('invoice-delete-document-note')!.textContent).toBe('Der Beleg wird ebenfalls gelöscht.');
 	});
 
+	// #1410 (Fachreview 1410-1 M-1): bis wann die Rechnung aufzubewahren ist und warum; ohne Frist kein Hinweis
+	it('nennt beim Löschen das Ende der Aufbewahrungsfrist und die Rechtsgrundlage', () => {
+		show(InvoicePage, { data: { invoice: toInvoice(invoiceRow(invoiceContract)) } } as never);
+		click('invoice-delete-button');
+		expect(byTestId('invoice-delete-retention-note')!.textContent).toBe(
+			'Bewahren Sie die Originalrechnung bis zum 31.12.2036 auf, auf Papier oder als Datei. Wer zur Buchführung verpflichtet ist, muss Buchungsbelege 10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art. 958f OR). Auch als Privatperson brauchen Sie die Rechnung bis dann: Die Steuerbehörde kann bis 10 Jahre nach Ende der Steuerperiode ein Nachsteuerverfahren einleiten (Art. 152 DBG).'
+		);
+	});
+
+	it('nennt beim Löschen nach Ablauf der Aufbewahrungsfrist keine Frist', () => {
+		show(InvoicePage, { data: { invoice: toInvoice(invoiceRow({ ...invoiceContract, keepUntil: null })) } } as never);
+		click('invoice-delete-button');
+		expect(byTestId('invoice-delete-confirm')).not.toBeNull();
+		expect(byTestId('invoice-delete-retention-note')).toBeNull();
+	});
+
 	it('zeigt, was die KI beim Hochladen auf dem Beleg gesehen hat (Persona Anna; Fachreview V-3, V-4)', () => {
 		const beleg = { fileName: 'werke.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: true };
 		detail({ beleg });

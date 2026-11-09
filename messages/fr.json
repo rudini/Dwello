@@ -1210,6 +1210,7 @@
 	"invoices_beleg_how_replace": "Choisissez le nouveau fichier, puis « Remplacer la pièce justificative ».",
 	"invoices_beleg_how_add": "Choisissez le fichier, puis « Ajouter la pièce justificative ».",
 	"invoices_delete_beleg": "La pièce justificative est également supprimée.",
+	"invoices_delete_retention": "Conservez la facture originale jusqu’au {date}, sur papier ou sous forme de fichier. Quiconque est tenu de tenir une comptabilité doit conserver les pièces comptables pendant 10 ans à compter de la fin de l’exercice (art. 958f CO). En tant que particulier, vous en avez aussi besoin jusqu’à cette date : l’autorité fiscale peut introduire une procédure de rappel d’impôt jusqu’à 10 ans après la fin de la période fiscale (art. 152 LIFD).",
 	"invoices_date_decides": "Détermine dans quelle période de décompte tombe la facture.",
 	"invoices_service_period_days": "Seuls les jours compris dans la période de décompte comptent.",
 	"invoices_created": "Saisie",

@@ -1210,6 +1210,7 @@
 	"invoices_beleg_how_replace": "Scelga il nuovo file, poi «Sostituire il giustificativo».",
 	"invoices_beleg_how_add": "Scelga il file, poi «Aggiungere il giustificativo».",
 	"invoices_delete_beleg": "Anche il giustificativo viene eliminato.",
+	"invoices_delete_retention": "Conservi la fattura originale fino al {date}, su carta o come file. Chi è tenuto alla contabilità deve conservare i documenti contabili per 10 anni dalla fine dell’esercizio (art. 958f CO). Anche come privato le serve fino ad allora: l’autorità fiscale può avviare una procedura di ricupero d’imposta fino a 10 anni dopo la fine del periodo fiscale (art. 152 LIFD).",
 	"invoices_date_decides": "Determina in quale periodo di conteggio rientra la fattura.",
 	"invoices_service_period_days": "Contano solo i giorni nel periodo di conteggio.",
 	"invoices_created": "Registrata",

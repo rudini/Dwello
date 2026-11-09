@@ -30,6 +30,7 @@ export interface InvoiceWithDetails extends Invoice {
 	llmCategory: Pick<Category, Names> | null;
 	beleg: Pick<InvoiceDocument, 'fileName' | 'mimeType' | 'deductedAmount' | 'nonAllocableItems'> | null;
 	inPeriod?: InPeriod; // only in a list filtered by an Abrechnungsperiode (#454)
+	keepUntil: string | null; // the end of its Aufbewahrungsfrist while it runs (#1410)
 }
 
 /** The kinds of finding of the check for missing invoices per category (`GET /invoices/completeness`); the UI names each */

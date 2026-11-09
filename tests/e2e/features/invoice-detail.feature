@@ -217,17 +217,15 @@ Funktionalität: Rechnungsdetail
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnungen"
 
   # #1410 (Entscheid PO): 10 Jahre ab dem Ende der Abrechnungsperiode der Rechnung; Löschen bleibt nach der Bestätigung möglich
-  @wip
   Szenario: Vor dem Löschen einer Rechnung nennt Dwello die Aufbewahrungsfrist
     Angenommen die Rechnung von "Hauswart Huber" ist vom "2024-03-31"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Wenn der Liegenschaftsverwalter die Rechnung löschen will
-    Dann nennt die Bestätigung zum Löschen der Rechnung die Aufbewahrungsfrist "TEXT_FACHREVIEW mit 31.12.2034 und Art. 958f OR"
+    Dann nennt die Bestätigung zum Löschen der Rechnung die Aufbewahrungsfrist "Bewahren Sie die Originalrechnung bis zum 31.12.2034 auf, auf Papier oder als Datei. Wer zur Buchführung verpflichtet ist, muss Buchungsbelege 10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art. 958f OR). Auch als Privatperson brauchen Sie die Rechnung bis dann: Die Steuerbehörde kann bis 10 Jahre nach Ende der Steuerperiode ein Nachsteuerverfahren einleiten (Art. 152 DBG)."
     Wenn der Liegenschaftsverwalter das Löschen der Rechnung bestätigt
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
     Und die Rechnung von "Hauswart Huber" ist nicht mehr auffindbar
 
-  @wip
   Szenario: Nach Ablauf der Aufbewahrungsfrist nennt die Bestätigung keine Frist
     Angenommen die Rechnung von "Hauswart Huber" ist vom "2015-06-30"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"

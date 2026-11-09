@@ -1210,6 +1210,7 @@
 	"invoices_beleg_how_replace": "Choose the new file, then «Replace the supporting document».",
 	"invoices_beleg_how_add": "Choose the file, then «Add the supporting document».",
 	"invoices_delete_beleg": "The supporting document is deleted as well.",
+	"invoices_delete_retention": "Keep the original invoice until {date}, on paper or as a file. Anyone required to keep accounts must keep accounting vouchers for 10 years from the end of the financial year (Art. 958f CO). As a private person you also need it until then: the tax authority can open back-tax proceedings up to 10 years after the end of the tax period (Art. 152 DBG).",
 	"invoices_date_decides": "Decides which billing period the invoice falls into.",
 	"invoices_service_period_days": "Only the days within the billing period count.",
 	"invoices_created": "Recorded",

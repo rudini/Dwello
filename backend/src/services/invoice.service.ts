@@ -3,7 +3,9 @@
  * Business logic for invoice operations with LLM categorization
  */
 
-import { eq, sql, desc, and, gte, lte, ilike, isNotNull, isNull, or } from 'drizzle-orm';
+import { retention } from './invoice-retention';
+import { inPeriod, inPeriodOf } from './invoice-period';
+import { eq, sql, desc, and, gte, lte, ilike, isNotNull, or } from 'drizzle-orm';
 import { containing, db } from '../db/connection';
 import { recordAudit } from './audit-log.service';
 import {
@@ -19,10 +21,9 @@ import { validateInvoiceForUtilityStatement } from './utility-validation.service
 import { buildingExists } from './building.service';
 import { periodReadings } from './fuel-stock.service';
 import { getCategory } from './category.service';
-import { roundToRappen } from './pdf-format';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { checkedFile } from './document.service';
-import type { InPeriod, InvoiceWithDetails, LatestKey } from '../api/invoice';
+import type { InvoiceWithDetails, LatestKey } from '../api/invoice';
 
 /** An uploaded file for an invoice, Base64 encoded */
 /** A file for an invoice; read by the KI in «Rechnungen hochladen», with what it saw on it (#233) */
@@ -55,6 +56,7 @@ function selectWithDetails() {
 				name: buildings.name,
 				address: buildings.address
 			},
+			accountingPeriod: buildings.accountingPeriod, // for the Aufbewahrungsfrist (#1410)
 			category: {
 				id: categories.id,
 				name: categories.name,
@@ -161,6 +163,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 	// Transform results
 	const invoiceList: InvoiceWithDetails[] = results.map((row) => ({
 		...row.invoice,
+		keepUntil: retention(row.accountingPeriod, row.invoice),
 		building: row.building,
 		category: row.category,
 		distributionKey: row.distributionKey,
@@ -202,6 +205,7 @@ export async function getInvoice(id: string): Promise<InvoiceWithDetails | null>
 
 	return {
 		...result.invoice,
+		keepUntil: retention(result.accountingPeriod, result.invoice),
 		building: result.building,
 		category: result.category,
 		distributionKey: result.distributionKey,
@@ -555,35 +559,6 @@ export async function validateInvoice(id: string): Promise<{
 		description: invoice.description
 	});
 }
-
-const DAY = 86_400_000;
-const daysFrom = (start: string, end: string) => (Date.parse(end) - Date.parse(start)) / DAY + 1;
-
-/**
- * An invoice's part in a period: the days of its Leistungszeitraum within the period (without one, the whole period
- * when the Rechnungsdatum lies in it) and the amount of those days
- */
-export function inPeriod(
-	invoice: { amount: string; servicePeriodStart: string | null; servicePeriodEnd: string | null },
-	periodStart: string,
-	periodEnd: string
-): InPeriod {
-	const amount = parseFloat(invoice.amount);
-	if (!invoice.servicePeriodStart || !invoice.servicePeriodEnd) return { start: periodStart, end: periodEnd, amount, noPeriod: true as const };
-	const start = invoice.servicePeriodStart > periodStart ? invoice.servicePeriodStart : periodStart;
-	const end = invoice.servicePeriodEnd < periodEnd ? invoice.servicePeriodEnd : periodEnd;
-	const part = { start, end, amount: roundToRappen((amount * daysFrom(start, end)) / daysFrom(invoice.servicePeriodStart, invoice.servicePeriodEnd)) };
-	// a Leistungszeitraum reaching beyond the period: the receipt's dates and amount, so the tenant finds it (#241)
-	const beyond = start !== invoice.servicePeriodStart || end !== invoice.servicePeriodEnd;
-	return beyond ? { ...part, whole: { start: invoice.servicePeriodStart, end: invoice.servicePeriodEnd, amount } } : part;
-}
-
-// Rule 1: in the period by its Leistungszeitraum, without one by its Rechnungsdatum
-export const inPeriodOf = (periodStart: string, periodEnd: string) =>
-	or(
-		and(isNull(invoices.servicePeriodStart), gte(invoices.invoiceDate, periodStart), lte(invoices.invoiceDate, periodEnd)),
-		and(lte(invoices.servicePeriodStart, periodEnd), gte(invoices.servicePeriodEnd, periodStart))
-	);
 
 /**
  * Allocable invoices of a building for a period (for statement generation): those whose Leistungszeitraum overlaps it,
