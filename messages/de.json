@@ -1609,6 +1609,7 @@
 	"statements_drafts_busy": "Entwürfe werden erstellt …",
 	"statements_nothing": "Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu.",
 	"statements_resume": "Mit «Weiter» berechnet Dwello die Vorschau mit der neuen Rechnung.",
+	"statements_resume_invoice": "Mit «Weiter» berechnet Dwello die Vorschau neu, mit den Rechnungen, wie sie jetzt sind.",
 	"statements_draft_dropped_building_one": "Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt {number} «{step}».",
 	"statements_draft_dropped_building_many": "{count} Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat sie aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt {number} «{step}».",
 	"statements_draft_dropped_heating_profile": "Das Heizprofil aus Ihren Angaben gibt es nicht mehr. Wählen Sie im Schritt {number} «{step}» ein anderes.",

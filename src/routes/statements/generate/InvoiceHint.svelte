@@ -19,7 +19,7 @@
 		testid: string;
 	} = $props();
 	// saving or cancelling the edit leads back to the wizard (Persona Dr. Weber P-2, #452)
-	const back = '/statements/generate?schritt=3';
+	const back = '/statements/generate?schritt=3&from=invoice'; // #1314: the wizard says it recalculates, no new invoice
 </script>
 
 {#if buildings.length}

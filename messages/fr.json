@@ -1609,6 +1609,7 @@
 	"statements_drafts_busy": "Création des brouillons…",
 	"statements_nothing": "Choisissez une autre période de décompte ou d’autres immeubles. Pour recalculer un brouillon, choisissez « Recalculer » sur sa page.",
 	"statements_resume": "Avec « Continuer », Dwello calcule l’aperçu avec la nouvelle facture.",
+	"statements_resume_invoice": "Avec « Continuer », Dwello recalcule l’aperçu avec les factures telles qu’elles sont maintenant.",
 	"statements_draft_dropped_building_one": "Un immeuble de vos saisies n’existe plus. Dwello l’a retiré de la sélection. Vérifiez les immeubles à l’étape {number} « {step} ».",
 	"statements_draft_dropped_building_many": "{count} immeubles de vos saisies n’existent plus. Dwello les a retirés de la sélection. Vérifiez les immeubles à l’étape {number} « {step} ».",
 	"statements_draft_dropped_heating_profile": "Le profil de chauffage de vos saisies n’existe plus. Choisissez-en un autre à l’étape {number} « {step} ».",

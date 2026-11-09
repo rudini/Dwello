@@ -178,7 +178,7 @@
 	{splitKeys}
 	end={m.statements_split_keys_preview_end()}
 	testid="statement-preview-split-keys"
-	returnTo="/statements/generate?schritt=3"
+	returnTo="/statements/generate?schritt=3&from=invoice"
 />
 
 <InvoiceHint

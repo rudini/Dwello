@@ -163,3 +163,6 @@ export const recalculateNote = target('Hinweis zu «Neu berechnen» in der Wahl 
 export const runSummary = target('Zusammenfassung vor dem Erstellen', (page) => page.getByTestId('run-summary'));
 // read out while the server works, and the result once it is done (#664)
 export const wizardStatus = target('Statusmeldung des Assistenten', (page) => page.getByTestId('wizard-status'));
+
+// #1314: back from an invoice the preview named, why the wizard shows the step before the preview
+export const resumeNotice = target('Hinweis zur Rückkehr in den Assistenten', (page) => page.getByTestId('resume-notice'));
