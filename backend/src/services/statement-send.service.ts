@@ -8,7 +8,7 @@ import { createMailTransport, MailConfigError } from '../mail';
 import { CodedError } from './coded-error';
 import { getTypedConfig } from './config.service';
 import { createDocument } from './document.service';
-import { balanceText } from './pdf.service';
+import { balanceText } from './pdf-balance';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, utilityStatements, type Language } from '../db/schema';

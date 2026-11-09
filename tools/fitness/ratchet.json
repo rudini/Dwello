@@ -617,19 +617,14 @@
 	"fat": {
 		"files": {
 			"backend/src/db/schema.ts": 663,
-			"backend/src/routes/statements.ts": 506,
+			"backend/src/routes/statements.ts": 504,
 			"backend/src/services/calculation.service.ts": 450,
 			"backend/src/services/contract.service.ts": 533,
 			"backend/src/services/data-export.service.ts": 634,
 			"backend/src/services/invoice.service.ts": 552,
-			"backend/src/services/pdf.service.ts": 878,
 			"backend/src/services/statement.service.ts": 1021
 		},
 		"modules": {
-			"be:services/reminder": {
-				"files": 1,
-				"ce": 16
-			},
 			"be:services/statement": {
 				"files": 1,
 				"ce": 21
