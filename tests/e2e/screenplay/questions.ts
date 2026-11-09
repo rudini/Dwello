@@ -76,6 +76,13 @@ export const HiddenSideways = {
 			)
 		)
 };
+/** How many pixels the box itself scrolls sideways (not its parts); null when it is not there (#658) */
+export const ScrollsSideways = {
+	by: (target: Target) =>
+		about(target, 'how far it scrolls sideways:', (element) =>
+			single(element, (one) => one.evaluate((box) => box.scrollWidth - box.clientWidth, undefined, quick))
+		)
+};
 /** How many pixels the farthest part of a box reaches beyond the box's sides, or the box beyond the window's; 0 when
  *  everything shows within. Measured by bounding rectangles, so it reads alike in every browser (#1071) */
 export const ReachingOut = {

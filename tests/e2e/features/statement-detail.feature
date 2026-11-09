@@ -1767,3 +1767,11 @@ Funktionalität: Abrechnungsdetail
     Und das Browserfenster ist 1440 auf 900 Pixel gross
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
     Dann zeigt die Detailseite die ganze Kostenaufstellung, ohne seitlich zu verschieben
+
+  # #658 (Fallback-Review): wo das Feld der Kostenaufstellung 64rem breit ist, steht die Tabelle, und sie ist ganz zu sehen
+  Szenario: Im sehr breiten Fenster zeigt die Kostenaufstellung die Tabelle ganz
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "TV/Kabelanschluss" über "480" Franken vom "2024-06-30"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und das Browserfenster ist 1920 auf 900 Pixel gross
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Dann zeigt die Detailseite die Kostenaufstellung als Tabelle, ohne seitlich zu verschieben

@@ -378,3 +378,5 @@ Funktionalität: Rechnungsliste
       | Breite |
       | 640    |
       | 960    |
+      | 1440   |
+      | 1920   |

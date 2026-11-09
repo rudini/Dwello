@@ -4,6 +4,10 @@ export const statementStatus = target('Status der Abrechnung', (page) => page.ge
 export const costBreakdown = target('Kostenaufstellung', (page) => page.getByTestId('statement-cost-breakdown'));
 // A position as shown: a row of the table, or a card where the region is too narrow for the table (#658); the card's
 // first value is the category
+// #658: the table of the positions, a region that scrolls sideways when the table is wider than it
+export const costTableRegion = target('Tabelle der Kostenaufstellung', (page) =>
+	page.getByTestId('statement-cost-breakdown').getByRole('region').filter({ visible: true })
+);
 export const statementLineItem = (category: string) =>
 	target(`Position «${category}» der Abrechnung`, (page) =>
 		page

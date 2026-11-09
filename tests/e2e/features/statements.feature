@@ -281,3 +281,5 @@ Funktionalität: Nebenkostenabrechnungen
       | Breite |
       | 640    |
       | 960    |
+      | 1168   |
+      | 1440   |

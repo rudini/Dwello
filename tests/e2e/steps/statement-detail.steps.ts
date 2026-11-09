@@ -65,7 +65,8 @@ import {
 	newPdfStillToSend,
 	discontinuedNoteText,
 	sizeChangeNoteText,
-	detailCostsHiddenSideways
+	detailCostsHiddenSideways,
+	costTableScrollsBy
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -1027,4 +1028,9 @@ Then('nennt die Detailseite der Abrechnung zur neuen Fläche {string}', async ({
 // #658: the cost table switches to the line cards by the width of its region, so no column is cut
 Then('zeigt die Detailseite die ganze Kostenaufstellung, ohne seitlich zu verschieben', async ({ verwalter }) => {
 	await verwalter.sees(detailCostsHiddenSideways).toBe(0);
+});
+
+// #658: from a 64rem panel the table shows, and nothing of it scrolls out of view
+Then('zeigt die Detailseite die Kostenaufstellung als Tabelle, ohne seitlich zu verschieben', async ({ verwalter }) => {
+	await verwalter.sees(costTableScrollsBy).toBe(0);
 });

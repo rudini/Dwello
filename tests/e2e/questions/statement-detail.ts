@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Attribute, Count, Gap, HiddenSideways, HoldsFocus, Text, Value, ValueColumn, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Gap, HiddenSideways, HoldsFocus, ScrollsSideways, Text, Value, ValueColumn, Visibility } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
 	discontinuedNote,
@@ -11,6 +11,7 @@ import {
 	carryOverRow,
 	advanceDiffers,
 	costBreakdown,
+	costTableRegion,
 	statementAdvancePaid,
 	correctDialog,
 	declineCorrectionDialog,
@@ -201,5 +202,7 @@ export const paymentDone = Text.of(successToast);
 export const discontinuedNoteText = Text.of(discontinuedNote);
 export const sizeChangeNoteText = Text.of(sizeChangeNote); // #1301
 export const laterKeyInvoiceText = (date: string) => Text.of(laterKeyInvoice(date)); // #1309
+/** #658: how far the table of the positions scrolls sideways (null without a table shown); its sr-only caption does not count */
+export const costTableScrollsBy = ScrollsSideways.by(costTableRegion);
 /** #658: what the detail page's cost breakdown hides sideways; 0 when every column shows */
 export const detailCostsHiddenSideways = HiddenSideways.within(costBreakdown);
