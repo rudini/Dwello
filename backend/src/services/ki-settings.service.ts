@@ -114,16 +114,17 @@ export async function kiSettingsView() {
 	return { ...shown, apiKeyStored: apiKey !== '' };
 }
 
-export const trimmed = (input: KiInput) => ({
-	baseUrl: input.baseUrl?.trim().replace(/\/$/, '') ?? '',
-	apiKey: input.apiKey?.trim() ?? '',
-	model: input.model?.trim() ?? '',
-	provider: input.provider?.trim() ?? '',
-	providerCountry: input.providerCountry?.trim() ?? ''
+const trim = (value = '') => value.trim();
+const trimmed = (input: KiInput) => ({
+	baseUrl: trim(input.baseUrl).replace(/\/$/, ''),
+	apiKey: trim(input.apiKey),
+	model: trim(input.model),
+	provider: trim(input.provider),
+	providerCountry: trim(input.providerCountry)
 });
 
 /** The key to send to `baseUrl`: the one entered, else the stored one, but only to the address it was saved for */
-export async function keyFor(baseUrl: string, entered: string) {
+async function keyFor(baseUrl: string, entered: string) {
 	if (entered) return entered;
 	const row = await stored();
 	if (row?.mode !== 'provider' || !row.apiKeyEncrypted) return '';
@@ -151,12 +152,12 @@ function addressProblem(baseUrl: string) {
 	return null;
 }
 
-export function checkAddress(baseUrl: string) {
+function checkAddress(baseUrl: string) {
 	const problem = addressProblem(baseUrl);
 	if (problem) throw new CodedError(problem, 'Diese Adresse kann Dwello nicht verwenden.');
 }
 
-export const locked = () => new CodedError('KI_SET_BY_OPERATOR', 'Die KI ist vom Betreiber festgelegt.');
+const locked = () => new CodedError('KI_SET_BY_OPERATOR', 'Die KI ist vom Betreiber festgelegt.');
 
 export async function saveKiSettings(input: KiInput) {
 	if (llmConfig.byOperator) throw locked();
@@ -193,4 +194,50 @@ export async function saveKiSettings(input: KiInput) {
 	});
 	void loadModel({ ...llmConfig, local: false });
 	return kiSettingsView();
+}
+
+// «Verbindung prüfen» sends only this text and this image (a 1×1 PNG), never recorded data (domain review 580 F-3)
+const CHECK_TEXT = 'Verbindungstest von Dwello: Antworten Sie nur mit OK.';
+const CHECK_IMAGE =
+	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+/** Whether the entered provider answers, accepts the key and reads images; nothing is saved */
+export async function checkKiConnection(
+	input: KiInput
+): Promise<{ result: 'ok' | 'wrong-key' | 'unreachable' | 'no-images' }> {
+	if (llmConfig.byOperator) throw locked();
+	const { baseUrl, model, apiKey: entered } = trimmed(input);
+	checkAddress(baseUrl);
+	const apiKey = await keyFor(baseUrl, entered);
+	let response: Response;
+	try {
+		response = await fetch(new URL('chat/completions', `${baseUrl}/`), {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				...(apiKey && { Authorization: `Bearer ${apiKey}` })
+			},
+			body: JSON.stringify({
+				model,
+				messages: [
+					{
+						role: 'user',
+						content: [
+							{ type: 'text', text: CHECK_TEXT },
+							{ type: 'image_url', image_url: { url: CHECK_IMAGE } }
+						]
+					}
+				]
+			}),
+			signal: AbortSignal.timeout(llmConfig.timeout),
+			redirect: 'error'
+		});
+	} catch {
+		return { result: 'unreachable' };
+	}
+	if (response.status === 401 || response.status === 403) return { result: 'wrong-key' };
+	if (response.ok) return { result: 'ok' };
+	// only a refused request is about the image; a wrong address or model (404), no credit or too many requests, or a
+	// server error say nothing about it (code review 580 C-7, domain review 580 F-24)
+	return { result: response.status === 400 ? 'no-images' : 'unreachable' };
 }
