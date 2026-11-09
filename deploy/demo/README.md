@@ -77,6 +77,8 @@ docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
 deploy/demo/reset-demo.sh                       # loads the demo data the first time
 ```
 
+Without `OPERATOR_NAME` and `OPERATOR_CONTACT` in `deploy/demo/.env` the demo refuses to start: the privacy statement names the operator as controller, and the demo notice says whom to ask for an own installation (#1170).
+
 Then open https://demo.dwello.ch. The model runs on the VM's CPU: categorizing an invoice takes a while, and invoice data never leaves the VM.
 
 **Update** by hand: `git pull`, then the same `up -d --build` command, then `docker image prune -f` to remove the replaced images. Section 7 does this for every release.

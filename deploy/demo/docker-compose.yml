@@ -18,6 +18,9 @@ services:
     environment:
       # The demo notice on every page, its section in the help and in the privacy statement (#162, #675)
       - DEMO=on
+      # the demo refuses to start without its operator: the privacy statement names the controller, the notice its contact (#1170)
+      - OPERATOR_NAME=${OPERATOR_NAME:?set OPERATOR_NAME in deploy/demo/.env}
+      - OPERATOR_CONTACT=${OPERATOR_CONTACT:?set OPERATOR_CONTACT in deploy/demo/.env}
 
   backend:
     ports: !reset []
