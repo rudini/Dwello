@@ -8,7 +8,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { apartments, categories, distributionKeys, invoices, utilityStatements } from '../db/schema';
+import { apartments, buildings, categories, distributionKeys, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createDistributionKey, deleteDistributionKey } from '../services/distribution-key.service';
 import { createHeatingProfile, deleteHeatingProfile, updateHeatingProfile } from '../services/heating-profile.service';
@@ -261,6 +261,42 @@ describe('Versendete Abrechnung mit danach geänderten Werten', () => {
 		await otherApartment({ area: '140', rooms: '3.5', sizeFrom: '2025-07-01' });
 
 		expect((await changes(id)) as Correction).toMatchObject({ valuesChanged: false, correctionDue: false });
+	});
+
+	// Code-Review 1395-4 C-1: with #1410, an invoice deleted after its Aufbewahrungsfrist no longer makes a statement
+	// «nicht aktuell»; recalculating without it must not count as a change of an apartment or a key either
+	it('verlangt keine Berichtigung, wenn nur eine Rechnung nach ihrer Aufbewahrungsfrist gelöscht wurde', async () => {
+		const old = await createRental(`${token}-2014`, { startDate: '2014-01-01', endDate: '2014-12-31', monthlyAdvancePayment: '0' });
+		const [caretaker] = await db.select().from(categories).where(eq(categories.name, 'Caretaker'));
+		const [invoice] = await db
+			.insert(invoices)
+			.values({
+				buildingId: old.building,
+				categoryId: caretaker.id,
+				distributionKeyId: await perAreaKey(),
+				billingEntityName: 'Muster AG',
+				description: `Hauswart ${token}`,
+				amount: '732.00',
+				invoiceDate: '2014-12-31',
+				isValidUtilityCost: true
+			})
+			.returning();
+		const created = await generateStatement({
+			contractId: old.contract,
+			buildingId: old.building,
+			periodStart: '2014-01-01',
+			periodEnd: '2014-12-31',
+			managementFeePercent: 0
+		});
+		await db.update(utilityStatements).set({ status: 'sent', paymentDeadline: '2015-03-31' }).where(eq(utilityStatements.id, created.id));
+		await db.delete(invoices).where(eq(invoices.id, invoice.id));
+		await db.update(buildings).set({ updatedAt: new Date() }).where(eq(buildings.id, old.building));
+
+		const found = (await changes(created.id)) as Correction;
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, created.id));
+		await deleteStatement(created.id);
+		await old.remove();
+		expect(found).toMatchObject({ invoiceIds: [], valuesChanged: false, correctionDue: false });
 	});
 
 	it('nennt in der Übersicht die Aufgabe «Abrechnung berichtigen» mit dem Grund', async () => {

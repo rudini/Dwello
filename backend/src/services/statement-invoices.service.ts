@@ -108,16 +108,18 @@ function perPeriod(): Loaders {
 	};
 }
 
-// The invoices of a statement's period recorded, changed or deleted since it was created
-async function changedInvoices(statement: Located, load: Loaders): Promise<string[]> {
+// The invoices of a statement's period recorded, changed or deleted since it was created, and whether it billed one
+// deleted after its Aufbewahrungsfrist (#1410), which a recalculation can no longer take into account
+async function changedInvoices(statement: Located, load: Loaders) {
 	const positions = statement.lineItems;
 	const now = agreedIn(statement, await load.invoices(statement));
-	if (!known(positions)) return now.filter((invoice) => recordedAfter(invoice, statement)).map((invoice) => invoice.id);
+	if (!known(positions)) return { ids: now.filter((invoice) => recordedAfter(invoice, statement)).map((invoice) => invoice.id), expired: false };
 	const changed = now.filter((invoice) => !billedAsIs(positions, invoice)).map((invoice) => invoice.id);
 	const gone = positions
 		.flatMap((position) => position.invoices ?? [])
 		.filter((billed) => !billed.fuelStock && !now.some((invoice) => invoice.id === billed.id));
-	return [...changed, ...(await deletedWithinRetention(statement.building.id, gone)).map((billed) => billed.id)];
+	const kept = await deletedWithinRetention(statement.building.id, gone);
+	return { ids: [...changed, ...kept.map((billed) => billed.id)], expired: kept.length < gone.length };
 }
 
 type Stock = { categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string } | null;
@@ -199,11 +201,12 @@ function correctionOf(statement: StatementWithDetails, correctable: boolean, che
 async function changesOf(statement: StatementWithDetails | null, load: Loaders) {
 	if (!statement?.building) return null;
 	const located = statement as Located;
-	const invoiceIds = await changedInvoices(located, load);
+	const { ids: invoiceIds, expired } = await changedInvoices(located, load);
 	const fuelStock = await fuelStockChanged(located, load);
 	const keys = await uncalculableKeys(located, load);
 	const correctable = CORRECTED.includes(statement.status) && (invoiceIds.length > 0 || fuelStock || keys.length > 0);
-	const touched = !invoiceIds.length && !fuelStock && !keys.length && (await valuesTouched(located, load));
+	// Code-Review 1395-4 C-1: not when it billed an invoice deleted after its Aufbewahrungsfrist, which no longer counts (#1410)
+	const touched = !invoiceIds.length && !expired && !fuelStock && !keys.length && (await valuesTouched(located, load));
 	// a key that cannot be calculated: recalculating would split equally, so there is no Saldo to show (#1309)
 	const full = (correctable || touched) && !keys.length ? await load.full(located) : null;
 	const check = full ? await recalculation(full) : null;
@@ -244,7 +247,7 @@ export async function notUpToDate<S extends StatementWithDetails>(statements: S[
 		if (!s.building) return null;
 		if ((await uncalculableKeys(s as Located, load)).length) return 'key';
 		const changed =
-			(await changedInvoices(s as Located, load)).length > 0 ||
+			(await changedInvoices(s as Located, load)).ids.length > 0 ||
 			(await fuelStockChanged(s as Located, load)) ||
 			(s.status === 'draft' && draftOutdated(await changesOf(s, load)));
 		return changed ? 'changed' : null;
