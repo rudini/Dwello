@@ -8,7 +8,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { apartments, categories, distributionKeys, invoices } from '../db/schema';
+import { apartments, categories, distributionKeys, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createDistributionKey, deleteDistributionKey } from '../services/distribution-key.service';
 import { createHeatingProfile, deleteHeatingProfile, updateHeatingProfile } from '../services/heating-profile.service';
@@ -42,7 +42,10 @@ afterAll(async () => {
 const otherApartment = (values: object) => sendJson('PUT', `/api/v1/apartments/${other}`, values);
 
 async function clear() {
-	for (const id of statements.splice(0)) await deleteStatement(id);
+	for (const id of statements.splice(0)) {
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, id)); // deletable again
+		await deleteStatement(id);
+	}
 	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
 	await db.update(apartments).set({ area: '70', rooms: '3.5', earlierSizes: [], discontinuedFrom: null }).where(eq(apartments.id, other));
 }
@@ -209,5 +212,62 @@ describe('Entwürfe mit geänderten Werten beim Erstellen und Versenden', () => 
 		const query = `buildingId=${rental.building}&periodStart=2024-01-01&periodEnd=2024-12-31&managementFeePercent=0`;
 		const { statements: differing } = (await (await callApi(`/api/v1/statements/run-differences?${query}`)).json()) as { statements: { id: string }[] };
 		expect(differing.find((one) => one.id === id)).toMatchObject({ outdated: false, fuelStock: false, values: true });
+	});
+});
+
+// #1395 (PO): the same rule for a sent statement, through its correction (Berichtigung)
+describe('Versendete Abrechnung mit danach geänderten Werten', () => {
+	type Correction = { invoiceIds: string[]; valuesChanged: boolean; correctionDue: boolean };
+	async function sent(distributionKeyId?: string, paymentDeadline = '2099-12-31') {
+		const id = await draft(distributionKeyId);
+		await db.update(utilityStatements).set({ status: 'sent', paymentDeadline }).where(eq(utilityStatements.id, id));
+		return id;
+	}
+
+	it('verlangt nach einer danach korrigierten Fläche eine Berichtigung, mit dem Grund', async () => {
+		const id = await sent();
+		await otherApartment({ area: '140', rooms: '3.5' });
+
+		expect((await changes(id)) as Correction).toMatchObject({ invoiceIds: [], valuesChanged: true, correctionDue: true });
+	});
+
+	it('verlangt auch bei einer überfälligen Abrechnung eine Berichtigung', async () => {
+		const id = await sent(undefined, '2025-01-31');
+		await otherApartment({ area: '140', rooms: '3.5' });
+
+		expect((await changes(id)) as Correction).toMatchObject({ valuesChanged: true, correctionDue: true });
+	});
+
+	it('verlangt nach einer danach gelöschten leeren Wohnung des Gebäudes eine Berichtigung', async () => {
+		const gone = (await createApartment({ buildingId: rental.building, number: '2.03', floor: 2, area: '70', rooms: '3.5' })).id;
+		const id = await sent();
+		expect((await callApi(`/api/v1/apartments/${gone}`, { method: 'DELETE' })).ok).toBe(true);
+
+		expect(((await changes(id)) as Correction).correctionDue).toBe(true);
+	});
+
+	it('verlangt nach einer danach geänderten Formel des Verteilschlüssels eine Berichtigung', async () => {
+		await otherApartment({ area: '70', rooms: '5.5' });
+		const key = await createDistributionKey({ name: `Versandt ${token}`, nameDE: `Versandt ${token}`, type: 'custom', formula: '{units}' });
+		keys.push(key.id);
+		const id = await sent(key.id);
+		await sendJson('PUT', `/api/v1/distribution-keys/${key.id}`, { formula: '{rooms}' });
+
+		expect(((await changes(id)) as Correction).correctionDue).toBe(true);
+	});
+
+	it('verlangt keine Berichtigung, wenn die neue Fläche erst nach der Abrechnungsperiode gilt', async () => {
+		const id = await sent();
+		await otherApartment({ area: '140', rooms: '3.5', sizeFrom: '2025-07-01' });
+
+		expect((await changes(id)) as Correction).toMatchObject({ valuesChanged: false, correctionDue: false });
+	});
+
+	it('nennt in der Übersicht die Aufgabe «Abrechnung berichtigen» mit dem Grund', async () => {
+		const id = await sent();
+		await otherApartment({ area: '140', rooms: '3.5' });
+
+		const { statements: listed } = (await (await callApi('/api/v1/statements/outdated')).json()) as { statements: { id: string }[] };
+		expect(listed.find((one) => one.id === id)).toMatchObject({ status: 'sent', invoices: 0, values: true });
 	});
 });
