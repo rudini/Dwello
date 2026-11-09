@@ -6,6 +6,18 @@ Closes #
 
 <!-- The changed scenario in tests/e2e/features/; an app change without one needs a line "No scenario" + ": <reason>" (CI checks it). -->
 
+## Type
+
+<!-- One of: domain, product, bug (functional), or one ISO 25010 category: nfr:security, nfr:reliability, nfr:performance, nfr:usability, nfr:maintainability, nfr:portability, nfr:compatibility. A pull request from a fork closes a ready issue (Closes #n) and names its label. -->
+
+## Decisions
+
+<!-- Each decision taken: the decision, the alternative rejected, the reason. An architecture decision adds a new ADR in docs/architecture/adr/. -->
+
+## Risks
+
+<!-- What could break or behave differently, and for whom; "None" when nothing. -->
+
 ## Checked before opening
 
 - `bun run lint`, `bun run check` and `cd backend && bun run type-check` pass

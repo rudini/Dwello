@@ -1,5 +1,5 @@
 import { execFile, execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:http';
@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 const SCRIPT = fileURLToPath(new URL('./check-issues.mjs', import.meta.url));
 const proposed = '## Decided\n\nNothing yet\n\n## Proposed (confirm before starting)\n\n- a';
+const SECTIONS = '\n\n## Type\n\nnfr:maintainability\n\n## Decisions\n\n- A, not B: shorter\n\n## Risks\n\nNone\n';
 let close = () => {};
 afterEach(() => close());
 
@@ -17,11 +18,34 @@ afterEach(() => close());
 async function check(
 	open: object[],
 	listStatus = 200,
-	pull?: { number: number; body: string; cwd: string; status?: number; base?: string; issue?: object; script?: string }
+	pull?: {
+		number: number;
+		body: string;
+		cwd: string;
+		status?: number;
+		base?: string;
+		issue?: object;
+		script?: string;
+		sections?: string;
+		user?: string;
+		fork?: boolean;
+	}
 ) {
-	// the answer per path: the pull request's text, the list of open issues (one page), else an open issue
+	// the answer per path: the pull request (its text with the required sections unless a test sets them), the list of
+	// open issues (one page), else an open issue
 	const answer = (path: string, page: number): [number, unknown] => {
-		if (pull && path.endsWith(`/pulls/${pull.number}`)) return [pull.status ?? 200, { body: pull.body }];
+		if (pull && path.endsWith(`/pulls/${pull.number}`)) {
+			const repo = (name: string) => ({ repo: { full_name: name } });
+			return [
+				pull.status ?? 200,
+				{
+					body: `${pull.body}${pull.sections ?? SECTIONS}`,
+					user: { login: pull.user ?? 'rudini' },
+					head: repo(pull.fork ? 'someone/Dwello' : 'rudini/Dwello'),
+					base: repo('rudini/Dwello')
+				}
+			];
+		}
 		if (path.endsWith('/issues')) return [listStatus, page === 1 ? open : []];
 		return [200, pull?.issue ?? { state: 'open' }];
 	};
@@ -457,4 +481,65 @@ Then('sieht der Liegenschaftsverwalter nichts', async ({ verwalter }) => {
 		expect(result.code).toBe(1);
 		expect(result.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {liegenschaft}», used by tests/e2e/features/buildings.feature:3');
 	});
+});
+
+describe('Der Text des Pull Requests nennt Typ, Entscheide und Risiken (#1271)', () => {
+	const own = (sections: string, extra: object = {}) =>
+		check([], 200, { number: 5, body: 'Refs #1271', cwd: process.cwd(), sections, ...extra });
+	const sections = (type: string, decisions = '- A, not B: shorter', risks = 'None') =>
+		`\n\n## Type\n\n${type}\n\n## Decisions\n\n${decisions}\n\n## Risks\n\n${risks}\n`;
+
+	it('lässt einen eigenen Pull Request mit allen Abschnitten durch', async () => {
+		expect(await own(sections('bug'))).toMatchObject({ code: 0 });
+	});
+
+	it('meldet einen fehlenden Abschnitt', async () => {
+		const result = await own(sections('bug').replace(/## Risks[^]*/, ''));
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('The pull request text lacks the section «Risks»');
+	});
+
+	it('meldet einen leeren Abschnitt, auch wenn nur der Hinweis der Vorlage drin steht', async () => {
+		const result = await own(sections('bug', '<!-- decision, rejected alternative, reason -->'));
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('The section «Decisions» of the pull request text is empty');
+	});
+
+	it('meldet einen Typ, der keine Kategorie nennt', async () => {
+		const result = await own(sections('a refactoring'));
+		expect(result.out).toContain('«Type» names none of domain, product, bug or an nfr: category');
+	});
+
+	it('lässt Pull Requests von Dependabot ohne Abschnitte durch', async () => {
+		expect(await own('', { user: 'dependabot[bot]' })).toMatchObject({ code: 0 });
+	});
+
+	const fork = (body: string, issue: object, type = 'bug') =>
+		check([], 200, { number: 5, body, cwd: process.cwd(), sections: sections(type), fork: true, issue });
+	const ready = { state: 'open', labels: [{ name: 'bug' }] };
+
+	it('meldet einen Fork, der kein Issue schliesst, und einen, dessen Issue nicht bereit ist', async () => {
+		expect((await fork('Refs #7', ready)).out).toContain('A pull request from a fork closes an issue (Closes #<n>)');
+		const deciding = { state: 'open', labels: [{ name: 'bug' }, { name: 'needs-decision' }] };
+		expect((await fork('Closes #7', deciding)).out).toContain('#7 is not ready: it is labelled needs-decision');
+		const closed = { state: 'closed', labels: [{ name: 'bug' }] };
+		expect((await fork('Closes #7', closed)).out).toContain('#7 is not ready: it is closed');
+		const two = { state: 'open', labels: [{ name: 'bug' }, { name: 'nfr:security' }] };
+		expect((await fork('Closes #7', two)).out).toContain('#7 is not ready: it has 2 type labels, not one');
+	});
+
+	it('meldet einen Fork, dessen Typ nicht zum Label des Issues passt, und lässt den passenden durch', async () => {
+		const result = await fork('Closes #7', ready, 'nfr:usability');
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('«Type» says nfr:usability, but #7 is labelled bug');
+		expect(await fork('Closes #7', ready)).toMatchObject({ code: 0 });
+	});
+});
+
+// the template's sections are the ones the check asks for: a text left as the template is red for being empty
+it('meldet die leeren Abschnitte der Vorlage', async () => {
+	const template = readFileSync(fileURLToPath(new URL('../../.github/pull_request_template.md', import.meta.url)), 'utf8');
+	const result = await check([], 200, { number: 5, body: template, cwd: process.cwd(), sections: '' });
+	for (const name of ['Type', 'Decisions', 'Risks'])
+		expect(result.out).toContain(`The section «${name}» of the pull request text is empty`);
 });

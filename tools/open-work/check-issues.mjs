@@ -43,22 +43,45 @@ const get = async (path) => {
 	}
 	return response;
 };
-/** The pull request's text as it is now; an unreadable one stops the run, as it would switch its checks off */
-async function textOf(number) {
+/** The pull request as it is now; an unreadable one stops the run, as it would switch its checks off */
+async function pullOf(number) {
 	const response = await get(`pulls/${number}`);
 	if (!response.ok) {
 		console.error(`Cannot read pull request #${number} (HTTP ${response.status})`);
 		process.exit(1);
 	}
-	return (await response.json()).body ?? '';
+	return response.json();
 }
-const prBody =
-	process.env.PR_NUMBER && process.env.GITHUB_TOKEN ? await textOf(process.env.PR_NUMBER) : (process.env.PR_BODY ?? '');
+const pull =
+	process.env.PR_NUMBER && process.env.GITHUB_TOKEN ? await pullOf(process.env.PR_NUMBER) : { body: process.env.PR_BODY };
+const prBody = pull.body ?? '';
 
 const failures = [];
 const closing = [...prBody.matchAll(/\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?)\s+#(\d+)/gi)];
 for (const [, n] of closing) {
 	if (refs.has(n)) failures.push(`This pull request closes #${n}, but markers still name it: ${refs.get(n).join(', ')}`);
+}
+
+// The text says what the change is, what was decided and what may break (#1271); Dependabot's pull requests are exempt.
+// A pull request from a fork closes a ready issue with one type label, and its «Type» names that label.
+const typeLabel = /^(domain|product|bug|nfr:(security|reliability|performance|usability|maintainability|portability|compatibility))$/;
+if (pull.user && pull.user.login !== 'dependabot[bot]') {
+	const sections = Object.fromEntries(
+		prBody
+			.split(/^##[ \t]+/m)
+			.slice(1)
+			.map((part) => [part.split('\n')[0].trim(), part.slice(part.indexOf('\n') + 1).replace(/<!--[^]*?-->/g, '').trim()])
+	);
+	for (const name of ['Type', 'Decisions', 'Risks']) {
+		if (sections[name] === undefined) failures.push(`The pull request text lacks the section «${name}» (.github/pull_request_template.md)`);
+		else if (!sections[name]) failures.push(`The section «${name}» of the pull request text is empty`);
+	}
+	const type = (sections.Type ?? '').match(/\b(?:domain|product|bug|nfr:[a-z]+)\b/g)?.find((word) => typeLabel.test(word));
+	if (sections.Type && !type) failures.push('«Type» names none of domain, product, bug or an nfr: category (ISO 25010)');
+	if (pull.head?.repo?.full_name !== pull.base?.repo?.full_name) {
+		if (!closing.length) failures.push('A pull request from a fork closes an issue (Closes #<n>) that is ready');
+		for (const [, n] of closing) failures.push(...(await readiness(n, type)));
+	}
 }
 
 // `No scenario: <reason>` in the pull request text where none applies, e.g. a refactoring without new behaviour
@@ -202,6 +225,19 @@ function examplesOnly(lines, after, body) {
 	while (/^\s*\|/.test(lines[row])) row--;
 	const [heading, ...rows] = /^\s*Beispiele:/.test(body[0]) ? body : [lines[row], ...body];
 	return /^\s*Beispiele:/.test(heading) && rows.every((line) => /^\s*\|/.test(line));
+}
+
+/** Why issue `n` is no ready issue for a pull request from a fork whose «Type» is `type` (#1271) */
+async function readiness(n, type) {
+	const response = await get(`issues/${n}`);
+	if (!response.ok) return [`#${n} is not ready: it is missing (HTTP ${response.status})`];
+	const issue = await response.json();
+	const names = (issue.labels ?? []).map((label) => label.name);
+	const types = names.filter((name) => typeLabel.test(name));
+	if (issue.state !== 'open') return [`#${n} is not ready: it is ${issue.state}`];
+	if (names.includes('needs-decision')) return [`#${n} is not ready: it is labelled needs-decision`];
+	if (types.length !== 1) return [`#${n} is not ready: it has ${types.length} type labels, not one`];
+	return type === types[0] ? [] : [`«Type» says ${type ?? 'nothing'}, but #${n} is labelled ${types[0]}`];
 }
 
 /** Whether a package manifest runs its checks differently: its `scripts` changed, or it cannot be read (fails closed) */
