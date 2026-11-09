@@ -126,10 +126,12 @@
 {#if statement.lineItems.length === 0}
 	<p class="text-ink-muted">{m.statements_no_lines()}</p>
 {:else}
-	<!-- A narrow region (and stacked pages at every width) gets the lines one below the other, every amount in view -->
+	<!-- A narrow region (and stacked pages at every width) gets the lines one below the other, every amount in view;
+	     a position is keyed by category and key, which a recalculation keeps: its new ids would replace each card, and
+	     WebKit, without a scroll anchor, moved the page by the card for a moment (#1366) -->
 	<div class="@container">
 		<ul class="flex flex-col gap-4 {shown.list}" aria-label={m.statements_lines()}>
-			{#each statement.lineItems as item (item.id)}
+			{#each statement.lineItems as item (`${item.categoryId}/${item.distributionKeyId}`)}
 				<li class="rounded-panel border border-line p-4" data-testid="statement-line-card">
 					<dl class="grid grid-cols-2 gap-x-4 gap-y-2 tabular-nums">
 						<dt class="text-ink-muted">{m.buildings_category()}</dt>
@@ -158,7 +160,7 @@
 
 		<div class={shown.table}>
 			<Table caption={m.statements_lines()} captionHidden {columns}>
-				{#each statement.lineItems as item (item.id)}
+				{#each statement.lineItems as item (`${item.categoryId}/${item.distributionKeyId}`)}
 					<tr data-testid="statement-line-item">
 						<td class="text-ink">{item.categoryName}</td>
 						<td class="text-ink-muted">{item.distributionKeyName}</td>
