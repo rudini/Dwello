@@ -17,13 +17,19 @@
 </script>
 
 <p>{m.invoices_delete_text({ name: invoice.billingEntity, amount: formatCurrency(invoice.amount) })}</p>
+<!-- #1410: until when to keep it and why; a wertvermehrende Investition until the sale (Fachreview 1410-1 V-2) -->
 {#if invoice.keepUntil}
-	<p data-testid="invoice-delete-retention-note">{m.invoices_delete_retention({ date: formatDate(invoice.keepUntil) })}</p>
+	<p data-testid="invoice-delete-retention-note">
+		{invoice.keepUntil === 'sale'
+			? m.invoices_delete_retention_investment()
+			: m.invoices_delete_retention({ date: formatDate(invoice.keepUntil) })}
+	</p>
 {/if}
 {#if invoice.beleg}
 	<p data-testid="invoice-delete-document-note">{m.invoices_delete_beleg()}</p>
 {/if}
-{#if billedIn?.length}
+<!-- after its Aufbewahrungsfrist no statement is to correct (Fachreview 1410-1 V-3) -->
+{#if billedIn?.length && invoice.keepUntil !== null}
 	<BilledWarning periods={billedIn} {statements}>
 		<p data-testid="invoice-delete-billed-text">{m.invoices_delete_billed_text()}</p>
 		{#if invoice.beleg}

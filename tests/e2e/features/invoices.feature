@@ -382,7 +382,6 @@ Funktionalität: Rechnungsliste
       | 1920   |
 
   # #1410 (Entscheid PO): «Behalten» beendet die Aufgabe für dieses Gebäude und diese Abrechnungsperiode, wie «Als geprüft markieren» (#459)
-  @wip
   Szenario: Rechnungen nach Ablauf der Aufbewahrungsfrist behalten
     Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
     Und die Rechnung von "Hauswart Huber" ist vom "2014-03-31"

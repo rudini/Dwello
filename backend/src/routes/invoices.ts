@@ -128,7 +128,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 	})
 	// The key the invoice form proposes per building and category (#379)
 	// #1410: the Abrechnungsperioden whose invoices may be deleted, and «Behalten» of one
-	.get('/retention', () => expiredInvoicePeriods())
+	.get('/retention', async () => ({ periods: await expiredInvoicePeriods() }))
 	.post(
 		'/retention/kept',
 		async ({ body, set }) => {

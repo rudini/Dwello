@@ -387,14 +387,12 @@ Funktionalität: Übersicht
     Und erklärt die Übersicht bei den Kennzahlen "Aufgehoben" mit "Die Wohnung gibt es ab dem Tag unter «Aufgehoben ab» nicht mehr; ab diesem Tag kann sie nicht vermietet werden."
 
   # #1410 (Entscheid PO): nach Ablauf der Aufbewahrungsfrist eine Aufgabe je Gebäude und Abrechnungsperiode
-  @wip
   Szenario: Die Übersicht nennt Rechnungen nach Ablauf der Aufbewahrungsfrist
     Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung" in der Kategorie "Hauswart" in Rechnung
     Und die Rechnung von "Hauswart Huber" ist vom "2014-03-31"
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann sagt die Aufgabe "Rechnungen 2014 von Seeblick können gelöscht werden" "Die Aufbewahrungsfrist von 1 Rechnung dieser Abrechnungsperiode endete am 31.12.2024."
 
-  @wip
   Szenario: Aufgabe führt zu den Rechnungen nach Ablauf der Aufbewahrungsfrist
     Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung" in der Kategorie "Hauswart" in Rechnung
     Und die Rechnung von "Hauswart Huber" ist vom "2014-03-31"
@@ -403,7 +401,6 @@ Funktionalität: Übersicht
     Dann zeigt die Rechnungsliste die Rechnungen der Abrechnungsperiode vom "2014-01-01" bis "2014-12-31" im Gebäude "Seeblick"
 
   # #1410: die Aufgabe endet, sobald die Rechnungen gelöscht sind
-  @wip
   Szenario: Gelöschte Rechnungen nennt die Übersicht nicht mehr zum Löschen
     Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung" in der Kategorie "Hauswart" in Rechnung
     Und die Rechnung von "Hauswart Huber" ist vom "2014-03-31"

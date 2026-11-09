@@ -4,8 +4,11 @@ import { insertInvoice, invoicedBuilding } from './helpers/records';
 import { sendJson } from './helpers/auth';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { invoices } from '../db/schema';
+import { categories, invoices } from '../db/schema';
 import { createBuilding, deleteBuilding } from '../services/building.service';
+import { generateStatement } from '../services/statement-generation.service';
+import { deleteStatement } from '../services/statement.service';
+import { createRental } from './helpers/rental';
 
 // #1410: the invoice names until when it must be kept, for the confirmation to delete it
 describe('Aufbewahrungsfrist einer Rechnung', () => {
@@ -13,9 +16,9 @@ describe('Aufbewahrungsfrist einer Rechnung', () => {
 	afterAll(async () => {
 		for (const remove of removals) await remove();
 	});
-	const keepUntilOf = async (invoiceDate: string) => {
+	const keepUntilOf = async (invoiceDate: string, categoryId?: string) => {
 		const name = `Aufbewahrung ${crypto.randomUUID()}`;
-		removals.push(await invoicedBuilding(name, { invoiceDate }));
+		removals.push(await invoicedBuilding(name, { invoiceDate, ...(categoryId && { categoryId }) }));
 		const { invoices } = (await (
 			await callApi(`/api/v1/invoices?search=${encodeURIComponent('Muster AG')}&limit=1000`)
 		).json()) as {
@@ -35,7 +38,15 @@ describe('Aufbewahrungsfrist einer Rechnung', () => {
 	it('GET /invoices/:id nennt nach Ablauf der Aufbewahrungsfrist kein Ende mehr', async () => {
 		expect(await keepUntilOf('2015-06-30')).toBeNull();
 	});
+
+	// Fachreview 1410-1 V-2 (Entscheid PO): sie belegen die Anlagekosten bei der Grundstückgewinnsteuer
+	it('GET /invoices/:id nennt bei wertvermehrenden Investitionen den Verkauf des Gebäudes', async () => {
+		expect(await keepUntilOf('2015-06-30', await investments())).toBe('sale');
+	});
 });
+
+const investments = async () =>
+	(await db.select().from(categories).where(eq(categories.name, 'Capital Improvements')))[0].id;
 
 // #1410 (Entscheid PO): je Gebäude und Abrechnungsperiode eine Aufgabe, sobald die Aufbewahrungsfrist vorbei ist
 describe('Rechnungen nach Ablauf der Aufbewahrungsfrist', () => {
@@ -48,9 +59,9 @@ describe('Rechnungen nach Ablauf der Aufbewahrungsfrist', () => {
 		count: number;
 	};
 	const expired = async (buildingId: string) =>
-		((await (await callApi('/api/v1/invoices/retention')).json()) as Expired[]).filter(
-			(p) => p.buildingId === buildingId
-		);
+		(
+			(await (await callApi('/api/v1/invoices/retention')).json()) as { periods: Expired[] }
+		).periods.filter((p) => p.buildingId === buildingId);
 	const removals: (() => Promise<void>)[] = [];
 	afterAll(async () => {
 		for (const remove of removals) await remove();
@@ -97,5 +108,59 @@ describe('Rechnungen nach Ablauf der Aufbewahrungsfrist', () => {
 		});
 		expect(kept.status).toBe(200);
 		expect((await expired(id)).map((p) => p.start)).toEqual(['2013-01-01']);
+	});
+
+	it('zählt Rechnungen für wertvermehrende Investitionen nicht', async () => {
+		const { id } = await building();
+		await insertInvoice(id, {
+			invoiceDate: '2014-03-31',
+			categoryId: await investments(),
+			isValidUtilityCost: false
+		});
+		await insertInvoice(id, { invoiceDate: '2013-03-31' });
+		expect((await expired(id)).map((p) => [p.start, p.count])).toEqual([['2013-01-01', 1]]);
+	});
+});
+
+// Fachreview 1410-1 V-3 (Entscheid PO): wer nach der Aufbewahrungsfrist löscht, macht alte Abrechnungen nicht «nicht aktuell»
+describe('Gelöschte Rechnung nach Ablauf der Aufbewahrungsfrist', () => {
+	let rental: Awaited<ReturnType<typeof createRental>>;
+	const statements: string[] = [];
+	afterAll(async () => {
+		for (const id of statements) await deleteStatement(id);
+		await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+		await rental.remove();
+	});
+	const changed = async (id: string) =>
+		(
+			(await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as {
+				invoiceIds: string[];
+			}
+		).invoiceIds;
+	const billedAndDeleted = async (year: number) => {
+		await insertInvoice(rental.building, { invoiceDate: `${year}-12-31` });
+		const { id } = await generateStatement({
+			contractId: rental.contract,
+			buildingId: rental.building,
+			periodStart: `${year}-01-01`,
+			periodEnd: `${year}-12-31`,
+			managementFeePercent: 0
+		});
+		statements.push(id);
+		await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+		return id;
+	};
+
+	it('macht die Abrechnung, die sie abrechnete, nicht «nicht aktuell»', async () => {
+		rental = await createRental(crypto.randomUUID(), {
+			startDate: '2014-01-01',
+			endDate: '2024-12-31',
+			monthlyAdvancePayment: '0'
+		});
+		expect(await changed(await billedAndDeleted(2014))).toEqual([]);
+	});
+
+	it('macht eine Abrechnung innerhalb der Aufbewahrungsfrist weiter «nicht aktuell»', async () => {
+		expect(await changed(await billedAndDeleted(2024))).toHaveLength(1);
 	});
 });

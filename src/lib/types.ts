@@ -278,7 +278,7 @@ export type Invoice = Pick<
 	};
 
 export interface InvoiceWithDetails extends Invoice {
-	keepUntil?: string | null; // the end of its Aufbewahrungsfrist while it runs (#1410)
+	keepUntil?: string | 'sale' | null; // the end of its Aufbewahrungsfrist while it runs (#1410)
 	buildingName: string;
 	buildingAddress: string;
 	category?: Category & { key?: string; predefined?: boolean }; // key and predefined name its reason (#292)

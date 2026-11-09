@@ -36,6 +36,7 @@ import {
 import validationRefused from '../../tests/contracts/validation-refused.json';
 import type { InvoiceWithDetails } from '$lib/types';
 import invoiceContract from '../../tests/contracts/invoice.json';
+import retention from '../../tests/contracts/invoice-retention.json';
 import { invoiceRow } from './helpers/invoice';
 import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 
@@ -114,6 +115,53 @@ describe('Rechnungsliste', () => {
 				defaultDistributionKeyId: ''
 			}
 		} as never);
+
+	// #1410 (Entscheid PO): «Behalten» der Rechnungen einer Abrechnungsperiode nach Ablauf der Aufbewahrungsfrist
+	describe('Abrechnungsperiode nach Ablauf der Aufbewahrungsfrist', () => {
+		const withRetention = (form: object | null = null) =>
+			show(InvoicesPage, {
+				data: {
+					invoices: [],
+					total: 0,
+					page: 1,
+					pageSize: 20,
+					buildings,
+					categories,
+					years: [],
+					distributionKeys: [],
+					defaultDistributionKeyId: '',
+					retention: { ...retention.periods[0], period: '2014' }
+				},
+				form
+			} as never);
+
+		it('sagt, dass die Rechnungen gelöscht werden können, und bietet «Behalten» an', () => {
+			withRetention();
+			expect(byTestId('invoice-retention-hint')!.textContent).toContain(
+				'Rechnungen 2014 von Seeblick können gelöscht werden'
+			);
+			expect(byTestId('invoice-retention-hint')!.textContent).toContain(
+				'Die Aufbewahrungsfrist von 2 Rechnungen dieser Abrechnungsperiode endete am 31.12.2024.'
+			);
+			const keep = byTestId('invoice-retention-keep')!;
+			expect(keep.textContent).toContain('Behalten');
+			const form = keep.closest('form')!;
+			expect(form.getAttribute('action')).toBe('?/keep');
+			expect(Object.fromEntries(new FormData(form))).toEqual({
+				buildingId: 'b1',
+				periodStart: '2014-01-01'
+			});
+		});
+
+		it('sagt, wenn das Behalten nicht gespeichert wurde', () => {
+			withRetention({
+				keepError: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.'
+			});
+			expect(byTestId('invoice-retention-error')!.textContent).toContain(
+				'Beim Speichern ist ein Fehler aufgetreten.'
+			);
+		});
+	});
 
 	// the Übersicht's «Rechnungen hochladen» leads here (persona Anna)
 	it('öffnet «Rechnungen hochladen» gleich, wenn die Adresse es verlangt', () => {
@@ -1338,10 +1386,37 @@ describe('Beleg einer Rechnung', () => {
 	});
 
 	it('nennt beim Löschen nach Ablauf der Aufbewahrungsfrist keine Frist', () => {
-		show(InvoicePage, { data: { invoice: toInvoice(invoiceRow({ ...invoiceContract, keepUntil: null })) } } as never);
+		show(InvoicePage, {
+			data: { invoice: toInvoice(invoiceRow({ ...invoiceContract, keepUntil: null })) }
+		} as never);
 		click('invoice-delete-button');
 		expect(byTestId('invoice-delete-confirm')).not.toBeNull();
 		expect(byTestId('invoice-delete-retention-note')).toBeNull();
+	});
+
+	// Fachreview 1410-1 V-2 (Entscheid PO): bis zum Verkauf des Gebäudes, statt eines Datums
+	it('nennt beim Löschen einer wertvermehrenden Investition den Verkauf des Gebäudes', () => {
+		show(InvoicePage, {
+			data: { invoice: toInvoice(invoiceRow({ ...invoiceContract, keepUntil: 'sale' })) }
+		} as never);
+		click('invoice-delete-button');
+		expect(byTestId('invoice-delete-retention-note')!.textContent).toBe(
+			'Rechnungen für wertvermehrende Investitionen bewahren Sie auf, bis Sie das Gebäude verkaufen: Sie belegen die Anlagekosten bei der Grundstückgewinnsteuer.'
+		);
+	});
+
+	// Fachreview 1410-1 V-3 (Entscheid PO): nach der Aufbewahrungsfrist wird keine Abrechnung nicht aktuell
+	it('verlangt beim Löschen nach Ablauf der Aufbewahrungsfrist keine Berichtigung der Abrechnungen', () => {
+		detail({ keepUntil: null }, [{ start: '2014-01-01', end: '2014-12-31' }]);
+		click('invoice-delete-button');
+		expect(byTestId('invoice-delete-confirm')).not.toBeNull();
+		expect(byTestId('invoice-delete-billed-text')).toBeNull();
+	});
+
+	it('verlangt beim Löschen innerhalb der Aufbewahrungsfrist die Berichtigung der Abrechnungen', () => {
+		detail({ keepUntil: '2034-12-31' }, [{ start: '2024-01-01', end: '2024-12-31' }]);
+		click('invoice-delete-button');
+		expect(byTestId('invoice-delete-billed-text')).not.toBeNull();
 	});
 
 	it('zeigt, was die KI beim Hochladen auf dem Beleg gesehen hat (Persona Anna; Fachreview V-3, V-4)', () => {

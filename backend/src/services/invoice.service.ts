@@ -163,7 +163,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 	// Transform results
 	const invoiceList: InvoiceWithDetails[] = results.map((row) => ({
 		...row.invoice,
-		keepUntil: retention(row.accountingPeriod, row.invoice),
+		keepUntil: retention(row.accountingPeriod, row.invoice, row.category?.name),
 		building: row.building,
 		category: row.category,
 		distributionKey: row.distributionKey,
@@ -205,7 +205,7 @@ export async function getInvoice(id: string): Promise<InvoiceWithDetails | null>
 
 	return {
 		...result.invoice,
-		keepUntil: retention(result.accountingPeriod, result.invoice),
+		keepUntil: retention(result.accountingPeriod, result.invoice, result.category?.name),
 		building: result.building,
 		category: result.category,
 		distributionKey: result.distributionKey,
