@@ -20,7 +20,7 @@ import {
 	tenantExists
 } from '../services/tenant.service';
 import type { TenantResponse } from '../api/tenant';
-import { exportTenant } from '../services/tenant-export.service';
+import { exportFile, exportTenant } from '../services/tenant-export.service';
 import { anonymisableFrom, anonymiseTenant } from '../services/tenant-anonymise.service';
 import { errorBody } from '../services/coded-error';
 import { pageLimit } from './page-limit';
@@ -107,6 +107,20 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 		}
 		return result;
 	})
+	// #748: one file of the export at a time, so no answer holds them all
+	.get(
+		'/:id/export/files/:kind/:fileId',
+		async ({ params, set }) => {
+			const file = await exportFile(params.id, params.kind, params.fileId);
+			if (!file) {
+				set.status = 404;
+				return { error: 'File not found' };
+			}
+			set.headers['content-type'] = 'application/octet-stream';
+			return file;
+		},
+		{ params: t.Object({ id: t.String({ format: 'uuid' }), kind: t.String(), fileId: t.String({ format: 'uuid' }) }) }
+	)
 	// Get tenant with contract history
 	.get('/:id/history', async ({ params, set }) => {
 		const result = await getTenantWithHistory(params.id);
