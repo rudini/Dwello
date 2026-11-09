@@ -50,7 +50,7 @@ function moveOutsIn(apartmentIds: string[], contracts: Contract[], types: Map<st
 	);
 }
 
-// only the columns the rule reads, not listStatements: it loads line items, and a new user of statement.service
+// only the columns the rule reads, not listStatements: it loads line items, and a new user of statement-query.service
 // would put it against the stability of its own dependencies (fitness unstable-dependency)
 const statementsOf = (buildingId?: string) =>
 	db
