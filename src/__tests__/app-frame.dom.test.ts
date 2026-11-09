@@ -28,6 +28,7 @@ describe('Hauptnavigation', () => {
 			['Nebenkostenabrechnungen', '/statements'],
 			['Dokumente', '/documents'],
 			['Berichte', '/reports'],
+			['Auswertungen', '/analytics'],
 			['Einstellungen', '/config'],
 			['Kategorien', '/config/categories'],
 			['Verteilschlüssel', '/config/distribution-keys'],

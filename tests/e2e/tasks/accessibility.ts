@@ -47,6 +47,7 @@ import { deleteButton, fuelCheckbox, heatingCheckbox, nameInput, proposal, propo
 import { deleteButton as keyDeleteButton } from '../targets/distribution-keys';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
+import { runningYearNote } from '../targets/annual-report';
 import { kiModelLoading, setupError } from '../targets/einrichtung';
 import { FRESH_ACCOUNT, FRESH_APP, FRESH_KI_STUB, freshLocalAccount, resetFreshBackup } from '../fixtures/fresh-installation';
 import {
@@ -283,6 +284,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	paged: () => Wait.until(on.nextPageLink), // #746
 	'paged-older': () => async (actor) => actor.attemptsTo(Click.on(on.nextPageLink), Wait.until(on.previousPageLink)),
 	'empty-year': () => Wait.until(on.emptyHint),
+	'running-year': () => Wait.until(runningYearNote), // #1409
 	'first-use': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Erstes Gebäude erfassen')))),
 	'login-error': () => Wait.until(on.loginError),
 	'login-not-allowed': () => Wait.until(on.loginError),

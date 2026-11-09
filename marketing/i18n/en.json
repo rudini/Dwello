@@ -94,7 +94,6 @@
 	"Idee oder Fehler melden": "Suggest an idea or report a bug",
 	"Was als Nächstes kommt.": "What comes next.",
 	"Installer in einem Schritt": "One-step installer",
-	"Pro Gebäude und Kalenderjahr: die vereinbarten Einnahmen aus den Mietverträgen und die Kosten nach Kategorie, getrennt nach Nebenkosten, Unterhalt und wertvermehrenden Investitionen. Als PDF und CSV.": "Per building and calendar year: the income agreed in the rental contracts and the costs by category, split into utility costs, maintenance and value-adding investments. As PDF and CSV.",
 	"Häufige Fragen.": "Frequently asked questions.",
 	"Kostet Dwello wirklich nichts?": "Is Dwello really free?",
 	"Brauche ich technische Kenntnisse?": "Do I need technical knowledge?",
@@ -254,5 +253,6 @@
 	"Unter «Berichte» sehen Sie für jede Abrechnungsperiode, für die Sie Abrechnungen erstellt haben, welchen Teil der Kosten die Mieter tragen und welchen Sie selbst, etwa für Leerstand.": "Under «Reports» you see, for each billing period you have created statements for, which part of the costs the tenants bear and which part you bear yourself, for example for vacancy.",
 	"KI-Programme mit Zugangsschlüssel": "AI programs with an access key",
 	"Mit einem Zugangsschlüssel liest ein KI-Programm Ihrer Wahl Ihre Daten in Dwello, auch die Ihrer Mieter (MCP). Es kann nichts ändern und keine Dokumente öffnen. Das Programm bearbeitet die Daten nach seinen eigenen Regeln. Jeder Schlüssel läuft nach 90 Tagen ab, und Sie können ihn jederzeit widerrufen.": "With an access key, an AI program of your choice reads your data in Dwello, including your tenants’ data (MCP). It cannot change anything or open documents. The program processes the data under its own rules. Each key expires after 90 days, and you can revoke it at any time.",
-	"Jahresbericht für Steuer und Treuhand": "Annual report for tax and your accountant"
+	"Jahresbericht für Steuer und Treuhand": "Annual report for tax and your accountant",
+	"Pro Gebäude und Kalenderjahr: der vereinbarte Mietertrag und die Kosten, die Sie selbst tragen, als PDF und CSV.": "Per building and calendar year: the agreed rental income and the costs you bear yourself, as PDF and CSV."
 }

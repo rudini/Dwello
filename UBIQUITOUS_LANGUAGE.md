@@ -223,6 +223,18 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Überfällig** | Versendet und Zahlungsfrist überschritten, auch nach einer Teilzahlung, solange ein offener Betrag bleibt. (`overdue`) |
 | **Ersetzt** | Durch eine berichtigte Abrechnung ersetzt; wird nicht gemahnt und zählt nicht als Abrechnung der Periode; Zahlungsdatum und Saldo der ersetzten Abrechnung bleiben erhalten. (`replaced`) |
 
+## Jahresbericht
+
+Begriffe des Jahresberichts auf der Seite «Auswertungen» (#1409, vom Product Owner am 09.11.2026 entschieden).
+
+| Begriff | Definition | Code / Schema |
+|---------|-----------|---------------|
+| **Jahresbericht** | Bericht je Gebäude und Kalenderjahr: der vereinbarte Mietertrag und die Kosten, die der Vermieter selbst trägt; auf der Seite «Auswertungen», als CSV und PDF. Er prüft keine Zahlungen und vergleicht nicht mit einem Pauschalabzug. | `GET /api/v1/reports/annual` (#1409) |
+| **Mietertrag (Jahresbericht)** | Nettomiete, Zusatzmiete und Nebenkostenpauschale, die die Mietverträge für das Jahr vereinbaren; ein angebrochener Monat nach Tagen. Ohne Akontobeiträge, Nachzahlungen, Rückerstattungen und Verwaltungspauschale. | Berechnung |
+| **Nebenkosten, die Sie tragen (Jahresbericht)** | «davon tragen Sie» der Kostenabstimmung der Abrechnungsperiode, die im Jahr endet, je Kategorie. Nicht zu verwechseln mit «Eigene Nebenkosten». | Berechnung |
+| **Unterhalt und Verwaltung (Jahresbericht)** | Die nicht umlagefähigen Rechnungen nach Rechnungsdatum, ohne die Kategorien «Hypothekarzinsen» und «Wertvermehrende Investitionen». | Berechnung |
+| **Wertvermehrende Investitionen (Jahresbericht)** | Rechnungen der Kategorie «Wertvermehrende Investitionen»; getrennt gezeigt, nicht abziehbar (Art. 34 Bst. d DBG). | Berechnung |
+
 ---
 
 ## Zahlungsverkehr und Dokumente

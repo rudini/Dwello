@@ -23,6 +23,7 @@ Funktionalität: Navigation
       | Nebenkostenabrechnungen | Nebenkostenabrechnungen |
       | Dokumente               | Dokumente               |
       | Berichte                | Berichte                |
+      | Auswertungen            | Auswertungen            |
       | Einstellungen           | Einstellungen           |
       | Kategorien              | Kategorien              |
       | Verteilschlüssel        | Verteilschlüssel        |
@@ -46,6 +47,7 @@ Funktionalität: Navigation
       | Nebenkostenabrechnungen | Nebenkostenabrechnungen |
       | Dokumente               | Dokumente               |
       | Berichte                | Berichte                |
+      | Auswertungen            | Auswertungen            |
       | Einstellungen           | Einstellungen           |
       | Kategorien              | Kategorien              |
       | Verteilschlüssel        | Verteilschlüssel        |

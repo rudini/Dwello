@@ -3,9 +3,7 @@
  * print and keep apart from the computer; never stored (Fachreview 718b R-3). Wording: Fachreview 718b-1 and 718b-2.
  */
 
-import { once } from 'events';
-import PDFDocument from 'pdfkit';
-import { embedFonts, FONT } from './pdf-layout';
+import { a4Pdf, FONT } from './pdf-layout';
 import type { Language } from '../db/schema';
 
 const GUIDE = 'https://github.com/rudini/Dwello/blob/main/docs/installation.md';
@@ -84,34 +82,21 @@ export async function renderEmergencySheet(
 	replacing = false
 ) {
 	const w = WORDING[language];
-	const doc = embedFonts(
-		new PDFDocument({
-			size: 'A4',
-			margins: { top: 60, bottom: 60, left: 70, right: 70 },
-			info: { Title: w.title }
-		})
-	);
-	const finished = once(doc, 'end');
-	const pages: Buffer[] = [];
-	doc.on('data', (page: Buffer) => pages.push(page));
-
-	doc.font(FONT.bold).fontSize(18).fillColor('#111318').text(w.title);
-	doc.moveDown().font(FONT.regular).fontSize(11).text(w.code);
-	doc.font(FONT.bold).fontSize(20).text(code, { characterSpacing: 1 });
-	doc
-		.moveDown()
-		.font(FONT.regular)
-		.fontSize(11)
-		.text(w.date.replace('{date}', swissDay(createdAt)), { width: 455 });
-	if (replacing) doc.moveDown().text(w.older, { width: 455 });
-	doc.moveDown().text(w.address.replace('{address}', address), { width: 455 });
-	for (const paragraph of [w.location, w.emergency, w.self])
-		doc.moveDown().text(paragraph, { width: 455 });
-	// on a line of its own, so the address is not broken
-	doc.text(GUIDE);
-	doc.moveDown().text(w.keep, { width: 455 });
-	doc.end();
-
-	await finished;
-	return Buffer.concat(pages);
+	return a4Pdf({ margins: { top: 60, bottom: 60, left: 70, right: 70 }, info: { Title: w.title } }, (doc) => {
+		doc.font(FONT.bold).fontSize(18).fillColor('#111318').text(w.title);
+		doc.moveDown().font(FONT.regular).fontSize(11).text(w.code);
+		doc.font(FONT.bold).fontSize(20).text(code, { characterSpacing: 1 });
+		doc
+			.moveDown()
+			.font(FONT.regular)
+			.fontSize(11)
+			.text(w.date.replace('{date}', swissDay(createdAt)), { width: 455 });
+		if (replacing) doc.moveDown().text(w.older, { width: 455 });
+		doc.moveDown().text(w.address.replace('{address}', address), { width: 455 });
+		for (const paragraph of [w.location, w.emergency, w.self])
+			doc.moveDown().text(paragraph, { width: 455 });
+		// on a line of its own, so the address is not broken
+		doc.text(GUIDE);
+		doc.moveDown().text(w.keep, { width: 455 });
+	});
 }

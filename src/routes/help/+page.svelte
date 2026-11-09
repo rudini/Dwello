@@ -49,7 +49,8 @@
 				m.help_statements_2(),
 				m.help_statements_3(),
 				m.help_statements_4(),
-				m.help_statements_5()
+				m.help_statements_5(),
+				m.help_statements_6()
 			]
 		},
 		{

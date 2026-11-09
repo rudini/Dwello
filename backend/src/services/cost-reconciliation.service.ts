@@ -142,7 +142,7 @@ async function nonAllocableInPeriod(buildingId: string, period: Range) {
 }
 
 // the statements of the building that count in exactly this period: drafts included, a replaced one not
-async function validStatements(buildingId: string, period: Range) {
+export async function validStatements(buildingId: string, period: Range) {
 	const { statements } = await listStatements({
 		buildingId,
 		periodStart: period.start,

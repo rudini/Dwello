@@ -18,6 +18,7 @@ const query: Record<string, string> = {
 	'login-error': '?error=failed',
 	'login-not-allowed': '?error=not_allowed',
 	'empty-year': `?year=${new Date().getFullYear()}`, // a year of the invoices' year filter (#662, S-4)
+	'running-year': `?building={building}&year=${new Date().getFullYear()}`, // the Jahresbericht of this year (#1409)
 	// #1413: one record a page, so the records of seedFor fill more than one; the audit log and the statements keep their
 	// fixed page sizes (50, 10) and ignore it
 	paged: '?pageSize=1'

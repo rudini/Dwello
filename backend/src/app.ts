@@ -20,6 +20,7 @@ import { heatingProfileRoutes } from './routes/heating-profiles';
 import { configRoutes } from './routes/config';
 import { documentRoutes } from './routes/documents';
 import { statementRoutes } from './routes/statements';
+import { annualReportRoutes } from './routes/annual-report';
 import { reportRoutes } from './routes/reports';
 import { auditLogRoutes } from './routes/audit-log';
 import { dataExportRoutes } from './routes/data-export';
@@ -125,6 +126,7 @@ export const app = new Elysia()
 	.use(configRoutes)
 	.use(statementRoutes)
 	.use(reportRoutes)
+	.use(annualReportRoutes)
 	.use(documentRoutes)
 	.use(auditLogRoutes)
 	.use(dataExportRoutes)

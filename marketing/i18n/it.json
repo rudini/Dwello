@@ -95,7 +95,6 @@
 	"Roadmap": "Tabella di marcia",
 	"Was als Nächstes kommt.": "Cosa arriva dopo.",
 	"Installer in einem Schritt": "Installazione in un passo",
-	"Pro Gebäude und Kalenderjahr: die vereinbarten Einnahmen aus den Mietverträgen und die Kosten nach Kategorie, getrennt nach Nebenkosten, Unterhalt und wertvermehrenden Investitionen. Als PDF und CSV.": "Per immobile e anno civile: le entrate pattuite nei contratti di locazione e i costi per categoria, suddivisi in spese accessorie, manutenzione e investimenti di valorizzazione. In PDF e CSV.",
 	"Häufige Fragen.": "Domande frequenti.",
 	"Kostet Dwello wirklich nichts?": "Dwello è davvero gratuito?",
 	"Brauche ich technische Kenntnisse?": "Mi servono conoscenze tecniche?",
@@ -257,5 +256,6 @@
 	"Unter «Berichte» sehen Sie für jede Abrechnungsperiode, für die Sie Abrechnungen erstellt haben, welchen Teil der Kosten die Mieter tragen und welchen Sie selbst, etwa für Leerstand.": "In «Rapporti» vede, per ogni periodo di conteggio per cui ha allestito dei conteggi, quale parte dei costi sostengono gli inquilini e quale sostiene Lei, per esempio per lo sfitto.",
 	"KI-Programme mit Zugangsschlüssel": "Programmi di IA con chiave di accesso",
 	"Mit einem Zugangsschlüssel liest ein KI-Programm Ihrer Wahl Ihre Daten in Dwello, auch die Ihrer Mieter (MCP). Es kann nichts ändern und keine Dokumente öffnen. Das Programm bearbeitet die Daten nach seinen eigenen Regeln. Jeder Schlüssel läuft nach 90 Tagen ab, und Sie können ihn jederzeit widerrufen.": "Con una chiave di accesso, un programma di IA di Sua scelta legge i Suoi dati in Dwello, anche quelli dei Suoi inquilini (MCP). Non può modificare nulla né aprire documenti. Il programma tratta i dati secondo le proprie regole. Ogni chiave scade dopo 90 giorni e Lei può disattivarla in qualsiasi momento.",
-	"Jahresbericht für Steuer und Treuhand": "Rapporto annuale per le imposte e la fiduciaria"
+	"Jahresbericht für Steuer und Treuhand": "Rapporto annuale per le imposte e la fiduciaria",
+	"Pro Gebäude und Kalenderjahr: der vereinbarte Mietertrag und die Kosten, die Sie selbst tragen, als PDF und CSV.": "Per immobile e anno civile: il reddito locativo pattuito e i costi che sostiene lei stesso, in PDF e in CSV."
 }

@@ -95,7 +95,6 @@
 	"Roadmap": "Feuille de route",
 	"Was als Nächstes kommt.": "Ce qui vient ensuite.",
 	"Installer in einem Schritt": "Installateur en une étape",
-	"Pro Gebäude und Kalenderjahr: die vereinbarten Einnahmen aus den Mietverträgen und die Kosten nach Kategorie, getrennt nach Nebenkosten, Unterhalt und wertvermehrenden Investitionen. Als PDF und CSV.": "Par immeuble et par année civile : les recettes convenues dans les contrats de bail et les coûts par catégorie, répartis entre frais accessoires, entretien et investissements créant des plus-values. En PDF et en CSV.",
 	"Häufige Fragen.": "Questions fréquentes.",
 	"Kostet Dwello wirklich nichts?": "Dwello est-il vraiment gratuit ?",
 	"Brauche ich technische Kenntnisse?": "Ai-je besoin de connaissances techniques ?",
@@ -257,5 +256,6 @@
 	"Unter «Berichte» sehen Sie für jede Abrechnungsperiode, für die Sie Abrechnungen erstellt haben, welchen Teil der Kosten die Mieter tragen und welchen Sie selbst, etwa für Leerstand.": "Sous « Rapports », vous voyez, pour chaque période de décompte pour laquelle vous avez établi des décomptes, quelle part des coûts les locataires supportent et quelle part vous supportez vous-même, par exemple pour la vacance.",
 	"KI-Programme mit Zugangsschlüssel": "Programmes d’IA avec clé d’accès",
 	"Mit einem Zugangsschlüssel liest ein KI-Programm Ihrer Wahl Ihre Daten in Dwello, auch die Ihrer Mieter (MCP). Es kann nichts ändern und keine Dokumente öffnen. Das Programm bearbeitet die Daten nach seinen eigenen Regeln. Jeder Schlüssel läuft nach 90 Tagen ab, und Sie können ihn jederzeit widerrufen.": "Avec une clé d’accès, un programme d’IA de votre choix lit vos données dans Dwello, y compris celles de vos locataires (MCP). Il ne peut rien modifier ni ouvrir de documents. Le programme traite les données selon ses propres règles. Chaque clé expire après 90 jours, et vous pouvez la révoquer à tout moment.",
-	"Jahresbericht für Steuer und Treuhand": "Rapport annuel pour les impôts et la fiduciaire"
+	"Jahresbericht für Steuer und Treuhand": "Rapport annuel pour les impôts et la fiduciaire",
+	"Pro Gebäude und Kalenderjahr: der vereinbarte Mietertrag und die Kosten, die Sie selbst tragen, als PDF und CSV.": "Par immeuble et année civile : le revenu locatif convenu et les coûts que vous supportez vous-même, en PDF et en CSV."
 }
