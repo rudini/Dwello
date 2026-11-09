@@ -68,6 +68,11 @@ describe('Kommentare aus Daten eines Forks (Fallback-Review von #1386)', () => {
 		expect(comments).toContain("const [name, title] = line.split('\\t').map((part) => part.slice(0, 200));");
 	});
 
+	it('liest höchstens 300 Screenshots und kürzt den fertigen Kommentar unter die Grenze von GitHub (Fallback-Review von #1391)', () => {
+		expect(comments).toMatch(/fs\.readFileSync\('ui-screenshots\/shots\.txt', 'utf8'\)\.split\('\\n'\)\.filter\(Boolean\)\.slice\(0, 300\)/);
+		expect(comments).toContain(").replace(/@(?=[\\w-])/g, '@\\u200b').slice(0, 65000);");
+	});
+
 	it('macht @-Erwähnungen in beiden Kommentaren unwirksam', () => {
 		expect(comments.split("replace(/@(?=[\\w-])/g, '@\\u200b')").length - 1).toBe(2);
 	});

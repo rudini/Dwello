@@ -140,7 +140,7 @@ jobs:
             // one that looks the same as on the base branch has no screenshot (looksTheSame)
             const unchanged = [];
             const taken = fs.existsSync('ui-screenshots/shots.txt')
-              ? fs.readFileSync('ui-screenshots/shots.txt', 'utf8').split('\n').filter(Boolean).sort()
+              ? fs.readFileSync('ui-screenshots/shots.txt', 'utf8').split('\n').filter(Boolean).slice(0, 300).sort()
               : [];
             const shots = taken.flatMap((line) => {
               const [name, title] = line.split('\t').map((part) => part.slice(0, 200));
@@ -161,7 +161,7 @@ jobs:
               shots.length
               ? `${marker}\n## UI screenshots\nChanged pages as of ${process.env.SHA.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${listed}${same}`
               : `${marker}\n## UI screenshots\nNo visible changes as of ${process.env.SHA.slice(0, 7)}.${same}`
-            ).replace(/@(?=[\w-])/g, '@\u200b');
+            ).replace(/@(?=[\w-])/g, '@\u200b').slice(0, 65000);
             const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
             const existing = comments.find((comment) => comment.body?.startsWith(marker));
             if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
