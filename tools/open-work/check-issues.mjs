@@ -114,11 +114,11 @@ if (!approvals.length)
 // A pull request may not loosen the checks that judge it: a changed gate file needs `Gate change approved: #n` (#1269)
 const gateApprovals = [...prBody.matchAll(/\bgate change approved:\s*#(\d+)/gi)].map(([, n]) => n);
 const gateFile =
-	/^(\.github\/workflows\/|tools\/|\.claude\/(hooks|skills)\/)|(^|\/)CLAUDE\.md$|^(\.fallowrc\.json|deepcheck\.config\.json|\.(deepcheck|testcheck)-baseline\.json|vitest\.config\.ts|backend\/scripts\/coverage-check\.ts)$/;
+	/^(\.github\/workflows\/|tools\/|\.claude\/(hooks|skills)\/)|(^|\/)CLAUDE\.md$|^(\.fallowrc\.json|deepcheck\.config\.json|\.(deepcheck|testcheck)-baseline\.json|vitest\.config\.ts|backend\/scripts\/coverage-check\.ts|backend\/bunfig\.toml)$/;
 const gateChanges = base
 	? git('diff', '--name-only', '--no-renames', from, 'HEAD')
 			.split('\n')
-			.filter((file) => gateFile.test(file))
+			.filter((file) => gateFile.test(file) || (/^(backend\/)?package\.json$/.test(file) && scriptsChanged(file)))
 	: [];
 // a lowered coverage floor stays red with approval too: a ratchet against the merge base, as tools/fitness/ratchet.json
 const floorsOf = (rev, file) => {
@@ -202,6 +202,16 @@ function examplesOnly(lines, after, body) {
 	while (/^\s*\|/.test(lines[row])) row--;
 	const [heading, ...rows] = /^\s*Beispiele:/.test(body[0]) ? body : [lines[row], ...body];
 	return /^\s*Beispiele:/.test(heading) && rows.every((line) => /^\s*\|/.test(line));
+}
+
+/** Whether a package manifest runs its checks differently: its `scripts` changed, or it cannot be read (fails closed) */
+function scriptsChanged(file) {
+	try {
+		const [before, after] = [from, 'HEAD'].map((rev) => JSON.stringify(JSON.parse(show(rev, file) || '{}').scripts));
+		return before !== after;
+	} catch {
+		return true;
+	}
 }
 
 /** The step definitions of a step file on the base that the pull request changes or removes, each with its matcher */
