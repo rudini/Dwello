@@ -57,7 +57,8 @@ export type Ratchet = {
 	fat?: Fat;
 };
 
-export type Finding = { check: string; message: string };
+/** hint: reported in the job summary, not red (#1396) */
+export type Finding = { check: string; message: string; hint?: true };
 
 const readRepoFile = (path: string) => {
 	try {
@@ -215,13 +216,13 @@ export type Structure = { kpis: Kpi[]; maintainability: Record<string, number> }
 /** Files of the pull request: changed ones as [base path, head path] (a rename included), added ones by their path */
 export type FileChanges = { changed: [string, string][]; added: string[] };
 
-/** #1272: red when a changed file's maintainability drops */
+/** #1272: red when a changed file's maintainability drops by more than 1 point; a smaller drop is a hint (#1396) */
 export function structureFindings(base: Structure, head: Structure, files: FileChanges, r: Ratchet): Finding[] {
 	const findings: Finding[] = [];
 	for (const [was, is] of files.changed) {
 		const [before, after] = [base.maintainability[was], head.maintainability[is]];
 		if (before !== undefined && after !== undefined && after < before)
-			findings.push({ check: 'structure-maintainability', message: `Ä1: ${is}: maintainability ${before} → ${after} (fallow). Fix: split long or deeply nested functions of the file until it is back at ${before}.` });
+			findings.push({ check: 'structure-maintainability', message: `Ä1: ${is}: maintainability ${before} → ${after} (fallow). Fix: split long or deeply nested functions of the file until it is back at ${before}.`, ...(Math.round((before - after) * 100) <= 100 && { hint: true as const }) });
 	}
 	const [b, h] = [values(base), values(head)];
 	const kpi = (check: string, worse: boolean, message: string) => worse && findings.push({ check, message: `Ä1: ${message} Fix: ${FIX[check]}` });
@@ -572,8 +573,10 @@ if (import.meta.main) {
 		// REVIEW_DIR: keep both measurements and the table for the reviewer report (tools/review-report, #1273)
 		const review = process.env.REVIEW_DIR;
 		const [before, after] = [structureAt(base, review && resolve(review, 'base')), structureAt('HEAD', review && resolve(review, 'head'))];
-		errors.push(...structureFindings(before, after, fileChanges(git(['diff', '--name-status', '-M', base, 'HEAD'])), ratchet));
-		const table = `### Structure: base → pull request\n\n${structureTable(before, after)}\n`;
+		const found = structureFindings(before, after, fileChanges(git(['diff', '--name-status', '-M', base, 'HEAD'])), ratchet);
+		errors.push(...found.filter((f) => !f.hint));
+		const hints = found.filter((f) => f.hint).map((f) => `- ${f.message.split(' Fix')[0]} (at most 1 point: a hint, #1396)\n`);
+		const table = `### Structure: base → pull request\n\n${structureTable(before, after)}\n${hints.length ? '\n' + hints.join('') : ''}`;
 		console.log(table);
 		if (review) writeFileSync(join(review, 'structure.md'), structureTable(before, after) + '\n');
 		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, table);
