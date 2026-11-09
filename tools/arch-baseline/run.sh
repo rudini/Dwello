@@ -18,7 +18,7 @@ if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
 fi
 
 bunx svelte-kit sync >/dev/null # .svelte-kit/tsconfig.json defines $lib for fallow and deepcheck
-bunx fallow health --format json >"$OUT/fallow-health.json" 2>/dev/null || true # exits 1 when it has findings
+bunx fallow health --no-cache --format json >"$OUT/fallow-health.json" 2>/dev/null || true # exits 1 when it has findings; no cache: churn cached before the unshallow stays truncated
 bunx fallow dupes --format json >"$OUT/fallow-dupes.json" 2>/dev/null || true
 bunx fallow dead-code --format json >"$OUT/fallow-deadcode.json" 2>/dev/null || true
 node tools/deepcheck/src/cli.ts scan --format json --top 200 --output "$OUT/deepcheck-scan.json" >/dev/null
