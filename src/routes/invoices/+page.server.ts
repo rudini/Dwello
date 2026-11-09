@@ -1,10 +1,7 @@
 import type { InvoicesListData } from '$lib/types';
 import { invoiceChoices, tankCategories, toInvoice, type InvoiceRow } from '$lib/server/invoice';
 import { kiOff } from '$lib/server/ki-settings';
-import { fail } from '@sveltejs/kit';
-import { m } from '$lib/paraglide/messages';
-import { periodName } from '$lib/accounting-period';
-import type { ExpiredInvoicePeriod } from '../../../backend/src/api/invoice';
+import { expiredPeriod, keepInvoices } from '$lib/server/invoice-retention';
 import type { Actions, PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -39,17 +36,6 @@ const filterYears = () => {
 	const thisYear = new Date().getFullYear();
 	return Array.from({ length: 6 }, (_, i) => String(thisYear - i));
 };
-
-/** #1410: the list's building and period when their Aufbewahrungsfrist has passed and they are not kept, else null */
-async function expiredPeriod(fetch: typeof globalThis.fetch, url: URL) {
-	const [building, start] = [url.searchParams.get('building'), url.searchParams.get('periodStart')];
-	if (!building || !start) return null;
-	const { periods = [] } = (await (
-		await fetch(`${BACKEND_URL}/api/v1/invoices/retention`)
-	).json()) as { periods?: ExpiredInvoicePeriod[] };
-	const found = periods.find((p) => p.buildingId === building && p.start === start);
-	return found ? { ...found, period: periodName(found) } : null;
-}
 
 export const load: PageServerLoad = async ({
 	url,
@@ -122,18 +108,5 @@ export const load: PageServerLoad = async ({
 	}
 };
 
-export const actions: Actions = {
-	// #1410: «Behalten» of the building's invoices of the period; the overview no longer names them
-	keep: async ({ fetch, request }) => {
-		const form = await request.formData();
-		const response = await fetch(`${BACKEND_URL}/api/v1/invoices/retention/kept`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				buildingId: form.get('buildingId'),
-				periodStart: form.get('periodStart')
-			})
-		});
-		if (!response.ok) return fail(response.status, { keepError: m.contracts_save_failed() });
-	}
-};
+// #1410: «Behalten» of the building's invoices of the period; the overview no longer names them
+export const actions: Actions = { keep: keepInvoices };

@@ -141,7 +141,12 @@
 	confirmTestid="invoice-delete-confirm"
 	onconfirm={remove}
 >
-	<DeleteConsequences {invoice} billedIn={data.billedIn} statements={data.statements} />
+	<!-- after its Aufbewahrungsfrist no statement is to correct (Fachreview 1410-1 V-3) -->
+	<DeleteConsequences
+		{invoice}
+		billedIn={invoice.keepUntil === null ? [] : data.billedIn}
+		statements={data.statements}
+	/>
 	{#if deleteError}
 		<Alert tone="critical" title={m.buildings_not_deleted()}><p>{deleteError}</p></Alert>
 	{/if}
