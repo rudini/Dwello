@@ -240,7 +240,7 @@ async function readiness(n, type) {
 	if (issue.state !== 'open') return [`#${n} is not ready: it is ${issue.state}`];
 	if (names.includes('needs-decision')) return [`#${n} is not ready: it is labelled needs-decision`];
 	if (types.length !== 1) return [`#${n} is not ready: it has ${types.length} type labels, not one`];
-	return type === types[0] ? [] : [`«Type» says ${type ?? 'nothing'}, but #${n} is labelled ${types[0]}`];
+	return !type || type === types[0] ? [] : [`«Type» says ${type}, but #${n} is labelled ${types[0]}`];
 }
 
 /** Whether a package manifest runs its checks differently: its `scripts` changed, or it cannot be read (fails closed) */

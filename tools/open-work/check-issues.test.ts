@@ -516,6 +516,10 @@ describe('Der Text des Pull Requests nennt Typ, Entscheide und Risiken (#1271)',
 		const result = await own(sections('bug, nfr:security'));
 		expect(result.code).toBe(1);
 		expect(result.out).toContain('«Type» names more than one category: bug, nfr:security');
+		// review 1271-review-2 C-4: a fork with such a Type gets that message only, not one claiming Type names nothing
+		const forked = await check([], 200, { number: 5, body: 'Closes #7', cwd: process.cwd(), sections: sections('bug, nfr:security'), fork: true, issue: { state: 'open', labels: [{ name: 'bug' }] } });
+		expect(forked.out).toContain('«Type» names more than one category');
+		expect(forked.out).not.toContain('says nothing');
 	});
 
 	it('lässt Pull Requests von Dependabot ohne Abschnitte durch', async () => {
