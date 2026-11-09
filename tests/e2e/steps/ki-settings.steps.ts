@@ -78,16 +78,17 @@ const stubAddress = stubProvider('', '').address;
 const withExtra: Record<string, string> = {
 	Abfrage: `${stubAddress}?version=1`,
 	Sprungmarke: `${stubAddress}#chat`,
-	Anmeldedaten: stubAddress.replace('://', '://nutzer:geheim@')
+	Anmeldedaten: stubAddress.replace('://', '://nutzer:geheim@'),
+	'http im Internet': 'http://api.anbieter.ch/v1'
 };
 When(
-	/^der Liegenschaftsverwalter einen Anbieter der KI mit einer Adresse mit (Abfrage|Sprungmarke|Anmeldedaten) speichert$/,
+	/^der Liegenschaftsverwalter einen Anbieter der KI mit einer Adresse mit (Abfrage|Sprungmarke|Anmeldedaten|http im Internet) speichert$/,
 	async ({ verwalter }, extra: string) => {
 		await verwalter.attemptsTo(saveProvider({ ...stubProvider('Muster KI AG', 'Deutschland'), address: withExtra[extra] }));
 	}
 );
 When(
-	/^der Liegenschaftsverwalter die Verbindung zu einer Adresse mit (Abfrage|Sprungmarke|Anmeldedaten) prüft$/,
+	/^der Liegenschaftsverwalter die Verbindung zu einer Adresse mit (Abfrage|Sprungmarke|Anmeldedaten|http im Internet) prüft$/,
 	async ({ verwalter }, extra: string) => {
 		await verwalter.attemptsTo(checkConnection({ ...stubProvider('Muster KI AG', 'Deutschland'), address: withExtra[extra] }));
 	}

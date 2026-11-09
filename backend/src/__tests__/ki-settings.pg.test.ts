@@ -258,9 +258,12 @@ describe('KI in den Einstellungen', () => {
 		expect(await settings()).toMatchObject({ mode: 'local' });
 	});
 
-	// #1372: Dwello hängt den Pfad an die Adresse selbst; Anmeldedaten, Abfrage oder Sprungmarke darin lenken die Anfrage um
-	it('verweigert eine Adresse mit Anmeldedaten, Abfrage oder Sprungmarke beim Speichern und Prüfen', async () => {
-		for (const baseUrl of [`${address}?x=1`, `${address}#x`, address.replace('://', '://nutzer:geheim@'), 'kein url']) {
+	// #1372: Dwello hängt den Pfad an die Adresse selbst; Anmeldedaten, Abfrage oder Sprungmarke darin lenken die Anfrage um.
+	// Ein Anbieter im Internet bekommt den Schlüssel nur verschlüsselt (entschieden in #1372)
+	it('verweigert eine Adresse mit Anmeldedaten, Abfrage, Sprungmarke oder ohne https im Internet beim Speichern und Prüfen', async () => {
+		const refused = [`${address}?x=1`, `${address}#x`, address.replace('://', '://nutzer:geheim@'), 'kein url'];
+		const publicHttp = ['http://api.example.ch/v1', 'http://8.8.8.8/v1', 'http://172.32.0.1/v1', 'http://[2001:db8::1]/v1'];
+		for (const baseUrl of [...refused, ...publicHttp, 'file:///etc/passwd']) {
 			for (const send of [save, check]) {
 				const response = await send({ ...muster, baseUrl });
 
@@ -270,6 +273,17 @@ describe('KI in den Einstellungen', () => {
 		}
 		expect(requests).toEqual([]);
 		expect(await settings()).toMatchObject({ mode: 'local' });
+	});
+
+	// #580, entschieden in #1372: eine KI im eigenen Netz antwortet auch ohne https (pinnt bestehendes Verhalten)
+	it('speichert einen Anbieter im eigenen Netz auch mit http', async () => {
+		const own = ['http://192.168.1.10:11434/v1', 'http://10.0.0.5/v1', 'http://172.20.0.3/v1', 'http://[fd00::1]/v1', 'http://ki-server:8080/v1', 'http://localhost/v1'];
+		for (const baseUrl of own) {
+			const response = await save({ ...muster, baseUrl });
+
+			expect(response.status).toBe(200);
+		}
+		expect(await settings()).toMatchObject({ baseUrl: 'http://localhost/v1' });
 	});
 
 	it('verweigert einen Schlüssel, solange der Server keinen Schlüssel zum Verschlüsseln hat', async () => {

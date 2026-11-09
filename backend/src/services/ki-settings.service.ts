@@ -135,11 +135,16 @@ async function keyFor(baseUrl: string, entered: string) {
 	return decrypt(row.apiKeyEncrypted);
 }
 
+// The landlord's own network, which may answer over http (#580): private and loopback addresses and names without a
+// dot, such as a compose service; a provider on the internet gets the key only over https (decided in #1372)
+const OWN_NETWORK = /^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[::1\]$|\[f[cd])|^[^.[]+$/i;
+
 // Dwello appends the path to the address itself: credentials, a query or a fragment in it would send the request
 // elsewhere (#1372)
 function checkAddress(baseUrl: string) {
 	const url = URL.parse(baseUrl);
-	if (!url || !['http:', 'https:'].includes(url.protocol) || url.username || url.password || /[?#]/.test(baseUrl))
+	const scheme = url?.protocol === 'https:' || (url?.protocol === 'http:' && OWN_NETWORK.test(url.hostname));
+	if (!url || !scheme || url.username || url.password || /[?#]/.test(baseUrl))
 		throw new CodedError('KI_ADDRESS_INVALID', 'Diese Adresse kann Dwello nicht verwenden.');
 }
 

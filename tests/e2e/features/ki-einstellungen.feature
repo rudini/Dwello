@@ -143,7 +143,8 @@ Funktionalität: KI in den Einstellungen wählen
     Wenn der Liegenschaftsverwalter die Verbindung zu einer neuen Adresse ohne API-Schlüssel prüft
     Dann sagt die Prüfung der Verbindung "Geben Sie den API-Schlüssel erneut ein. Dwello schickt den gespeicherten Schlüssel nicht an eine andere Adresse."
 
-  # #1372: Dwello schickt Anfragen nur an die Adresse der KI selbst, ohne Anmeldedaten, Abfrage oder Sprungmarke darin
+  # #1372: Dwello schickt Anfragen nur an die Adresse der KI selbst, ohne Anmeldedaten, Abfrage oder Sprungmarke darin,
+  # und einem Anbieter im Internet nur verschlüsselt
   Szenariogrundriss: Eine Adresse mit <Zusatz> wird weder gespeichert noch geprüft
     Angenommen Dwello ist eingerichtet
     Wenn der Liegenschaftsverwalter einen Anbieter der KI mit einer Adresse mit <Zusatz> speichert
@@ -154,10 +155,12 @@ Funktionalität: KI in den Einstellungen wählen
     Dann sagt die Prüfung der Verbindung "Diese Adresse kann Dwello nicht verwenden. Geben Sie die Adresse der KI an, die Ihnen der Anbieter nennt, zum Beispiel https://api.anbieter.ch/v1."
 
     Beispiele:
-      | Zusatz         |
-      | Abfrage        |
-      | Sprungmarke    |
-      | Anmeldedaten   |
+      | Zusatz           |
+      | Abfrage          |
+      | Sprungmarke      |
+      | Anmeldedaten     |
+      # entschieden in #1372: im Internet nur verschlüsselt; im eigenen Netz auch http (#580)
+      | http im Internet |
 
   # Fachreview 580 F-3: die Prüfung schickt nur ein festes Testbild und einen festen Text, nie erfasste Daten
   Szenariogrundriss: Die Verbindung zur KI prüfen
