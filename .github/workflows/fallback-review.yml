@@ -38,12 +38,14 @@ jobs:
       # by branch, the one key every trigger knows, so a CI run started by hand and one of the pull request share it
       group: fallback-review-${{ github.event.pull_request.head.ref || github.event.workflow_run.head_branch || inputs.pr }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       PR: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
       BRANCH: ${{ github.event.workflow_run.head_branch }}
+      # when the CI run that started this one finished; empty for other triggers, which take the report as it is
+      CI_DONE: ${{ github.event.workflow_run.updated_at }}
       MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
       MODEL: MiniMax-M3.1-Flash
       # unset, it thought through all 32000 tokens of a 47 kB diff without an answer; medium answered in a minute but
@@ -142,10 +144,16 @@ jobs:
           jq -r '.[] | select(.filename | endswith(".lock")) |
             "diff --git a/\(.filename) b/\(.filename)\n(lock file changed; its content is left out)"' files.json >> diff.txt
           gh api "repos/$GH_REPO/contents/CLAUDE.md" -H 'Accept: application/vnd.github.raw' > rules.md || : > rules.md
-          # the reviewer report (#1273), written by «Pull request comments» after CI; the review compares it and the
-          # PR text's Type, Decisions and Risks with the diff (#1275)
-          gh api --paginate "repos/$GH_REPO/issues/$PR/comments" \
-            --jq '.[] | select(.user.type == "Bot") | select(.body | startswith("<!-- review-report -->")) | .body' > report.md
+          # the reviewer report (#1273); the review compares it and the PR text's Type, Decisions and Risks with the
+          # diff (#1275). «Pull request comments» writes it after the same CI run, often later than this: up to 4
+          # minutes for one updated since that run finished, not an older run's
+          for _ in $(seq 5); do
+            gh api --paginate "repos/$GH_REPO/issues/$PR/comments" | jq -rs --arg since "$CI_DONE" '[.[][] |
+              select(.user.type == "Bot" and (.body | startswith("<!-- review-report -->")) and .updated_at >= $since)
+              ][-1].body // empty' > report.md
+            if [ -s report.md ] || [ -z "$CI_DONE" ]; then break; fi
+            sleep 60
+          done
           [ -s report.md ] || echo "(no reviewer report)" > report.md
           : > files.txt
           budget=$MAX_FILES_BYTES
@@ -190,8 +198,8 @@ jobs:
               {role: "system", content: $system},
               {role: "user", content: ("Pull request:\n" + $pr + "\n\nDiff:\n```diff\n" + $diff + "\n```\n\nReviewer report:\n" + $report + "\n\nChanged files at the head commit:\n" + $files)}
             ]}' > request.json
-          # a second try when the answer is empty or a made-up tool call instead of a review; 10 minutes for Copilot and
-          # two tries of 8 stay within the job's 30, with time left to comment «No review»
+          # a second try when the answer is empty or a made-up tool call instead of a review; 10 minutes for Copilot, 4
+          # for the reviewer report and two tries of 8 stay within the job's 35, with time left to comment «No review»
           for attempt in 1 2; do
             # streamed: the model thinks for minutes before it answers, and a silent connection may be cut
             curl -sS -N --fail-with-body --max-time 480 https://api.minimax.io/v1/chat/completions \

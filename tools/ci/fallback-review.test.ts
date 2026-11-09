@@ -18,11 +18,18 @@ function script() {
 		.join('\n');
 }
 
-// gh answers pull request 7 with head «headsha»; `reviews` holds a real Copilot review when asked for one
+// gh answers pull request 7 with head «headsha»; `reviews` holds a real Copilot review when asked for one; the
+// comments hold the reviewer report, updated at REPORT_AT, from the REPORT_CALL-th call on
 const gh = (copilotReviewed: boolean) => `#!/bin/bash
 echo "gh $*" >> "$LOG"
+report() {
+  echo x >> report-calls
+  if [ "$(wc -l < report-calls)" -lt "$REPORT_CALL" ]; then echo '[]'; return; fi
+  jq -n --arg at "$REPORT_AT" '[{user: {type: "Bot"}, updated_at: $at,
+    body: "<!-- review-report -->\\n## Reviewer report\\nNeue Tabelle: mieter"}]'
+}
 case "$*" in
-  *issues/7/comments\\ --jq*) printf '%s\\n' '<!-- review-report -->' '## Reviewer report' 'Neue Tabelle: mieter' ;;
+  *--paginate\\ repos/rudini/Dwello/issues/7/comments*) report ;;
   *statuses/*|*issues/*/comments*|*reviews\\ -f\\ event*) ;;
   *pulls/7/reviews*) ${copilotReviewed ? `echo '"## Pull request overview"'` : ':'} ;;
   *requested_reviewers*) echo false ;;
@@ -35,7 +42,12 @@ esac
 `;
 
 /** Runs the step after CI finished and returns its folder (request.json) and the gh calls it made */
-function run({ copilotReviewed = false, apiKey = 'key' } = {}) {
+function run({
+	copilotReviewed = false,
+	apiKey = 'key',
+	reportCall = 1,
+	reportAt = '2026-11-09T10:02:00Z'
+} = {}) {
 	const dir = mkdtempSync(join(tmpdir(), 'fallback-review-'));
 	const bin = join(dir, 'bin');
 	mkdirSync(bin);
@@ -63,7 +75,10 @@ function run({ copilotReviewed = false, apiKey = 'key' } = {}) {
 			MODEL: 'MiniMax',
 			REASONING_EFFORT: 'high',
 			MAX_DIFF_BYTES: '400000',
-			MAX_FILES_BYTES: '200000'
+			MAX_FILES_BYTES: '200000',
+			CI_DONE: '2026-11-09T10:00:00Z',
+			REPORT_CALL: String(reportCall),
+			REPORT_AT: reportAt
 		}
 	});
 	return { dir, calls: readFileSync(log, 'utf8').split('\n') };
@@ -94,10 +109,21 @@ describe('fallback-review: Status «Outside review»', () => {
 
 // #1275: MiniMax compares the explanation (reviewer report, Type, Decisions, Risks) with the diff
 describe('fallback-review: Erklärung gegen den Diff', () => {
-	const request = () => JSON.parse(readFileSync(join(run().dir, 'request.json'), 'utf8'));
+	const request = (options?: Parameters<typeof run>[0]) =>
+		JSON.parse(readFileSync(join(run(options).dir, 'request.json'), 'utf8'));
 
 	it('gibt MiniMax den Prüfbericht des Pull Requests mit', () => {
 		expect(request().messages[1].content).toContain('## Reviewer report\nNeue Tabelle: mieter');
+	});
+
+	it('wartet auf den Prüfbericht, den «Pull request comments» erst nach CI schreibt', () => {
+		expect(request({ reportCall: 3 }).messages[1].content).toContain('Neue Tabelle: mieter');
+	});
+
+	it('gibt MiniMax keinen Prüfbericht eines früheren CI-Laufs mit', () => {
+		const content = request({ reportAt: '2026-11-09T09:00:00Z' }).messages[1].content;
+		expect(content).not.toContain('Neue Tabelle: mieter');
+		expect(content).toContain('(no reviewer report)');
 	});
 
 	it('gibt MiniMax die Abschnitte Type, Decisions und Risks des PR-Textes mit', () => {
