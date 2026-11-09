@@ -10,7 +10,7 @@ Five `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` 
 ## Fallow (`.claude/hooks/fallow-gate.sh`)
 
 - Blocks new unused exports or files, duplication, and complexity/CRAP findings. Fix them by un-exporting, deleting or splitting the function. `bunx fallow audit` shows the findings before committing; CI runs the same audit.
-- A CRAP finding on a Svelte template is estimated, not measured: move expressions into `$derived` or a function, or a loop into a child component.
+- A CRAP finding on a Svelte template is estimated, not measured: move expressions into `$derived` or a function, or a loop into a child component; a child component goes to a module with room under fitness `fat-module` (`$lib/<area>`), not next to its page, so the split does not trip the next gate (#1411).
 - Only findings the change introduces block (`fallow audit` default gate `new-only`; a clone group on the base commit stays `"introduced": false` when a touched file's lines move around it). A duplication finding in code the change only touches: check `introduced` in `bunx fallow audit --format json` first; never reshape the code only to get past an inherited one. One the change introduces: fix it when it is small and changes no behavior (note it in the plan), else ask the product owner.
 - The gate audits the working tree: to commit one slice while the next is in progress, `git stash push --keep-index -u` first and `git stash pop` after.
 - A preparing export (a Parallel Change step) and its first user form one commit. A script run by hand gets a `package.json` script, which makes it an entry point.
@@ -28,6 +28,8 @@ Runs testcheck on the changed test files (`bun run testcheck:audit` shows it by 
 ## Fitness (`.claude/hooks/fitness-gate.sh`)
 
 On a `git commit` while a file under `src/`, `backend/src/` or `tools/fitness/` is changed, runs `bun run fitness -- --base origin/main` as CI does and blocks on an error (a fat file or module, a dependency against the layer direction, a loosened ratchet); it prints the error lines. Fix it in the slice before its review: `docs/architecture/fitness-functions.md` names each check. New files count only once Git knows them (`git add` or `git add -N` before the commit command). A run that ends without its summary line («Fitness: N errors, M warnings») passes with a notice; a push is left to CI.
+
+CI also runs `--structure` (Ä1 `structure-maintainability`: a changed file's fallow maintainability may drop by at most 1 point); run `bun run fitness -- --base origin/main --structure` before the push. It measures the committed HEAD, so commit a fix before measuring it; in a shallow clone run `git fetch --unshallow origin main` first, or hotspot churn shows a false drop. To raise a file's score, read its row in `bunx fallow health --format json` (`fan_out`, `complexity_density`, `maintainability_index`) and lower the branches (`??`, `?.`, `||`, `&&`, ternaries) in the touched functions first; line count alone barely moves it, and a new import costs about as much as a split saves, so do not split a file only for the score (#1411).
 
 ## Commit subject (`.claude/hooks/commit-msg-gate.mjs`)
 

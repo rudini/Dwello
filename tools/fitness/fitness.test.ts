@@ -453,6 +453,12 @@ describe('fette Dateien und Module (XS)', () => {
 		const m = measured([{ path: 'backend/src/services/pdf.service.ts', lines: 1200 }], [{ module: 'be:app', files: 1, ce: 26 }]);
 		expect(tighten(m, r).fat).toEqual({ files: { 'backend/src/services/pdf.service.ts': 1200 }, modules: {}, roots: fat.roots });
 	});
+
+	it('senkt mit --base nur die Grenzen der Dateien und Module, die der Branch ändert (#1411)', () => {
+		const m = measured([{ path: 'backend/src/services/pdf.service.ts', lines: 1200 }], [{ module: 'fe:ui', files: 50, ce: 8 }]);
+		expect(tighten(m, r, ['src/lib/ui/Button.svelte']).fat).toEqual({ files: fat.files, modules: { 'fe:ui': { files: 50, ce: 8 } }, roots: fat.roots });
+		expect(tighten(measured([], []), r, ['backend/src/services/pdf.service.ts']).fat).toEqual({ files: {}, modules: fat.modules, roots: fat.roots });
+	});
 });
 
 describe('Abhängigkeiten gegen die Stabilität', () => {

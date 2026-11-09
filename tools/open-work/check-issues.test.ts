@@ -277,6 +277,13 @@ describe('Änderungen an Prüfungen brauchen eine Freigabe (#1269)', () => {
 		expect(await changeGate({ 'src/lib/a.ts': 'a\n', 'docs/CLAUDE-notes.md': 'b\n' })).toMatchObject({ code: 0 });
 	});
 
+	it('lässt einen geänderten Importpfad in tools/ ohne Freigabe durch, eine Änderung daneben nicht (#1411)', async () => {
+		const base = { 'tools/a.ts': "import { x } from '../src/old';\nrun(x);\n" };
+		expect(await changeGate({ 'tools/a.ts': "import { x } from '../src/new';\nrun(x);\n" }, '', base)).toMatchObject({ code: 0 });
+		const result = await changeGate({ 'tools/a.ts': "import { x } from '../src/new';\nrun(x, 1);\n" }, '', base);
+		expect(result.out).toContain('tools/a.ts changes a check');
+	});
+
 	it('meldet eine gelöschte und eine umbenannte Prüfdatei', async () => {
 		const base = { 'tools/a.ts': 'one\ntwo\nthree\n', '.fallowrc.json': '{}\n' };
 		const result = await changeGate({ 'tools/a.ts': null, 'lib/a.ts': 'one\ntwo\nthree\n', '.fallowrc.json': null }, '', base);

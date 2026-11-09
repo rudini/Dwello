@@ -345,8 +345,11 @@ const loosenedFatModules = (w: Fat, b: Fat) =>
 		return x.files > was.files || x.ce > was.ce ? [`fat.modules.${module} rose to ${size}.`] : [];
 	});
 
-/** The ratchet after an improvement: lower thresholds stay lower, and exceptions the code no longer needs drop out. */
-export function tighten(m: Measured, r: Ratchet): Ratchet {
+/**
+ * The ratchet after an improvement: lower thresholds stay lower, and exceptions the code no longer needs drop out.
+ * `changed` (the paths the branch changes against `--base`): only their fat limits are lowered (#1411).
+ */
+export function tighten(m: Measured, r: Ratchet, changed?: string[]): Ratchet {
 	const x = r.exceptions;
 	const fieldSpread = { median: 0, p90: 0, max: 0 };
 	for (const k of ['median', 'p90', 'max'] as const) fieldSpread[k] = Math.min(m.fieldSpread[k], r.fieldSpread[k]);
@@ -360,7 +363,7 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 	const mirrors = new Set(m.entityMirrors.map((e) => `${e.table}\t${e.path}`));
 	return {
 		...r,
-		...(r.fat && m.fat && { fat: tightenFat(m.fat, r.fat) }),
+		...(r.fat && m.fat && { fat: tightenFat(m.fat, r.fat, changed) }),
 		fieldSpread,
 		exceptions: {
 			bffDecisions: x.bffDecisions.filter((d) => !stale.includes(d)),
@@ -377,12 +380,18 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 	};
 }
 
-function tightenFat(m: NonNullable<Measured['fat']>, r: Fat): Fat {
-	const files = Object.fromEntries(m.files.filter((f) => r.files[f.path] !== undefined).map((f) => [f.path, Math.min(f.lines, r.files[f.path])]));
-	const modules = Object.fromEntries(
-		m.modules.filter((x) => r.modules[x.module]).map((x) => [x.module, { files: Math.min(x.files, r.modules[x.module].files), ce: Math.min(x.ce, r.modules[x.module].ce) }])
-	);
-	return { files, modules, roots: r.roots };
+function tightenFat(m: NonNullable<Measured['fat']>, r: Fat, changed?: string[]): Fat {
+	// a limit the branch does not touch stays, so a parallel merge into that file cannot turn main red (#1411)
+	const touched = (p: string) => !changed || changed.includes(p);
+	const files = Object.entries(r.files).flatMap(([p, n]) => {
+		const f = touched(p) ? m.files.find((x) => x.path === p) : { lines: n };
+		return f ? [[p, Math.min(f.lines, n)]] : [];
+	});
+	const modules = Object.entries(r.modules).flatMap(([mod, n]) => {
+		const x = !changed || changed.some((p) => classify(p).module === mod) ? m.modules.find((y) => y.module === mod) : n;
+		return x ? [[mod, { files: Math.min(x.files, n.files), ce: Math.min(x.ce, n.ce) }]] : [];
+	});
+	return { files: Object.fromEntries(files), modules: Object.fromEntries(modules), roots: r.roots };
 }
 
 /** Items left after taking out one listed entry per occurrence (a multiset difference by key). */
@@ -401,7 +410,8 @@ function unlisted<T, L>(items: T[], listed: L[], key: (x: T | L) => string): T[]
 //   --base      compare the ratchet with the merge-base's file and report the change size against it
 //   --structure with --base: the structure report's indicators and changed files' maintainability, base → HEAD (#1272;
 //               committed state only, each measured in a worktree)
-//   --update    write improved values into ratchet.json (the ratchet only tightens)
+//   --update    write improved values into ratchet.json (the ratchet only tightens; with --base, fat limits only of
+//               the files and modules the branch changes, #1411)
 //   --cochange  co-change coupling of the last 6 months (needs the full git history; nightly)
 
 const scripts = (out: string, names: string[], env: Record<string, string> = {}) => {
@@ -595,7 +605,7 @@ if (import.meta.main) {
 		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Architecture fitness\n\n${values}\n`);
 	}
 	if (args.includes('--update') && !errors.length) {
-		const next = m ? tighten(m, ratchet) : ratchet;
+		const next = m ? tighten(m, ratchet, base ? changedFiles(base, 'HEAD').map((f) => f.path) : undefined) : ratchet;
 		next.coChangeWarn = Math.min(pairs ?? Infinity, ratchet.coChangeWarn);
 		writeFileSync(file, JSON.stringify(next, null, '\t') + '\n');
 		console.log('ratchet.json tightened to the measured values');

@@ -140,10 +140,17 @@ if (!approvals.length)
 const gateApprovals = [...prBody.matchAll(/\bgate change approved:\s*#(\d+)/gi)].map(([, n]) => n);
 const gateFile =
 	/^(\.github\/workflows\/|tools\/|\.claude\/(hooks|skills)\/)|(^|\/)CLAUDE\.md$|^(\.fallowrc\.json|deepcheck\.config\.json|\.(deepcheck|testcheck)-baseline\.json|vitest\.config\.ts|backend\/scripts\/coverage-check\.ts|backend\/bunfig\.toml)$/;
+// an import path in tools/ that follows a moved function changes no check (#1411)
+const onlyImports = (file) =>
+	file.startsWith('tools/') &&
+	git('diff', '-U0', '--no-renames', from, 'HEAD', '--', file)
+		.split('\n')
+		.filter((line) => /^[-+](?![-+]{2} )/.test(line))
+		.every((line) => /^[-+]\s*import\b.*\bfrom\s+['"][^'"]+['"];?\s*$/.test(line));
 const gateChanges = base
 	? git('diff', '--name-only', '--no-renames', from, 'HEAD')
 			.split('\n')
-			.filter((file) => gateFile.test(file) || (/^(backend\/)?package\.json$/.test(file) && scriptsChanged(file)))
+			.filter((file) => (gateFile.test(file) && !onlyImports(file)) || (/^(backend\/)?package\.json$/.test(file) && scriptsChanged(file)))
 	: [];
 // a lowered coverage floor stays red with approval too: a ratchet against the merge base, as tools/fitness/ratchet.json
 const floorsOf = (rev, file) => {
