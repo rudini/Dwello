@@ -63,4 +63,29 @@ describe('GET /tenants/[id]/export', () => {
 
 		await expect(response.arrayBuffer()).rejects.toThrow();
 	});
+
+	// #748, code review 748-1 C-1: no server holds every file; each comes only when the browser reads on
+	it('holt jede Datei erst, wenn der Browser den ZIP weiterliest', async () => {
+		const two = {
+			...sample,
+			files: [
+				...sample.files,
+				{ path: 'dokumente/2026-10-20 Kündigung.pdf', source: 'document/second' }
+			]
+		};
+		const calls: string[] = [];
+		const fetch = async (url: string) => (
+			calls.push(url),
+			url.includes('/export/files/') ? new Response('%PDF-1.4\n') : Response.json(two)
+		);
+		const response = await (GET as (event: never) => Promise<Response>)({
+			params: { id: 't1' },
+			fetch
+		} as never);
+		const reader = response.body!.getReader();
+
+		expect(calls).toHaveLength(1);
+		while (calls.length < 2) await reader.read();
+		expect(calls).toHaveLength(2);
+	});
 });

@@ -119,7 +119,13 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 			set.headers['content-type'] = 'application/octet-stream';
 			return file;
 		},
-		{ params: t.Object({ id: t.String({ format: 'uuid' }), kind: t.String(), fileId: t.String({ format: 'uuid' }) }) }
+		{
+			params: t.Object({
+				id: t.String({ format: 'uuid' }),
+				kind: t.Union([t.Literal('document'), t.Literal('contract'), t.Literal('statement')]),
+				fileId: t.String({ format: 'uuid' })
+			})
+		}
 	)
 	// Get tenant with contract history
 	.get('/:id/history', async ({ params, set }) => {

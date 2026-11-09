@@ -139,10 +139,24 @@ describe('Daten eines Mieters exportieren', () => {
 	});
 
 	it('gibt keine Datei eines anderen Mieters heraus (Art. 26 und 29 DSG)', async () => {
-		const { files } = await listOf(former.tenant);
+		// a document, a statement and the contract PDF of the Vormieter (code review 748-1 C-2)
+		const contract = eq(rentalContracts.id, former.contract);
+		await db.update(rentalContracts).set({ contractPdf: pdf('former contract') }).where(contract);
+		try {
+			const { files } = await listOf(former.tenant);
 
-		for (const { source } of files) expect((await fileOf(rental.tenant, source)).status).toBe(404);
-		expect(files.length).toBeGreaterThan(0);
+			expect(files.map(({ source }) => source.split('/')[0]).sort()).toEqual(['contract', 'document', 'statement']);
+			for (const { source } of files) expect((await fileOf(rental.tenant, source)).status).toBe(404);
+		} finally {
+			await db.update(rentalContracts).set({ contractPdf: null }).where(contract);
+		}
+	});
+
+	// code review 748-1 C-3: only the three kinds of files, no other name
+	it('lehnt eine unbekannte Art von Datei ab', async () => {
+		const { files } = await listOf(rental.tenant);
+
+		expect((await fileOf(rental.tenant, `valueOf/${files[0].source.split('/')[1]}`)).status).toBe(422);
 	});
 
 	it('gibt keine Daten des Vormieters derselben Wohnung heraus (Art. 26 und 29 DSG)', async () => {
