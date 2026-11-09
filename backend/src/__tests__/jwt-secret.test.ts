@@ -1,38 +1,42 @@
 /**
- * The secret the backend checks session JWTs with, as the BFF requires it (src/lib/server/jwt-config.ts, #1376)
+ * The secret the backend checks session JWTs with, refused at start as the BFF refuses it
+ * (src/lib/server/jwt-config.ts, #1376)
  */
 
 import { describe, expect, it } from 'bun:test';
-import { jwtSecret } from '../config/jwt';
+import { checkJwtSecret } from '../config/jwt';
 
 describe('JWT-Geheimnis beim Start', () => {
 	it('verweigert den Start im Betrieb ohne JWT_SECRET', () => {
-		expect(() => jwtSecret({ NODE_ENV: 'production' })).toThrow(
+		expect(() => checkJwtSecret({ NODE_ENV: 'production' })).toThrow(
 			'JWT_SECRET environment variable is required'
 		);
 	});
 
-	it('verweigert den Start im Betrieb mit einem JWT_SECRET unter 32 Zeichen', () => {
-		expect(() => jwtSecret({ NODE_ENV: 'production', JWT_SECRET: 'x'.repeat(31) })).toThrow(
+	it('verweigert den Start mit einem JWT_SECRET unter 32 Zeichen', () => {
+		expect(() => checkJwtSecret({ JWT_SECRET: 'x'.repeat(31) })).toThrow(
 			'JWT_SECRET must be at least 32 characters long'
 		);
 	});
 
-	it('nimmt im Betrieb ein JWT_SECRET ab 32 Zeichen', () => {
-		expect(jwtSecret({ NODE_ENV: 'production', JWT_SECRET: 'x'.repeat(32) })).toBe('x'.repeat(32));
+	it('lässt den Start im Betrieb mit einem JWT_SECRET ab 32 Zeichen zu', () => {
+		expect(() =>
+			checkJwtSecret({ NODE_ENV: 'production', JWT_SECRET: 'x'.repeat(32) })
+		).not.toThrow();
 	});
 
-	it('nimmt in der Entwicklung ohne JWT_SECRET das Entwicklungsgeheimnis des BFF', () => {
-		expect(jwtSecret({})).toBe('development-secret-key-change-in-production');
+	it('lässt den Start in der Entwicklung ohne JWT_SECRET zu', () => {
+		expect(() => checkJwtSecret({})).not.toThrow();
 	});
 
-	it('bricht das Laden der Anmeldeprüfung im Betrieb ohne JWT_SECRET ab', () => {
-		const run = Bun.spawnSync(['bun', '-e', "await import('./src/middleware/auth')"], {
+	it('bricht den Start des Backends im Betrieb ohne JWT_SECRET ab', () => {
+		const run = Bun.spawnSync(['bun', 'src/index.ts'], {
 			cwd: `${import.meta.dir}/../..`,
 			// empty, not removed: Bun would fill a missing one from a developer's backend/.env
-			env: { ...process.env, NODE_ENV: 'production', JWT_SECRET: '' }
+			env: { ...process.env, NODE_ENV: 'production', JWT_SECRET: '', PORT: '0' },
+			timeout: 15000
 		});
-		expect(run.exitCode).not.toBe(0);
 		expect(run.stderr.toString()).toContain('JWT_SECRET environment variable is required');
-	});
+		expect(run.exitCode).not.toBe(0);
+	}, 20000);
 });
