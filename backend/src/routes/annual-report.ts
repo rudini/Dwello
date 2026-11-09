@@ -30,7 +30,7 @@ export const annualReportRoutes = new Elysia({ prefix: '/api/v1/reports' })
 		{
 			query: t.Object({
 				buildingId: t.String({ format: 'uuid' }),
-				year: t.Numeric({ minimum: 1900, maximum: 2999 })
+				year: t.Integer({ minimum: 1900, maximum: 2999 })
 			})
 		}
 	)

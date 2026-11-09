@@ -18,13 +18,18 @@ const categories = {
 type Body = typeof report;
 
 // #1409: which Jahresbericht «Auswertungen» shows first, and the years to choose from
-function backend(firstYear: number, body: Body = report, list: unknown = buildings) {
+function backend(
+	firstYear: number,
+	body: Body = report,
+	list: unknown = buildings,
+	cats: unknown = categories
+) {
 	const asked: string[] = [];
 	const posted: unknown[] = [];
 	const fetch = (async (url: string, init?: RequestInit) => {
 		const { pathname, searchParams } = new URL(url);
 		if (pathname.endsWith('/buildings')) return Response.json(list);
-		if (pathname.endsWith('/categories')) return Response.json(categories);
+		if (pathname.endsWith('/categories')) return Response.json(cats);
 		if (pathname.endsWith('/reports/pdf')) {
 			posted.push(JSON.parse(String(init?.body)));
 			return new Response('%PDF-');
@@ -115,6 +120,17 @@ describe('Jahresbericht zum Herunterladen', () => {
 			`${costs};Wertvermehrende Investitionen;15000.00`,
 			`${costs};Total wertvermehrende Investitionen;15000.00`
 		]);
+	});
+
+	// fallback review of #1421: a name a spreadsheet would run as a formula gets a leading «'», an amount stays a number
+	it('setzt in der CSV vor einen Namen wie eine Formel einen Apostroph', async () => {
+		const named = {
+			...categories,
+			categories: [{ ...categories.categories[0], name: '=HYPERLINK(1)', nameDE: '=HYPERLINK(1)' }]
+		};
+		const response = await annualReportCsv(backend(2024, report, buildings, named).fetch, chosen);
+		const text = new TextDecoder().decode(await response.arrayBuffer());
+		expect(text).toContain("Kosten, die Sie selbst tragen;'=HYPERLINK(1);920.00");
 	});
 
 	it('lässt das PDF mit Titel, Gebäude, Zeitraum und den Beträgen der Seite machen', async () => {

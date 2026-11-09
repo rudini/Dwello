@@ -102,7 +102,8 @@ async function periodEndingIn(buildingId: string, yearEnd: string) {
 	return lastCompletedPeriod(type, `${Number(yearEnd.slice(0, 4)) + 1}-01-01`);
 }
 
-/** Whether a contract of the building is billed outside Dwello up to a day of the period («Abgerechnet bis») */
+/** Whether a contract of the building in the period is billed outside Dwello into it («Abgerechnet bis» on or after
+ * its first day, also after its end: fallback review of #1421) */
 async function billedOutside(buildingId: string, period: { start: string; end: string }) {
 	const found = await db
 		.select({ id: rentalContracts.id })
@@ -112,7 +113,7 @@ async function billedOutside(buildingId: string, period: { start: string; end: s
 			and(
 				eq(apartments.buildingId, buildingId),
 				gte(rentalContracts.billedUntil, period.start),
-				lte(rentalContracts.billedUntil, period.end)
+				lte(rentalContracts.startDate, period.end)
 			)
 		)
 		.limit(1);

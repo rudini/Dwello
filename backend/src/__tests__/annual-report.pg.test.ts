@@ -115,17 +115,15 @@ beforeAll(async () => {
 		servicePeriodEnd: '2025-12-15'
 	});
 	// review 1409-2 C-11: a non-allocable invoice without a Kategorie counts too, last
-	await db
-		.insert(invoices)
-		.values({
-			buildingId: rental.building,
-			categoryId: null,
-			billingEntityName: 'Muster AG',
-			description: `Jahresbericht ${token}`,
-			amount: '50.00',
-			invoiceDate: '2025-07-01',
-			isValidUtilityCost: false
-		});
+	await db.insert(invoices).values({
+		buildingId: rental.building,
+		categoryId: null,
+		billingEntityName: 'Muster AG',
+		description: `Jahresbericht ${token}`,
+		amount: '50.00',
+		invoiceDate: '2025-07-01',
+		isValidUtilityCost: false
+	});
 	await invoice('Mortgage Interest', { amount: '4200.00', isValidUtilityCost: false });
 	await invoice('Capital Improvements', {
 		amount: '15000.00',
@@ -280,6 +278,22 @@ describe('Kosten, die der Vermieter trägt', () => {
 				.where(eq(rentalContracts.id, extra.contract));
 		}
 	});
+
+	// fallback review of #1421: billed outside Dwello up to a day after the period covers the whole period
+	it('sagt es auch, wenn «Abgerechnet bis» nach dem Ende der Periode liegt', async () => {
+		await db
+			.update(rentalContracts)
+			.set({ billedUntil: '2026-01-31' })
+			.where(eq(rentalContracts.id, extra.contract));
+		try {
+			expect((await report()).costs.utility.outside).toBe(true);
+		} finally {
+			await db
+				.update(rentalContracts)
+				.set({ billedUntil: null })
+				.where(eq(rentalContracts.id, extra.contract));
+		}
+	});
 });
 
 describe('Jahre des Jahresberichts', () => {
@@ -291,6 +305,13 @@ describe('Jahre des Jahresberichts', () => {
 	it('nennt das erste Jahr des Gebäudes auch, wenn es nach dem gefragten Jahr liegt', async () => {
 		const report = (await (await reportOf(2023)).json()) as Report;
 		expect([report.year, report.firstYear]).toEqual([2023, 2024]);
+	});
+
+	// fallback review of #1421: a year is a whole number
+	it('lehnt ein Jahr mit Bruchteil ab', async () => {
+		expect(
+			(await callApi(`/api/v1/reports/annual?buildingId=${rental.building}&year=2025.5`)).status
+		).toBe(422);
 	});
 
 	it('lehnt ein unbekanntes Gebäude ab', async () => {

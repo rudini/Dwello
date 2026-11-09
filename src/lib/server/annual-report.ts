@@ -160,8 +160,11 @@ const reportOf = async (fetch: Fetch, url: URL) => {
 const fileName = (loaded: { buildingName: string; report: { year: number } }, extension: string) =>
 	`${m.analytics_report_heading({ building: loaded.buildingName, year: loaded.report.year })}.${extension}`;
 
-// a field with «;», a quote or a line break in quotes; only the landlord's own names and plain numbers, so no formula
-// guard as in the export of all data (Fachreview 496-1 V-2)
+// a text a spreadsheet would run as a formula gets a leading «'», as in the export of all data (Fachreview 496-1 V-2,
+// fallback review of #1421); the amounts are plain numbers and stay as they are
+const text = (value: string) =>
+	'=+-@'.includes(value[0] ?? ' ') || value.charCodeAt(0) < 32 ? `'${value}` : value;
+// a field with «;», a quote or a line break in quotes
 const field = (text: string) => (/[;"\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text);
 
 /** The Jahresbericht as CSV, as the export of all data: UTF-8 with the mark Excel reads it by, «;», CRLF; a row per row
@@ -170,8 +173,8 @@ export async function annualReportCsv(fetch: Fetch, url: URL) {
 	const loaded = await reportOf(fetch, url);
 	// a note as a row without amount (Fachreview 1409-2 V-17)
 	const rows = loaded.report.sections.flatMap(({ heading, notes, rows }) => [
-		...notes.map((note) => [heading, note, '']),
-		...rows.map(({ label, amount }) => [heading, label, amount.toFixed(2)])
+		...notes.map((note) => [text(heading), text(note), '']),
+		...rows.map(({ label, amount }) => [text(heading), text(label), amount.toFixed(2)])
 	]);
 	return fileDownload(
 		fileName(loaded, 'csv'),
