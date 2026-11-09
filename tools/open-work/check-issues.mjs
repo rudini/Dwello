@@ -145,8 +145,9 @@ const gateFile =
 const withoutPath = (line) => /^\s*import\s[^;'"]*\sfrom\s+['"][^'"]+['"];?\s*$/.test(line) && line.replace(/['"][^'"]+['"]/, "''");
 const onlyImports = (file) => {
 	if (!file.startsWith('tools/')) return false;
-	const lines = git('diff', '-U0', '--no-renames', from, 'HEAD', '--', file).split('\n');
-	const side = (sign) => lines.filter((line) => line.startsWith(sign) && !line.startsWith(sign.repeat(3) + ' ')).map((line) => withoutPath(line.slice(1)));
+	const diff = git('diff', '-U0', '--no-renames', from, 'HEAD', '--', file).split('\n');
+	const lines = diff.slice(diff.findIndex((line) => line.startsWith('@@'))); // the file header ends at the first hunk
+	const side = (sign) => lines.filter((line) => line.startsWith(sign)).map((line) => withoutPath(line.slice(1)));
 	const [removed, added] = [side('-'), side('+')];
 	return removed.length > 0 && removed.length === added.length && removed.every((line, i) => line && line === added[i]);
 };

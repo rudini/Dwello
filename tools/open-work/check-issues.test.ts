@@ -289,6 +289,14 @@ describe('Änderungen an Prüfungen brauchen eine Freigabe (#1269)', () => {
 		expect((await changeGate({ 'tools/a.ts': "import { b as x } from '../src/m';\nrun(x);\n" }, '', base)).out).toContain('tools/a.ts changes a check');
 		const added = "import { a as x } from '../src/m';\nimport '../src/side';\nrun(x);\n";
 		expect((await changeGate({ 'tools/a.ts': added }, '', base)).out).toContain('tools/a.ts changes a check');
+		const dashes = { 'tools/a.ts': "import { a as x } from '../src/n';\n++ run(x);\n" };
+		expect((await changeGate(dashes, '', { 'tools/a.ts': "import { a as x } from '../src/m';\n-- run(y);\n" })).out).toContain('tools/a.ts changes a check');
+	});
+
+	it('verlangt eine Freigabe für eine Datei in tools/, deren Diff keine Zeile ändert (#1411)', async () => {
+		const cwd = gateRepo({ 'README.md': 'head\n' }, { 'tools/a.sh': 'echo a\n' });
+		execFileSync('sh', ['-c', 'chmod +x tools/a.sh && git -c user.name=t -c user.email=t@t commit -qam mode'], { cwd });
+		expect((await check([], 200, { number: 5, body: '', cwd, base: 'main' })).out).toContain('tools/a.sh changes a check');
 	});
 
 	it('meldet eine gelöschte und eine umbenannte Prüfdatei', async () => {
