@@ -90,6 +90,8 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Schlussrechnung (eines Rechnungsstellers)** | Rechnung eines Rechnungsstellers über das Total seiner Leistungen, die seine Akontorechnungen abzieht. Dwello erfasst sie mit dem Total vor dem Abzug. | — |
 | **Mahnung eines Rechnungsstellers** | Zahlungserinnerung zu einer Rechnung; Mahngebühren und Verzugszinsen sind keine Nebenkosten. Nicht zu verwechseln mit der Mahnung an einen Mieter. | — |
 | **Beleg** | Hochgeladene Datei einer Rechnung (Scan, Foto oder PDF), höchstens eine pro Rechnung. Wird mit der Rechnung gelöscht. Erleichtert die Belegeinsicht des Mieters (Art. 257b Abs. 2 OR); die Originalrechnung bewahrt der Liegenschaftsverwalter auf. | `invoice_documents` Tabelle |
+| **Aufbewahrungsfrist** (Rechnung) | Datum, bis zu dem der Liegenschaftsverwalter eine Rechnung aufbewahrt: der 31.12. des Jahres, in dem die Abrechnungsperiode des Gebäudes endet, die das spätere Datum von Rechnungsdatum und Ende des Leistungszeitraums enthält, plus 10 Jahre (Art. 958f OR; Art. 152 DBG). Löschen bleibt möglich, Dwello nennt dabei das Datum. Rechnungen für wertvermehrende Investitionen bewahrt er bis zum Verkauf des Gebäudes auf. | `keepUntil` (#1410) |
+| **Behalten** (Rechnungen einer Abrechnungsperiode) | Entscheid des Liegenschaftsverwalters, die Rechnungen einer Abrechnungsperiode eines Gebäudes nach Ablauf der Aufbewahrungsfrist zu behalten. Die Aufgabe in der Übersicht entfällt, Dwello löscht nichts (wie «Dokumente geprüft»). | `buildings.kept_invoice_periods` (#1410) |
 
 ---
 

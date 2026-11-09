@@ -54,6 +54,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Referenzindex | taux de référence | tasso di riferimento | reference rate |
 | Rechnung | facture | fattura | invoice |
 | Beleg (hochgeladene Datei einer Rechnung, #217) | pièce justificative | giustificativo | supporting document |
+| Aufbewahrungsfrist (Rechnung, #1410) | délai de conservation | termine di conservazione | retention period |
+| Behalten (Rechnungen nach der Aufbewahrungsfrist, #1410) | conserver | conservare | keep |
 | Gutschrift (eines Rechnungsstellers) | note de crédit | nota di credito | credit note |
 | Akontorechnung (eines Rechnungsstellers) | facture d’acompte | fattura d’acconto | advance invoice |
 | Schlussrechnung (eines Rechnungsstellers) | facture finale | fattura finale | final invoice |
