@@ -14,7 +14,7 @@
       },
       "devDependencies": {
         "@axe-core/playwright": "^4.14.0",
-        "@cucumber/cucumber-expressions": "19.0.0",
+        "@cucumber/cucumber-expressions": "20.1.0",
         "@eslint/js": "^10.0.1",
         "@inlang/paraglide-js": "2.29.3",
         "@inlang/plugin-message-format": "4.5.6",
@@ -99,7 +99,7 @@
 
     "@cucumber/ci-environment": ["@cucumber/ci-environment@13.0.0", "", {}, "sha512-cs+3NzfNkGbcmHPddjEv4TKFiBpZRQ6WJEEufB9mw+ExS22V/4R/zpDSEG+fsJ/iSNCd6A2sATdY8PFOyY3YnA=="],
 
-    "@cucumber/cucumber-expressions": ["@cucumber/cucumber-expressions@19.0.0", "", { "dependencies": { "regexp-match-indices": "1.0.2" } }, "sha512-4FKoOQh2Uf6F6/Ln+1OxuK8LkTg6PyAqekhf2Ix8zqV2M54sH+m7XNJNLhOFOAW/t9nxzRbw2CcvXbCLjcvHZg=="],
+    "@cucumber/cucumber-expressions": ["@cucumber/cucumber-expressions@20.1.0", "", { "dependencies": { "regexp-match-indices": "1.0.2" } }, "sha512-KXQJChHTyHdg6HI7fHy3zpjfoS205vV1B/aJQKB82VFgMGbdVdiaSy7sTtap/5Q787anLmZt25Tg0FqQ2n4fqw=="],
 
     "@cucumber/gherkin": ["@cucumber/gherkin@39.1.0", "", { "dependencies": { "@cucumber/messages": ">=31.0.0 <33" } }, "sha512-pqmSO2bUWxJm3TbNrKXlDaHjL6c77+ez9kWmfCd9oRPeTRPEVH3spZvpAqdXYWOZYSNYwWFCAAeZ4RGpkauNoQ=="],
 
@@ -1002,6 +1002,8 @@
     "eslint-plugin-svelte/globals": ["globals@16.5.0", "", {}, "sha512-c/c15i26VrJ4IRt5Z89DnIzCGDn9EcebibhAOjw5ibqEHsE1wLUgkPn9RDmNcUKyU87GeaL633nyJ+pplFR2ZQ=="],
 
     "fallow-type-aware/typescript": ["typescript@7.0.2", "", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
+
+    "playwright-bdd/@cucumber/cucumber-expressions": ["@cucumber/cucumber-expressions@19.0.0", "", { "dependencies": { "regexp-match-indices": "1.0.2" } }, "sha512-4FKoOQh2Uf6F6/Ln+1OxuK8LkTg6PyAqekhf2Ix8zqV2M54sH+m7XNJNLhOFOAW/t9nxzRbw2CcvXbCLjcvHZg=="],
 
     "playwright-bdd/commander": ["commander@13.1.0", "", {}, "sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw=="],
 
