@@ -26,11 +26,12 @@ const calls = gitCalls(input.tool_input?.command ?? '', cwd).filter((call) => {
 	const repository = call.dir && repositoryOf(call);
 	return !repository || repository === project;
 });
-/** The subjects a push would send: the commits since origin/main, merges left out as in CI */
+/** The subjects a push would send: the commits since origin/main, merges and Dependabot's left out as in CI (#1269) */
 const pushed = (call) =>
-	gitAs(call, 'log', '--no-merges', '--format=%s', 'origin/main..HEAD')
+	gitAs(call, 'log', '--no-merges', '--format=%an%x09%s', 'origin/main..HEAD')
 		.split('\n')
-		.filter(Boolean);
+		.filter((line) => line && !line.startsWith('dependabot[bot]\t'))
+		.map((line) => line.slice(line.indexOf('\t') + 1));
 
 /** The message of a commit: -m, --message=, -m<text>, or `-F -` with the heredoc the commit reads */
 function messageOf({ args, stdin }) {
