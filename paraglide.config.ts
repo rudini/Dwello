@@ -5,7 +5,10 @@ import { compile, type CompilerOptions } from '@inlang/paraglide-js';
 export const paraglideOptions = {
 	project: './project.inlang',
 	outdir: './src/lib/paraglide',
-	strategy: ['cookie', 'preferredLanguage', 'baseLocale']
+	strategy: ['cookie', 'preferredLanguage', 'baseLocale'],
+	// Physical message files, as in Paraglide 2: the E2E steps import BFF code under Node, which cannot load
+	// the Vite plugin's default `virtual:` modules
+	outputStructure: 'message-modules'
 } satisfies CompilerOptions;
 
 if (import.meta.main) await compile(paraglideOptions);

@@ -143,6 +143,23 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		expect(blocked.stderr).toContain('51 characters');
 	});
 
+	// Dependabot writes its own subjects, which CI «Commit subjects» exempts as well (#1269, for #1428)
+	it('lets a push through whose only overlong subject is a commit authored by dependabot[bot]', () => {
+		const project = writeRepo({
+			'.claude/hooks/commit-msg-gate.mjs': readFileSync(HOOK, 'utf8'),
+			'.claude/hooks/git-calls.mjs': readFileSync(GIT_CALLS, 'utf8'),
+			'CLAUDE.md': readFileSync(`${ROOT}/CLAUDE.md`, 'utf8')
+		});
+		git(project, 'update-ref', 'refs/remotes/origin/main', 'HEAD');
+		const subject = 'chore(build): Bump @inlang/paraglide-js from 2.29.3 to 3.2.1';
+		git(project, 'commit', '-q', '--allow-empty', '-m', subject, '--author=dependabot[bot] <bot@example.com>');
+		const push = spawnSync('node', [`${project}/.claude/hooks/commit-msg-gate.mjs`], {
+			input: JSON.stringify({ tool_input: { command: 'git push -u origin feature' }, cwd: project }),
+			encoding: 'utf8'
+		});
+		expect(push).toMatchObject({ status: 0, stderr: '' });
+	});
+
 	it('takes types and scopes from CLAUDE.md, so the list exists once', () => {
 		expect(hook('git commit -m "fix(i18n): x"').status).toBe(0);
 		expect(hook('git commit -m "docs(build): x"').status).toBe(0);

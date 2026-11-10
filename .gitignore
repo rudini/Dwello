@@ -71,3 +71,6 @@ tests/screenshots/
 
 # the Sicherung of a local installation (#718)
 backups/
+
+# Paraglide 3 compiler cache
+project.inlang/cache/
