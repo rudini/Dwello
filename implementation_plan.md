@@ -8,3 +8,16 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and write the session to its own archive file at the end. A session that appears on `main` after this one started makes this one parallel from then on: at the merge before the push take `main`'s plan and move this checklist into the pull request.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History: `docs/archive/implementation-plan-verlauf.md` (phases 0–22 and the sessions up to 2026-11-08, closed: add nothing) and `docs/archive/sessions/` (one file per later session).
+
+## Session
+
+Issue #1445: marketing videos (short and vertical cut, long cut caption fix, YouTube texts, scripts). No scenario: marketing tooling and video files, no app behaviour changes.
+
+- [ ] Long cut: captions no longer cover the app's toast «Gebäude … gespeichert»
+- [ ] Short cut 16:9, about 60 s, five highlights of about 8–10 s
+- [ ] Vertical cut 9:16, 30–45 s, mobile view (390 px): invoice PDF → KI → statement → QR-bill → «Gratis installieren – dwello.ch»
+- [ ] YouTube title, description, chapter marks and thumbnail per cut
+- [ ] Scripts and README in `docs/marketing-video/`
+- [ ] Landing page link: waits for the YouTube address («Stop and ask» of #1445)
+- [ ] Slice review (`code-reviewer`), closing round
+- [ ] Archive session, PR
