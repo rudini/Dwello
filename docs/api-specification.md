@@ -387,7 +387,7 @@ The root layout (`src/routes/+layout.svelte`) calls `/auth/refresh` every 50 min
 | Cookie | Content | Flags |
 |---|---|---|
 | `dwello_session` | JWT | HTTPOnly; `maxAge` = `JWT_EXPIRY` |
-| `dwello_xsrf` | XSRF token | readable by JS; `maxAge` = `JWT_EXPIRY`; a page load with a valid session but no XSRF cookie sets a new one that ends with the session (#1434) |
+| `dwello_xsrf` | XSRF token | readable by JS; `maxAge` = `JWT_EXPIRY`; any request with a valid session but no XSRF cookie sets a new one that ends with the session (#1434) |
 | `dwello_oauth_state` | OAuth state | HTTPOnly; 10 min |
 | `dwello_login` | provider and `redirectTo` during login | 10 min |
 

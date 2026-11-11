@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { getXsrfTokenFromCookie } from '$lib/api';
 	import { mobileNavOpen, openMobileNav } from '$lib/stores/navigation';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -15,7 +16,11 @@
 	let { user }: { user: User | null } = $props();
 
 	let menuOpen = $state(false);
-	let logoutRefused = $state(false); // #1434: the session stays, so the landlord must not land on the sign-in page
+	// #1434: the session stays, so the landlord must not land on the sign-in page; the message belongs to its page
+	let logoutRefusedOn = $state<string>();
+	$effect(() => {
+		if ($page.url.pathname !== logoutRefusedOn) logoutRefusedOn = undefined;
+	});
 	let menuButton = $state<HTMLButtonElement>();
 	const displayName = $derived(user?.name || user?.email || '');
 
@@ -48,7 +53,7 @@
 			});
 			if (response.status === 403) {
 				closeMenu();
-				logoutRefused = true;
+				logoutRefusedOn = $page.url.pathname;
 				return;
 			}
 			await goto('/login');
@@ -151,7 +156,7 @@
 			{/if}
 		</div>
 	</div>
-	{#if logoutRefused}
+	{#if logoutRefusedOn}
 		<div class="px-4 pb-4 lg:px-6">
 			<Alert tone="critical" title={m.header_logout_refused()} testid="logout-error" />
 		</div>
