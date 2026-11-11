@@ -36,6 +36,12 @@ export type KiInput = {
 	confirmed?: boolean;
 };
 
+// a short key weakens the derived one: refused at start, as JWT_SECRET (config/jwt.ts, #1437)
+export function checkEncryptionKey(env: Record<string, string | undefined> = process.env) {
+	if (env.ENCRYPTION_KEY && env.ENCRYPTION_KEY.length < 32)
+		throw new Error('ENCRYPTION_KEY must be at least 32 characters long');
+}
+
 // AES-256-GCM with a key derived from ENCRYPTION_KEY (docker/init-secrets.sh makes it); «iv.ciphertext» in base64
 const secretKey = async () => {
 	const secret = process.env.ENCRYPTION_KEY;

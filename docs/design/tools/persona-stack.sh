@@ -40,7 +40,7 @@ fi
 # e-mail goes to the mail catcher of the acceptance tests (shared with E2E, which reuses it): read on :2526/messages
 fuser 2525/tcp > /dev/null 2>&1 || (cd backend && setsid nohup bun run mail-catcher > /tmp/persona-mail.log 2>&1 &) < /dev/null > /dev/null 2>&1
 [ -z "$FRESH" ] || { rm -rf /tmp/persona-backups$SECOND; mkdir -p /tmp/persona-backups$SECOND; }
-(cd backend && env PORT=$API DATABASE_URL=$DB ${FRESH:+SETUP_CODE=PERS-FRSH} ${FRESH:+BACKUP_DIR=/tmp/persona-backups$SECOND} LLM_LOCAL_URL=http://127.0.0.1:2528/v1 ENCRYPTION_KEY=persona-encryption-key MAIL_TRANSPORT=smtp MAIL_FROM=verwaltung@dwello.test SMTP_HOST=127.0.0.1 SMTP_PORT=2525 setsid nohup bun run src/index.ts > /tmp/persona-backend$SECOND.log 2>&1 &) < /dev/null > /dev/null 2>&1
+(cd backend && env PORT=$API DATABASE_URL=$DB ${FRESH:+SETUP_CODE=PERS-FRSH} ${FRESH:+BACKUP_DIR=/tmp/persona-backups$SECOND} LLM_LOCAL_URL=http://127.0.0.1:2528/v1 ENCRYPTION_KEY=persona-encryption-key-of-the-persona-stack MAIL_TRANSPORT=smtp MAIL_FROM=verwaltung@dwello.test SMTP_HOST=127.0.0.1 SMTP_PORT=2525 setsid nohup bun run src/index.ts > /tmp/persona-backend$SECOND.log 2>&1 &) < /dev/null > /dev/null 2>&1
 # only the persona-kit's Liegenschaftsverwalter may sign in, as in production (#51); a fresh installation has no OAuth,
 # so «Dwello einrichten» shows
 # the address search asks the real Gebäuderegister (geo.admin.ch, #479): Node's fetch takes HTTPS_PROXY only with NODE_USE_ENV_PROXY
