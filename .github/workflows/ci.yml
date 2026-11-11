@@ -175,7 +175,8 @@ jobs:
           DWELLO_SOURCE: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           # an anonymous volume for the inner Docker's data: its overlay storage does not work on the container's overlay
-          docker run --rm --privileged --cgroupns=host -v /var/lib/docker -v "$PWD/install:/install:ro" -e DWELLO_SOURCE ubuntu:24.04 bash -euc '
+          # the runner's network: the bridge DNS stopped resolving archive.ubuntu.com on 2026-11-11 (#1443)
+          docker run --rm --privileged --cgroupns=host --network host -v /var/lib/docker -v "$PWD/install:/install:ro" -e DWELLO_SOURCE ubuntu:24.04 bash -euc '
             set -o pipefail
             apt-get update -qq && apt-get install -y -qq curl sudo >/dev/null
             useradd -m helper && echo "helper ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/helper
