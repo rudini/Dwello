@@ -13,11 +13,14 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 Issue #1445: marketing videos (short and vertical cut, long cut caption fix, YouTube texts, scripts). No scenario: marketing tooling and video files, no app behaviour changes.
 
-- [ ] Long cut: captions no longer cover the app's toast «Gebäude … gespeichert»
-- [ ] Short cut 16:9, about 60 s, five highlights of about 8–10 s
-- [ ] Vertical cut 9:16, 30–45 s, mobile view (390 px): invoice PDF → KI → statement → QR-bill → «Gratis installieren – dwello.ch»
-- [ ] YouTube title, description, chapter marks and thumbnail per cut
-- [ ] Scripts and README in `docs/marketing-video/`
+- [x] Long cut: captions no longer cover the app's toast «Gebäude … gespeichert»
+- [x] Short cut 16:9, about 60 s, five highlights of about 8–10 s
+- [x] Vertical cut 9:16, 30–45 s, mobile view (390 px): invoice PDF → KI → statement → QR-bill → «Gratis installieren – dwello.ch»
+- [x] YouTube title, description, chapter marks and thumbnail per cut
+- [x] Scripts and README in `docs/marketing-video/`
 - [ ] Landing page link: waits for the YouTube address («Stop and ask» of #1445)
 - [ ] Slice review (`code-reviewer`), closing round
 - [ ] Archive session, PR
+- [x] Vertical cut uploads all three invoices and shows one: with only the Kaminfeger the tenants get a refund, which has no QR-bill (issue said «an invoice PDF»; named in the PR)
+- [x] Vertical cut has no chapter marks: Shorts show none, and YouTube needs three parts of at least 10 s (named in the PR)
+- [x] Files: `docs/marketing-video/*` (new), `docs/design/tools/persona-kit.mjs` (exports `sessionToken`)
