@@ -35,12 +35,9 @@ export const searchStatements = (term: string): Activity => (actor) =>
 		filteredBy({ search: term }) // the list shown is the result, not the page before
 	);
 
+// the choice alone loads the list (#662); a click on «Suchen» after it loaded it again, after a later step's change (#1440)
 export const showStatementsOfBuilding = (buildingId: string): Activity => (actor) =>
-	actor.attemptsTo(
-		Select.option(buildingId).from(statementBuildingFilter),
-		Click.on(statementSearchButton),
-		filteredBy({ building: buildingId })
-	);
+	actor.attemptsTo(Select.option(buildingId).from(statementBuildingFilter), filteredBy({ building: buildingId }));
 
 // The building is chosen before the page is hydrated; the search runs once it is
 export const showStatementsOfBuildingWhileLoading = (buildingId: string): Activity => (actor) =>
