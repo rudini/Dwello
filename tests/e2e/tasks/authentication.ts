@@ -2,7 +2,7 @@ import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
 import { Click, Cookies, Enter, FailRequests, NoticeRequest, Navigate, Wait } from '../screenplay/interactions';
 import { userMenuButton } from '../targets/app-frame';
-import { loginButton, loginError, logoutButton, passwordEmailInput, passwordInput, passwordSubmitButton } from '../targets/authentication';
+import { loginButton, loginError, logoutButton, logoutError, passwordEmailInput, passwordInput, passwordSubmitButton } from '../targets/authentication';
 
 export const GOOGLE_SIGN_IN = 'Anmeldung bei Google';
 
@@ -12,6 +12,10 @@ export const signInWith = (provider: string): Activity => (actor) =>
 
 /** Chooses «Abmelden» without waiting for the sign-in page: unsaved changes ask first (#668) */
 export const chooseSignOut: Activity = (actor) => actor.attemptsTo(Click.on(userMenuButton), Click.on(logoutButton));
+
+// the browser keeps the session but no longer the XSRF token, so the sign-out is refused (#1434)
+export const loseXsrfToken = Cookies.loseXsrf;
+export const refusedSignOut: Activity = (actor) => actor.attemptsTo(chooseSignOut, Wait.until(logoutError));
 
 // ends on the sign-in page: a step after it would otherwise race the sign-out's redirect (WebKit, #424)
 export const signOut: Activity = (actor) =>

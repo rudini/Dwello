@@ -44,6 +44,7 @@ Funktionalität: Barrierefreiheit
       | dashboard              | ki-none             |
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
+      | dashboard              | logout-refused      |
       | dashboard              | other-language      |
       | dashboard              | language-changed    |
       | dashboard              | language-menu-open  |

@@ -22,6 +22,7 @@
 	"nav_close_menu": "Chiudere il menu",
 	"header_user_menu": "Menu utente",
 	"header_logout": "Disconnettersi",
+	"header_logout_refused": "Dwello non è riuscito a disconnetterla. Ricarichi la pagina e si disconnetta di nuovo.",
 	"footer_legal": "Note legali",
 	"footer_privacy": "Protezione dei dati",
 	"footer_terms": "Condizioni d’uso",

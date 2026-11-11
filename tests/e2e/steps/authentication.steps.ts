@@ -1,8 +1,8 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { enteredPassword, focusOnLoginHint, googleSignInParameter, loginHint, loginLegalText, loginPageOverflow, passwordSignInOffered, passwordSignInShownShare, shownUserName, signInOffered, signInOptions, signInShownShare } from '../questions/authentication';
+import { enteredPassword, focusOnLoginHint, logoutErrorText, googleSignInParameter, loginHint, loginLegalText, loginPageOverflow, passwordSignInOffered, passwordSignInShownShare, shownUserName, signInOffered, signInOptions, signInShownShare } from '../questions/authentication';
 import { pageTitle } from '../questions/navigation';
-import { expireSession, failPasswordCheck, failSignIns, holdSessionWithoutAccess, signInWith, signInWithPassword, signOut } from '../tasks/authentication';
+import { expireSession, failPasswordCheck, failSignIns, holdSessionWithoutAccess, loseXsrfToken, refusedSignOut, signInWith, signInWithPassword, signOut } from '../tasks/authentication';
 import { openPage } from '../tasks/navigation';
 
 const { Given, When, Then } = createBdd(test);
@@ -93,6 +93,18 @@ Then(
 		await verwalter.sees(shownUserName).toBe(name);
 	}
 );
+
+Given('der Browser hat das XSRF-Cookie der Sitzung verloren', async ({ verwalter }) => {
+	await verwalter.attemptsTo(loseXsrfToken);
+});
+
+Given('die Abmeldung wurde abgelehnt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(refusedSignOut);
+});
+
+Then('liest der Liegenschaftsverwalter in der Kopfzeile {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(logoutErrorText).toBe(text);
+});
 
 Then('führt die Übersicht den Liegenschaftsverwalter wieder zur Anmeldung', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openPage('/dashboard'));

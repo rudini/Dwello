@@ -1,5 +1,6 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { generateJwt } from '$lib/server/auth';
+import { jwtConfig } from '$lib/server/jwt-config';
 import { handle, handleFetch, init } from '../hooks.server';
 import { env as mockEnv } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
 
@@ -46,7 +47,10 @@ describe('Sitzung eines Kontos ohne Zugang (#51)', () => {
 			event: {
 				url,
 				request: new Request(url),
-				cookies: { get: (name: string) => (name === 'dwello_session' ? jwt : undefined) },
+				cookies: {
+					get: (name: string) => (name === 'dwello_session' ? jwt : undefined),
+					set: () => {}
+				},
 				locals: {}
 			},
 			resolve: async () => new Response('page')
@@ -66,6 +70,58 @@ describe('Sitzung eines Kontos ohne Zugang (#51)', () => {
 
 	it('lässt ein erlaubtes Konto wie bisher durch', async () => {
 		expect(await (await answer('/dashboard', 'verwalter@example.com')).text()).toBe('page');
+	});
+});
+
+// #1434 (decided by the product owner): a browser that lost the XSRF cookie gets a new one on the next page load, so
+// «Laden Sie die Seite neu und melden Sie sich noch einmal ab.» holds
+describe('XSRF-Cookie einer Sitzung (#1434)', () => {
+	const AGO = 10 * 60; // the session began 10 minutes ago
+	async function load(xsrf?: string) {
+		const jwt = await generateJwt({
+			sub: 's-1',
+			email: 'verwalter@example.com',
+			name: 'Vera',
+			provider: 'google'
+		});
+		const set = vi.fn();
+		const cookies = { dwello_session: jwt, dwello_xsrf: xsrf } as Record<
+			string,
+			string | undefined
+		>;
+		const url = new URL('http://localhost/dashboard');
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(Date.now() + AGO * 1000);
+		try {
+			await handle({
+				event: {
+					url,
+					request: new Request(url),
+					cookies: { get: (name: string) => cookies[name], set },
+					locals: {}
+				},
+				resolve: async () => new Response('page')
+			} as never);
+		} finally {
+			vi.useRealTimers();
+		}
+		return set;
+	}
+
+	it('gibt dem Browser beim Laden einer Seite ein neues, das mit der Sitzung endet', async () => {
+		const set = await load();
+
+		expect(set).toHaveBeenCalledWith(
+			'dwello_xsrf',
+			expect.stringMatching(/^[0-9a-f]{64}$/),
+			expect.objectContaining({ httpOnly: false, path: '/' })
+		);
+		// as long as the session still lasts, not 7 days from now: the privacy statement says both end together
+		expect(set.mock.calls[0][2].maxAge).toBeCloseTo(jwtConfig.expirySeconds - AGO, -1);
+	});
+
+	it('ersetzt ein vorhandenes nicht', async () => {
+		expect(await load('xsrf-of-the-session')).not.toHaveBeenCalled();
 	});
 });
 

@@ -378,7 +378,7 @@ Document fields: `id, tenantId, statementId, type ("reminder" | "statement" | "u
 | GET | `/auth/callback?code&state` | Validates `state`, exchanges the code, issues the JWT, sets session and XSRF cookies, 303 to `redirectTo` (default the dashboard). Any failure: 303 to `/login?error=failed` (or `cancelled`) |
 | GET | `/auth/me` | → `{ user: { sub, email, name, provider } }`. 401 |
 | POST | `/auth/refresh` | Requires `X-XSRF-TOKEN`. Issues a new JWT and XSRF token. → `{ success: true, xsrfToken }`. 400 bad XSRF; 401 |
-| POST | `/auth/logout` | Clears the auth cookies (also without a valid XSRF token). → `{ success: true }` |
+| POST | `/auth/logout` | Requires `X-XSRF-TOKEN`. Clears the auth cookies. → `{ success: true }`. 403 `XSRF_ERROR` without a valid token: the cookies stay (#1434) |
 
 The root layout (`src/routes/+layout.svelte`) calls `/auth/refresh` every 50 minutes while signed in and sends the user to `/login` if it fails.
 
@@ -387,7 +387,7 @@ The root layout (`src/routes/+layout.svelte`) calls `/auth/refresh` every 50 min
 | Cookie | Content | Flags |
 |---|---|---|
 | `dwello_session` | JWT | HTTPOnly; `maxAge` = `JWT_EXPIRY` |
-| `dwello_xsrf` | XSRF token | readable by JS; `maxAge` = `JWT_EXPIRY` |
+| `dwello_xsrf` | XSRF token | readable by JS; `maxAge` = `JWT_EXPIRY`; any request with a valid session but no XSRF cookie sets a new one that ends with the session (#1434) |
 | `dwello_oauth_state` | OAuth state | HTTPOnly; 10 min |
 | `dwello_login` | provider and `redirectTo` during login | 10 min |
 

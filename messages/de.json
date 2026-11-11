@@ -22,6 +22,7 @@
 	"nav_close_menu": "Menü schliessen",
 	"header_user_menu": "Benutzermenü",
 	"header_logout": "Abmelden",
+	"header_logout_refused": "Dwello konnte Sie nicht abmelden. Laden Sie die Seite neu und melden Sie sich noch einmal ab.",
 	"footer_legal": "Rechtliches",
 	"footer_privacy": "Datenschutz",
 	"footer_terms": "Nutzungsbedingungen",

@@ -221,7 +221,9 @@ export const Cookies = {
 		pageOf(actor).context().addCookies(cookies),
 	clear: (async (actor) => pageOf(actor).context().clearCookies()) as Activity,
 	/** Only the session: the language chosen stays (cookies do not tell ports apart) */
-	signOut: (async (actor) => pageOf(actor).context().clearCookies({ name: 'dwello_session' })) as Activity
+	signOut: (async (actor) => pageOf(actor).context().clearCookies({ name: 'dwello_session' })) as Activity,
+	/** Only the XSRF token: the session stays (#1434) */
+	loseXsrf: (async (actor) => pageOf(actor).context().clearCookies({ name: 'dwello_xsrf' })) as Activity
 };
 
 export const Browser = {

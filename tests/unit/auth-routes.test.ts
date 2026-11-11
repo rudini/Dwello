@@ -556,22 +556,23 @@ describe('Auth Routes Integration Tests', () => {
 			expect(authModule.clearAuthCookies).toHaveBeenCalled();
 		});
 
-		it('should still logout without valid XSRF token', async () => {
-			vi.mocked(authModule.validateXsrfToken).mockReturnValue(false);
-			vi.mocked(authModule.getJwtFromCookie).mockReturnValue(null);
+		it('lehnt die Abmeldung ohne gültiges XSRF-Token mit 403 ab und lässt die Sitzung bestehen (#1434)', async () => {
+			const actual = await vi.importActual<typeof import('$lib/server/auth')>('$lib/server/auth');
+			vi.mocked(authModule.validateXsrfToken).mockImplementation(actual.validateXsrfToken);
+			vi.mocked(authModule.clearAuthCookies).mockImplementation(actual.clearAuthCookies);
+			const cookies = createMockCookies();
+			cookies._store.set('dwello_session', 'valid-jwt-token');
+			cookies._store.set('dwello_xsrf', 'xsrf-of-the-session');
 
+			// a cross-site form POST: the browser sends the cookies, but no X-XSRF-TOKEN header
 			const { POST } = await import('$lib/../routes/auth/logout/+server');
-			const event = createMockRequestEvent({
-				url: 'http://localhost:3000/auth/logout',
-				method: 'POST'
-			});
+			const response = await POST(
+				createMockRequestEvent({ url: 'http://localhost:3000/auth/logout', method: 'POST', cookies })
+			);
 
-			const response = await POST(event);
-			expect(response.status).toBe(200);
-
-			const data = await response.json();
-			expect(data.success).toBe(true);
-			expect(authModule.clearAuthCookies).toHaveBeenCalled();
+			expect(response.status).toBe(403);
+			expect((await response.json()).error.code).toBe('XSRF_ERROR');
+			expect(cookies._store.get('dwello_session')).toBe('valid-jwt-token');
 		});
 	});
 });
