@@ -57,6 +57,13 @@ describe('Installation mit compose.yaml', () => {
 		expect(caddyfile).toContain('reverse_proxy frontend:3000');
 	});
 
+	// #1436: HSTS also covers the subdomains, in the Caddy of an installation and of the demo
+	it('verlangt HTTPS auch für die Subdomains der Domain', () => {
+		const hsts = 'header Strict-Transport-Security "max-age=31536000; includeSubDomains"';
+		expect(published.configs!.caddyfile.content).toContain(hsts);
+		expect(read('deploy/demo/Caddyfile')).toContain(hsts);
+	});
+
 	// #578 CI: busybox wget took «localhost» as ::1 and the web app listens on 0.0.0.0 only, so the frontend stayed unhealthy
 	it('prüft die Web-App über 127.0.0.1, wo sie lauscht', () => {
 		const checks = [
