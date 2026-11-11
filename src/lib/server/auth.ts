@@ -92,7 +92,7 @@ export function setSessionCookie(cookies: Cookies, jwt: string): void {
  * @param cookies SvelteKit cookies object
  * @returns Generated XSRF token
  */
-export function setXsrfToken(cookies: Cookies): string {
+export function setXsrfToken(cookies: Cookies, maxAge = jwtConfig.expirySeconds): string {
 	const token = randomBytes(32).toString('hex');
 
 	cookies.set(cookieConfig.xsrfName, token, {
@@ -101,7 +101,7 @@ export function setXsrfToken(cookies: Cookies): string {
 		secure: cookieConfig.secure,
 		sameSite: cookieConfig.sameSite,
 		domain: cookieConfig.domain,
-		maxAge: jwtConfig.expirySeconds
+		maxAge
 	});
 
 	return token;

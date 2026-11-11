@@ -29,7 +29,10 @@ async function request(path: string, session?: string) {
 		url,
 		params: {},
 		request: new Request(url),
-		cookies: { get: (name: string) => (name === 'dwello_session' ? session : undefined) },
+		cookies: {
+			get: (name: string) => (name === 'dwello_session' ? session : undefined),
+			set: () => {}
+		},
 		locals: {} as App.Locals
 	};
 	const resolve = vi.fn(async () => new Response('Seite'));
@@ -100,7 +103,10 @@ describe('Sicherung noch nicht eingerichtet', () => {
 			url,
 			params: {},
 			request: new Request(url),
-			cookies: { get: (name: string) => (name === 'dwello_session' ? session : undefined) },
+			cookies: {
+				get: (name: string) => (name === 'dwello_session' ? session : undefined),
+				set: () => {}
+			},
 			locals: {} as App.Locals,
 			fetch: vi.fn(async () => Response.json(health))
 		};

@@ -11,15 +11,13 @@ import { handleRequestError, logger } from '$lib/server/error-handler';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
-		// Validate XSRF token for mutation requests
-		// Note: We're lenient here - if no XSRF token, we still log out
-		// This prevents users from being "stuck" logged in
-		const hasValidXsrf = validateXsrfToken(request, cookies);
-
-		if (!hasValidXsrf) {
-			logger.warn('Logout without valid XSRF token', {
-				operation: 'logout'
-			});
+		// No valid XSRF token: a cross-site request, the session stays (#1434)
+		if (!validateXsrfToken(request, cookies)) {
+			logger.warn('Logout refused without valid XSRF token', { operation: 'logout' });
+			return json(
+				{ error: { code: 'XSRF_ERROR', message: 'Invalid XSRF token' } },
+				{ status: 403 }
+			);
 		}
 
 		// Try to get user info for logging (optional)
@@ -39,8 +37,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		clearAuthCookies(cookies);
 
 		logger.info('User logged out', {
-			userId: userId || 'unknown',
-			hadValidXsrf: hasValidXsrf
+			userId: userId || 'unknown'
 		});
 
 		return json({ success: true });

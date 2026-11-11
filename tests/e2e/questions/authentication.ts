@@ -1,6 +1,6 @@
 import { question } from '../screenplay/actor';
 import { Count, FocusedElement, RequestedUrl, ShareInViewport, Text, ThePage, Value, Visibility } from '../screenplay/questions';
-import { loginButton, loginError, loginLegalNote, passwordInput, passwordSubmitButton, userName } from '../targets/authentication';
+import { loginButton, loginError, loginLegalNote, logoutError, passwordInput, passwordSubmitButton, userName } from '../targets/authentication';
 import { GOOGLE_SIGN_IN } from '../tasks/authentication';
 
 export const signInOffered = (provider: string) => Visibility.of(loginButton(provider));
@@ -8,6 +8,7 @@ export const signInOptions = (provider: string) => Count.of(loginButton(provider
 export const loginHint = Text.of(loginError);
 export const passwordSignInOffered = Visibility.of(passwordSubmitButton);
 export const shownUserName = Text.of(userName);
+export const logoutErrorText = Text.of(logoutError);
 export const loginLegalText = Text.of(loginLegalNote);
 export const enteredPassword = Value.of(passwordInput);
 // once the hint is shown: SvelteKit's focus reset comes first, then the form moves the focus to it

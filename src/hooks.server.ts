@@ -1,6 +1,7 @@
 import { json, type Handle, type HandleFetch, type ServerInit } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
-import { getJwtFromCookie, verifyJwt } from '$lib/server/auth';
+import { decodeJwt } from 'jose';
+import { getJwtFromCookie, setXsrfToken, verifyJwt } from '$lib/server/auth';
 import { cookieConfig } from '$lib/server/jwt-config';
 import { isAllowed } from '$lib/server/allowed-emails';
 import { loginPage } from '$lib/server/login-flow';
@@ -52,6 +53,12 @@ const session: Handle = async ({ event, resolve }) => {
 	const { pathname, search } = event.url;
 
 	if (event.locals.user) {
+		// #1434: a browser that lost the XSRF cookie gets a new one, valid as long as the session (privacy statement)
+		if (!event.cookies.get(cookieConfig.xsrfName))
+			setXsrfToken(
+				event.cookies,
+				decodeJwt(getJwtFromCookie(event.cookies)!).exp! - Math.floor(Date.now() / 1000)
+			);
 		if (pathname === '/login') return redirectTo('/dashboard');
 		// #718 (A8): until the landlord confirmed the Wiederherstellungscode, every page of the app leads to «Sicherung
 		// einrichten»; help, the legal pages and the API stay reachable

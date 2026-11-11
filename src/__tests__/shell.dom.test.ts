@@ -9,15 +9,22 @@ import { byTestId, click, fakeBff, settle, show } from './helpers/dom';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 
 // the page the shell is on; the footer marks a legal page (#656)
-const at = vi.hoisted(() => ({ path: '/tenants' }));
+const at = vi.hoisted(() => ({ path: '/tenants', shells: new Set<(value: unknown) => void>() }));
 vi.mock('$app/stores', () => ({
 	page: {
 		subscribe: (run: (value: unknown) => void) => (
 			run({ url: new URL(at.path, 'http://localhost') }),
-			() => {}
+			at.shells.add(run),
+			() => at.shells.delete(run)
 		)
 	}
 }));
+/** The landlord opens another page, the shell stays (a client-side navigation) */
+function navigateTo(path: string) {
+	at.path = path;
+	at.shells.forEach((run) => run({ url: new URL(path, 'http://localhost') }));
+	flushSync();
+}
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
 // the version a build without a tag lacks (#728); vitest.config.ts defines 1.4.0 for the others
 const build = vi.hoisted(() => ({ version: '1.4.0' as string | null }));
@@ -138,6 +145,40 @@ describe('Kopfzeile', () => {
 		click('logout-button');
 		await settle();
 		expect(localStorage.length).toBe(0);
+	});
+
+	// #1434 (decided by the product owner): a refused sign-out does not pretend the landlord is signed out
+	it('bleibt auf der Seite und sagt, was zu tun ist, wenn Dwello die Abmeldung ablehnt', async () => {
+		const { goto } = await import('$app/navigation');
+		vi.mocked(goto).mockClear();
+		fakeBff(() => [403, { error: { code: 'XSRF_ERROR', message: 'Invalid XSRF token' } }]);
+		show(Header, { user });
+		click('user-menu-button');
+		click('logout-button');
+		await settle();
+		expect(goto).not.toHaveBeenCalled();
+		expect(byTestId('logout-error')!.textContent).toContain(
+			'Dwello konnte Sie nicht abmelden. Laden Sie die Seite neu und melden Sie sich noch einmal ab.'
+		);
+	});
+
+	// persona review of #1434 (Marco, P-1): the message belongs to the page it was refused on
+	it('nimmt den Hinweis auf die abgelehnte Abmeldung weg, sobald eine andere Seite offen ist', async () => {
+		at.path = '/dashboard';
+		fakeBff(() => [403, { error: { code: 'XSRF_ERROR', message: 'Invalid XSRF token' } }]);
+		try {
+			show(Header, { user });
+			click('user-menu-button');
+			click('logout-button');
+			await settle();
+			expect(byTestId('logout-error')).not.toBeNull();
+			navigateTo('/buildings');
+			expect(byTestId('logout-error')).toBeNull();
+			navigateTo('/dashboard'); // back again: the refusal is over, the next «Abmelden» gets a new token
+			expect(byTestId('logout-error')).toBeNull();
+		} finally {
+			at.path = '/tenants';
+		}
 	});
 
 	// #668 (fallback review on #1150, decided by the product owner): a form with unsaved changes asks first
