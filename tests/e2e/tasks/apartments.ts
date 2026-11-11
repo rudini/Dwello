@@ -21,8 +21,7 @@ const filteredBy = (buildingId: string, status = '') =>
 export const showApartmentsOfBuilding = (buildingId: string, status = ''): Activity => (actor) =>
 	actor.attemptsTo(
 		Select.option(buildingId).from(apartmentBuildingFilter),
-		Select.option(status).from(apartmentStatusFilter),
-		Click.on(apartmentSearchButton),
+		Select.option(status).from(apartmentStatusFilter), // each choice loads the list (#662), no «Suchen» after it (#1440)
 		filteredBy(buildingId, status)
 	);
 
