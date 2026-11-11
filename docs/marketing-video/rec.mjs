@@ -2,6 +2,7 @@
 // frame with its timestamp, turned into a 30 fps H.264 clip in build/marketing-video/clips/ (#1445).
 // A visible mouse pointer with a click ripple, eased mouse moves and typing at a human pace.
 // fallow-ignore-file unused-file
+// fallow-ignore-file unused-export
 // (the scripts of this folder are run by hand, README.md: no entry point reaches them)
 /* global Buffer, URL, console, crypto, process -- Node globals; document -- in page.evaluate */
 /* global document */
