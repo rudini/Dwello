@@ -77,7 +77,7 @@ import { giveOwnHolder, saveSettings } from './settings';
 import { kiCheckButton, kiCheckResult, kiMode, kiModelOffline, kiSaveAnswer, kiSaveButton } from '../targets/ki-settings';
 import { userMenuButton } from '../targets/app-frame';
 import { passwordSubmitButton } from '../targets/authentication';
-import { failSignIns, signInWithPassword } from './authentication';
+import { failSignIns, loseXsrfToken, refusedSignOut, signInWithPassword } from './authentication';
 import {
 	confirmDeleteContractButton,
 	confirmEndContractButton,
@@ -783,6 +783,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	},
 	'language-menu-open': () => (actor) => actor.attemptsTo(openLanguageChoice, Wait.until(on.languageOptions)),
 	'user-menu-open': () => (actor) => actor.attemptsTo(Click.on(userMenuButton), Wait.until(on.userMenuSettings)),
+	'logout-refused': () => (actor) => actor.attemptsTo(loseXsrfToken, refusedSignOut),
 	'overlap-warning': () => (actor) =>
 		actor.attemptsTo(
 			Click.on(nextButton), // tenant and apartment come from the address

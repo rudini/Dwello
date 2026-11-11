@@ -140,6 +140,21 @@ describe('Kopfzeile', () => {
 		expect(localStorage.length).toBe(0);
 	});
 
+	// #1434 (decided by the product owner): a refused sign-out does not pretend the landlord is signed out
+	it('bleibt auf der Seite und sagt, was zu tun ist, wenn Dwello die Abmeldung ablehnt', async () => {
+		const { goto } = await import('$app/navigation');
+		vi.mocked(goto).mockClear();
+		fakeBff(() => [403, { error: { code: 'XSRF_ERROR', message: 'Invalid XSRF token' } }]);
+		show(Header, { user });
+		click('user-menu-button');
+		click('logout-button');
+		await settle();
+		expect(goto).not.toHaveBeenCalled();
+		expect(byTestId('logout-error')!.textContent).toContain(
+			'Dwello konnte Sie nicht abmelden. Laden Sie die Seite neu und melden Sie sich noch einmal ab.'
+		);
+	});
+
 	// #668 (fallback review on #1150, decided by the product owner): a form with unsaved changes asks first
 	it('meldet nicht ab, solange ein Formular mit ungespeicherten Änderungen weiter bearbeitet wird', async () => {
 		writeDraft(localStorage, 'contract', { tenantId: 't1' }, new Date());

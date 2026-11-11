@@ -55,6 +55,24 @@ Funktionalität: Anmeldung
     Dann ist der Liegenschaftsverwalter auf der Seite "Anmelden"
     Und führt die Übersicht den Liegenschaftsverwalter wieder zur Anmeldung
 
+  # #1434: ohne gültiges XSRF-Token lehnt Dwello die Abmeldung ab (Schutz vor gefälschten Anfragen); Neuladen gibt dem
+  # Browser ein neues
+  Szenario: Abgelehnte Abmeldung sagt, was zu tun ist
+    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
+    Und der Browser hat das XSRF-Cookie der Sitzung verloren
+    Wenn der Liegenschaftsverwalter sich im Benutzermenü abmelden will
+    Dann liest der Liegenschaftsverwalter in der Kopfzeile "Dwello konnte Sie nicht abmelden. Laden Sie die Seite neu und melden Sie sich noch einmal ab."
+    Und ist der Liegenschaftsverwalter auf der Seite "Übersicht"
+
+  Szenario: Nach einer abgelehnten Abmeldung neu laden und abmelden
+    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
+    Und der Browser hat das XSRF-Cookie der Sitzung verloren
+    Und die Abmeldung wurde abgelehnt
+    Wenn der Liegenschaftsverwalter die Seite neu lädt
+    Und der Liegenschaftsverwalter sich abmeldet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Anmelden"
+    Und führt die Übersicht den Liegenschaftsverwalter wieder zur Anmeldung
+
   Szenario: Anmeldung ohne dauerhaften Zugriff auf das Google-Konto
     Angenommen ein Besucher hat die Anmeldeseite geöffnet
     Wenn der Besucher sich mit "Google" anmeldet

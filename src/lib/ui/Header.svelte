@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { getXsrfTokenFromCookie } from '$lib/api';
 	import { mobileNavOpen, openMobileNav } from '$lib/stores/navigation';
+	import Alert from '$lib/ui/Alert.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import IconButton from '$lib/ui/IconButton.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
@@ -14,6 +15,7 @@
 	let { user }: { user: User | null } = $props();
 
 	let menuOpen = $state(false);
+	let logoutRefused = $state(false); // #1434: the session stays, so the landlord must not land on the sign-in page
 	let menuButton = $state<HTMLButtonElement>();
 	const displayName = $derived(user?.name || user?.email || '');
 
@@ -40,10 +42,15 @@
 		clearAllDrafts(browserStorage()); // no personal data stays in the browser
 		try {
 			const xsrfToken = getXsrfTokenFromCookie();
-			await fetch('/auth/logout', {
+			const response = await fetch('/auth/logout', {
 				method: 'POST',
 				headers: xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}
 			});
+			if (response.status === 403) {
+				closeMenu();
+				logoutRefused = true;
+				return;
+			}
 			await goto('/login');
 		} catch (error) {
 			console.error('Logout failed:', error);
@@ -144,4 +151,9 @@
 			{/if}
 		</div>
 	</div>
+	{#if logoutRefused}
+		<div class="px-4 pb-4 lg:px-6">
+			<Alert tone="critical" title={m.header_logout_refused()} testid="logout-error" />
+		</div>
+	{/if}
 </header>
