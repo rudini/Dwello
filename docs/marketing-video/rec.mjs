@@ -11,7 +11,7 @@ import { execFileSync } from 'child_process';
 import { sessionToken } from '../design/tools/persona-kit.mjs';
 
 const require = createRequire(new URL('../../package.json', import.meta.url));
-const { chromium } = require('@playwright/test');
+export const { chromium } = require('@playwright/test');
 
 export const BASE = process.env.BASE || 'http://localhost:3300';
 // MV_BUILD: another output folder (with a trailing slash)

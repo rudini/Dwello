@@ -19,7 +19,8 @@ Issue #1445: marketing videos (short and vertical cut, long cut caption fix, You
 - [x] YouTube title, description, chapter marks and thumbnail per cut
 - [x] Scripts and README in `docs/marketing-video/`
 - [ ] Landing page link: waits for the YouTube address («Stop and ask» of #1445)
-- [ ] Slice review (`code-reviewer`), closing round
+- [x] Slice review round 1: `docs/reviews/marketing-video-review-1.md` (no Blocker/Major; C-1, C-2 fixed as the report proposes)
+- [ ] Closing round before the push (skill `pull-request`)
 - [ ] Archive session, PR
 - [x] Vertical cut uploads all three invoices and shows one: with only the Kaminfeger the tenants get a refund, which has no QR-bill (issue said «an invoice PDF»; named in the PR)
 - [x] Vertical cut has no chapter marks: Shorts show none, and YouTube needs three parts of at least 10 s (named in the PR)

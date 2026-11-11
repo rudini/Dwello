@@ -2,13 +2,9 @@
 // 2nd half-year are the ones the demo building Alpenblick lacks for 2025, so the statement preview stops warning.
 //   node docs/marketing-video/invoices.mjs   → build/marketing-video/invoices/
 // fallow-ignore-file unused-file
-/* global URL, console -- Node globals */
-import { createRequire } from 'module';
+/* global console -- Node global */
 import { mkdirSync } from 'fs';
-import { BUILD } from './rec.mjs';
-
-const require = createRequire(new URL('../../package.json', import.meta.url));
-const { chromium } = require('@playwright/test');
+import { BUILD, chromium } from './rec.mjs';
 
 const invoices = [
 	{

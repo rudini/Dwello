@@ -440,12 +440,8 @@
 						'<span class="say">==> Starting Dwello. The first time this downloads about 4 GB and takes a few minutes.</span>',
 						700
 					],
-					['chip', 0],
-					[ok('Image postgres:16-alpine                   ', 'Pulled'), 300],
-					[ok('Image alpine:3.20                          ', 'Pulled'), 250],
-					[ok('Image ghcr.io/rudini/dwello-frontend:latest', 'Pulled'), 350],
-					[ok('Image ghcr.io/rudini/dwello-backend:latest ', 'Pulled'), 350],
-					[ok('Image ollama/ollama:0.40.11                ', 'Pulled'), 450],
+					// `docker compose pull --quiet` prints nothing: the chip stands for its minutes
+					['chip', 1800],
 					[ok('Container dwello-secrets  ', 'Exited'), 200],
 					[ok('Container dwello-postgres ', 'Healthy'), 250],
 					[ok('Container dwello-ollama   ', 'Started'), 200],
@@ -463,6 +459,7 @@
 				for (const [line, wait] of lines) {
 					if (line === 'chip') {
 						document.getElementById('chip').style.opacity = 1;
+						await sleep(wait);
 						continue;
 					}
 					out += line + '\n';

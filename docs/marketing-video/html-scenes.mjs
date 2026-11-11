@@ -4,13 +4,9 @@
 // fallow-ignore-file unused-file
 /* global URL, process -- Node globals; document, window -- in page.evaluate */
 /* global document, window */
-import { createRequire } from 'module';
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'fs';
 import { execFileSync } from 'child_process';
-import { launch, record, BUILD, OUT } from './rec.mjs';
-
-const require = createRequire(new URL('../../package.json', import.meta.url));
-const { chromium } = require('@playwright/test');
+import { chromium, launch, record, BUILD, OUT } from './rec.mjs';
 
 const PAGE = 'file://' + new URL('./html/scenes.html', import.meta.url).pathname;
 const pdfPages = (dir) => {
