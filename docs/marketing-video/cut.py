@@ -116,7 +116,8 @@ def speak(work, spoken):
     for k, line in enumerate(REEL["lines"]):
         at, until = spoken[line["id"]]
         mp3 = os.path.join(work, line["id"] + ".mp3")
-        subprocess.run(["mmx", "speech", "synthesize", "--voice", REEL["voice"], "--text", line.get("say", line["text"]),
+        subprocess.run(["mmx", "speech", "synthesize", "--voice", REEL["voice"], "--emotion", REEL["emotion"],
+                        "--speed", str(REEL["speed"]), "--text", line.get("say", line["text"]),
                         "--out", mp3, "--quiet"], check=True, stdout=subprocess.DEVNULL)
         if at + 0.3 + duration(mp3) > until + FADE:
             print(f"warning: line {line['id']} ({duration(mp3):.1f} s) is longer than its pieces ({until - at:.1f} s)")

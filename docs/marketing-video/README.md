@@ -36,7 +36,7 @@ python3 docs/marketing-video/cut.py short                  # and long, vertical
 | `scenes.mjs` | the app scenes: GWR, upload, statements (and their PDF), reports, setup, and the phone's |
 | `html/scenes.html`, `html-scenes.mjs` | the scenes between them (title, chapter cards, terminal, PDF, end card), the captions and the thumbnails |
 | `invoices.mjs` | the invoices of made-up suppliers the KI reads, as PDF and as photos of the sheet on a table |
-| `reel.json` | the vertical cut's voice (a MiniMax voice id) and its lines: `cut.py` has them spoken (`mmx speech synthesize`), `html-scenes.mjs` makes them its captions |
+| `reel.json` | the vertical cut's voice (a MiniMax voice id, its emotion and speed) and its lines; `say` is what the voice reads where it differs from the caption (the address spelled out): `cut.py` has them spoken (`mmx speech synthesize`), `html-scenes.mjs` makes them its captions |
 | `people/` | the landlady of the vertical cut: three AI-generated stills (MiniMax `image-01`, the second and third with the first as subject reference), which `cut.py` shows with a slow zoom |
 | `cut.py` | each cut: its pieces with speed and crop, crossfades, captions on the final timeline, music |
 | `music.py` | the background track of the long and short cuts, synthesized for each cut's length: no samples, no licence. The vertical cut plays `build/marketing-video/music-vertical.mp3` under its voice, a track the product owner supplies (not in the repository); without that file it gets the synthesized one |
