@@ -323,7 +323,9 @@ jobs:
   unit-tests:
     name: Unit tests
     needs: changes
-    runs-on: ubuntu-latest
+    # pg_dump of the database's major version (postgres:16): ubuntu-latest became 26.04, whose newer pg_dump writes
+    # settings postgres:16 refuses on restore (#1447)
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16-alpine
