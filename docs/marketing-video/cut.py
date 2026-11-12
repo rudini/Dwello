@@ -16,7 +16,8 @@ REEL = json.load(open(os.path.join(HERE, "reel.json")))
 
 
 def piece(clip, speed=1.0, start=0.0, end=None, captions=(), group=None):
-    """A part of a clip, or of a still of people/ (a .jpg, `end` seconds long, with a slow zoom).
+    """A part of a clip, or a still of people/ (a .jpg): `end - start` seconds of it with a slow zoom, or those seconds
+    of build/marketing-video/people/<name>.mp4 when the product owner made a clip of the still.
     captions: (name, from, to) in seconds of the piece as cut (after its speed), to < 0 counts from its end.
     group: a caption shown over all consecutive pieces of the same group."""
     return dict(clip=clip, speed=speed, start=start, end=end, captions=captions, group=group)
@@ -59,17 +60,18 @@ CUTS = {
         piece("outro"),
     ],
     # 9:16 for Instagram, with the voice of reel.json: a landlady photographs an invoice, the KI reads it, the
-    # statement goes out by e-mail with its QR-bill. The people are AI-generated stills, the app is the real one.
+    # statement goes out by e-mail with its QR-bill. The people are AI-generated (stills, or clips made of them), the
+    # app is the real one.
     "vertical": [
-        piece("hook.jpg", end=4.6, group="r1"),
-        piece("photo.jpg", end=2.6, group="r2"),
+        piece("hook.jpg", start=1.0, end=5.6, group="r1"),
+        piece("photo.jpg", start=4.4, end=7.0, group="r2"),
         piece("m-upload-a", 2.0, start=1.0, end=7.0, group="r2"),
         piece("m-upload-b", 1.6, start=2.5, end=8.5, group="r2"),
         piece("m-statements", 2.0, start=14.0, end=22.0, group="r3"),
         piece("m-statements", 1.3, start=23.0, end=26.5, group="r3"),
         piece("m-send", 1.4, start=0.5, group="r4"),
         piece("v-pdf", 1.2, group="r4"),
-        piece("done.jpg", end=3.2, group="r5"),
+        piece("done.jpg", start=4.6, end=7.8, group="r5"),
         piece("v-outro", group="r6"),
     ],
 }
@@ -86,7 +88,15 @@ def ffmpeg(*args):
 def render(p, out):
     """One piece as a 30 fps clip"""
     if p["clip"].endswith(".jpg"):
-        frames = int(p["end"] * 30)
+        length = p["end"] - p["start"]
+        clip = os.path.join(BUILD, "people", p["clip"][:-4] + ".mp4")
+        if os.path.exists(clip):
+            # the product owner's clip of this still (720x1280), from its second `start`
+            ffmpeg("-ss", str(p["start"]), "-t", f"{length:.3f}", "-i", clip,
+                   "-vf", "scale=1080:1920:flags=lanczos,fps=30,format=yuv420p",
+                   "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-an", out)
+            return
+        frames = int(length * 30)
         # scaled up first, so the zoom moves by less than a pixel per frame
         zoom = (f"scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,"
                 f"zoompan=z='1+0.07*on/{frames}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s=1080x1920:fps=30,format=yuv420p")
