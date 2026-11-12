@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="de-CH">
+	<head>
+		<meta charset="utf-8" />
+		<title>Dwello Videoszenen</title>
+		<!-- The scenes between the app clips of the marketing videos (#1445); html-scenes.mjs films one per ?scene=.
+		     Landscape scenes on a 1280x720 page, vertical ones (v-…) on 540x960. Tokens of src/styles/tokens.css. -->
+		<style>
+			@font-face {
+				font-family: 'Inter';
+				src: url('../../../marketing/fonts/inter-latin.woff2') format('woff2');
+				font-weight: 100 900;
+			}
+			:root {
+				--canvas: #f5f7f8;
+				--ink: #161c21;
+				--muted: #3f4a54;
+				--accent: #1b5873;
+				--accent-strong: #123f54;
+				--positive: #17542e;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+			}
+			html,
+			body {
+				width: 100vw;
+				height: 100vh;
+				overflow: hidden;
+				font-family: Inter, system-ui, sans-serif;
+				color: var(--ink);
+				background: var(--canvas);
+				-webkit-font-smoothing: antialiased;
+			}
+			.scene {
+				position: absolute;
+				inset: 0;
+			}
+			.scene:not(.on) {
+				display: none !important;
+			}
+			.in {
+				opacity: 0;
+				transform: translateY(18px);
+				animation: in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+			}
+			@keyframes in {
+				to {
+					opacity: 1;
+					transform: none;
+				}
+			}
+
+			/* intro, outro */
+			.brand {
+				background: var(--accent);
+				color: #fff;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				gap: 28px;
+				text-align: center;
+				padding: 0 40px;
+			}
+			.brand .logo {
+				height: 76px;
+			}
+			.brand h1 {
+				font-size: 54px;
+				font-weight: 700;
+				letter-spacing: -0.02em;
+				line-height: 1.1;
+				max-width: 1000px;
+			}
+			.brand .tags {
+				font-size: 22px;
+				font-weight: 500;
+				color: #cfe3ec;
+			}
+			.cmd {
+				background: #12171b;
+				color: #dfe5ea;
+				border-radius: 6px;
+				padding: 16px 22px;
+				font:
+					17px/1.4 'DejaVu Sans Mono',
+					Menlo,
+					monospace;
+				text-align: left;
+			}
+			.cta {
+				background: #fff;
+				color: var(--accent-strong);
+				border-radius: 6px;
+				padding: 16px 36px;
+				font-size: 30px;
+				font-weight: 700;
+			}
+
+			/* chapter card */
+			.chapter {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				padding: 0 120px;
+				gap: 22px;
+			}
+			.chapter .num {
+				font-size: 22px;
+				font-weight: 600;
+				color: var(--accent);
+				display: flex;
+				align-items: center;
+				gap: 14px;
+			}
+			.chapter .num::before {
+				content: '';
+				width: 48px;
+				height: 4px;
+				background: var(--accent);
+				border-radius: 2px;
+			}
+			.chapter h2 {
+				font-size: 68px;
+				line-height: 1.06;
+				font-weight: 750;
+				letter-spacing: -0.025em;
+			}
+			.chapter p {
+				font-size: 27px;
+				line-height: 1.4;
+				color: var(--muted);
+				max-width: 960px;
+			}
+
+			/* terminal */
+			.termwrap {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.term {
+				width: 1120px;
+				height: 600px;
+				background: #12171b;
+				border-radius: 12px;
+				box-shadow: 0 12px 32px rgb(0 0 0 / 0.24);
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+			}
+			.bar {
+				height: 40px;
+				background: #242b30;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 0 16px;
+				color: #b4bec7;
+				font-size: 15px;
+			}
+			.bar i {
+				width: 13px;
+				height: 13px;
+				border-radius: 50%;
+				background: #3a444c;
+			}
+			.bar span {
+				margin: 0 auto;
+				transform: translateX(-30px);
+			}
+			.screen {
+				padding: 22px 26px;
+				font:
+					17px/1.55 'DejaVu Sans Mono',
+					Menlo,
+					monospace;
+				color: #dfe5ea;
+				white-space: pre-wrap;
+				word-break: break-all;
+			}
+			.prompt {
+				color: #86bfda;
+			}
+			.say {
+				color: #fff;
+				font-weight: 700;
+			}
+			.ok {
+				color: #6fcf8e;
+			}
+			.code {
+				color: #ffd479;
+			}
+			.caret {
+				display: inline-block;
+				width: 10px;
+				height: 20px;
+				background: #dfe5ea;
+				vertical-align: -3px;
+				animation: blink 1s steps(1) infinite;
+			}
+			@keyframes blink {
+				50% {
+					opacity: 0;
+				}
+			}
+			.chip {
+				position: absolute;
+				right: 96px;
+				bottom: 84px;
+				background: #fff;
+				border-radius: 6px;
+				padding: 6px 12px;
+				font-size: 15px;
+				font-weight: 600;
+				opacity: 0;
+				transition: opacity 0.4s;
+			}
+
+			/* statement PDF */
+			.page {
+				position: absolute;
+				width: 520px;
+				background: #fff;
+				border-radius: 4px;
+				box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+				transition:
+					left 1s cubic-bezier(0.2, 0.7, 0.2, 1),
+					top 1s,
+					transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+			}
+			.pdftext {
+				position: absolute;
+				left: 80px;
+				top: 0;
+				bottom: 0;
+				width: 470px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				gap: 20px;
+			}
+			.pdftext h2 {
+				font-size: 52px;
+				line-height: 1.08;
+				letter-spacing: -0.02em;
+				font-weight: 750;
+			}
+			.pdftext p {
+				font-size: 24px;
+				line-height: 1.45;
+				color: var(--muted);
+			}
+			.check {
+				display: flex;
+				gap: 12px;
+				align-items: center;
+				font-size: 22px;
+				font-weight: 600;
+			}
+			.check b {
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+				background: var(--positive);
+				color: #fff;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 18px;
+			}
+
+			/* vertical (540x960) */
+			.v.brand h1 {
+				font-size: 44px;
+			}
+			.v.brand .tags {
+				font-size: 20px;
+				line-height: 1.4;
+			}
+			.v.brand .logo {
+				height: 64px;
+			}
+			.v .cta {
+				font-size: 34px;
+				padding: 18px 40px;
+			}
+			#v-pdf {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding-top: 72px;
+				gap: 14px;
+				text-align: center;
+			}
+			#v-pdf h2 {
+				font-size: 42px;
+				line-height: 1.1;
+				letter-spacing: -0.02em;
+				font-weight: 750;
+			}
+			#v-pdf p {
+				font-size: 21px;
+				line-height: 1.4;
+				color: var(--muted);
+				padding: 0 36px;
+			}
+			/* the whole page first, then only its payment part (the bottom 38 %), the image anchored at the bottom */
+			#v-pdf .sheet {
+				position: relative;
+				width: 500px;
+				height: 707px;
+				margin-top: 24px;
+				overflow: hidden;
+				background: #fff;
+				border-radius: 4px;
+				box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+				transition:
+					opacity 0.7s,
+					height 1.4s cubic-bezier(0.2, 0.7, 0.2, 1),
+					margin-top 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+			}
+			#v-pdf .sheet img {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				width: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<section class="scene brand" id="intro">
+			<img class="logo in" src="../../../marketing/assets/dwello-logo-inverse.svg" alt="" />
+			<h1 class="in" style="animation-delay: 0.6s">Ihre Nebenkostenabrechnung,<br />einfacher gemacht.</h1>
+			<div class="tags in" style="animation-delay: 1.3s">
+				Open Source · Gratis · Für Schweizer Vermieterinnen und Vermieter
+			</div>
+		</section>
+
+		<section class="scene chapter" id="chapter">
+			<div class="num in" id="chapter-number"></div>
+			<h2 class="in" id="chapter-title" style="animation-delay: 0.2s"></h2>
+			<p class="in" id="chapter-text" style="animation-delay: 0.45s"></p>
+		</section>
+
+		<section class="scene termwrap" id="terminal">
+			<div class="term in">
+				<div class="bar"><i></i><i></i><i></i><span>Terminal — zsh</span></div>
+				<div class="screen" id="screen"></div>
+			</div>
+			<div class="chip" id="chip">Download gekürzt</div>
+		</section>
+
+		<section class="scene" id="pdf">
+			<div class="pdftext">
+				<h2 class="in">Fertig zum Versenden.</h2>
+				<p class="in" style="animation-delay: 0.3s">
+					Jeder Mieter erhält seine Abrechnung als PDF – mit Swiss QR-Rechnung für die Nachzahlung.
+				</p>
+				<div class="check in" style="animation-delay: 0.8s"><b>✓</b>Per E-Mail oder per Post</div>
+				<div class="check in" style="animation-delay: 1.1s"><b>✓</b>Deutsch, Französisch, Italienisch, Englisch</div>
+			</div>
+			<img class="page pdf-page-1" id="p1" alt="" style="left: 1300px; top: 40px; transform: rotate(3deg)" />
+			<img class="page pdf-page-last" id="p3" alt="" style="left: 1300px; top: 70px" />
+		</section>
+
+		<section class="scene brand" id="outro">
+			<img class="logo in" src="../../../marketing/assets/dwello-logo-inverse.svg" alt="" />
+			<h1 class="in" style="animation-delay: 0.3s">Jetzt gratis installieren.</h1>
+			<div class="cmd in" style="animation-delay: 0.7s">
+				<span class="prompt">$</span> /bin/bash -c "$(curl -fsSL
+				https://raw.githubusercontent.com/rudini/Dwello/main/install/macos.sh)"
+			</div>
+			<div class="tags in" style="animation-delay: 1.1s">
+				Windows · macOS · Linux — läuft auf Ihrem eigenen Computer
+			</div>
+			<div class="cta in" style="animation-delay: 1.6s">dwello.ch</div>
+		</section>
+
+		<section class="scene v" id="v-pdf">
+			<h2 class="in">Mit QR-Rechnung.</h2>
+			<p class="in" style="animation-delay: 0.3s">Als PDF per E-Mail an Ihren Mieter.</p>
+			<div class="sheet" id="vp" style="opacity: 0"><img class="pdf-page-last" alt="" /></div>
+		</section>
+
+		<section class="scene brand v" id="v-outro">
+			<img class="logo in" src="../../../marketing/assets/dwello-logo-inverse.svg" alt="" />
+			<h1 class="in" style="animation-delay: 0.3s">Gratis installieren.</h1>
+			<div class="cta in" style="animation-delay: 0.8s">dwello.ch</div>
+			<div class="tags in" style="animation-delay: 1.3s">Open Source · Für die Schweiz<br />Windows · macOS · Linux</div>
+		</section>
+
+		<script>
+			const query = new URLSearchParams(location.search);
+			const scene = query.get('scene');
+			document.getElementById(scene).classList.add('on');
+			if (scene === 'chapter') {
+				for (const part of ['number', 'title', 'text'])
+					document.getElementById(`chapter-${part}`).textContent = query.get(part);
+			}
+
+			const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+			window.done = false;
+
+			// the real command and the real messages of install/macos.sh; the download of the images is cut short
+			async function terminal() {
+				const screen = document.getElementById('screen');
+				const caret = '<span class="caret"></span>';
+				const prompt = '<span class="prompt">vera@MacBook ~ %</span> ';
+				const command =
+					'/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/macos.sh)"';
+				let out = prompt;
+				screen.innerHTML = out + caret;
+				await sleep(700);
+				for (const ch of command) {
+					out += ch;
+					screen.innerHTML = out + caret;
+					await sleep(18 + Math.random() * 22);
+				}
+				await sleep(500);
+				const ok = (what, state) => ` <span class="ok">✔</span> ${what} <span class="ok">${state}</span>`;
+				const lines = [
+					['', 200],
+					['<span class="say">==> Downloading Dwello into /Users/vera/dwello.</span>', 500],
+					['', 0],
+					[
+						'<span class="say">==> Starting Dwello. The first time this downloads about 4 GB and takes a few minutes.</span>',
+						700
+					],
+					// `docker compose pull --quiet` prints nothing: the chip stands for its minutes
+					['chip', 1800],
+					[ok('Container dwello-secrets  ', 'Exited'), 200],
+					[ok('Container dwello-postgres ', 'Healthy'), 250],
+					[ok('Container dwello-ollama   ', 'Started'), 200],
+					[ok('Container dwello-backend  ', 'Healthy'), 300],
+					[ok('Container dwello-frontend ', 'Healthy'), 500],
+					['', 0],
+					['<span class="say">==> Dwello runs at http://localhost:3000 and opens in the browser.</span>', 500],
+					['', 0],
+					[
+						'<span class="say">==> Einrichtungscode for «Dwello einrichten»: <span class="code">K7QM-3XRP</span></span>',
+						300
+					]
+				];
+				out += '\n';
+				for (const [line, wait] of lines) {
+					if (line === 'chip') {
+						document.getElementById('chip').style.opacity = 1;
+						await sleep(wait);
+						continue;
+					}
+					out += line + '\n';
+					screen.innerHTML = out + caret;
+					await sleep(wait);
+				}
+				screen.innerHTML = out + prompt + caret;
+				await sleep(1800);
+				window.done = true;
+			}
+
+			async function pdf() {
+				const [p1, p3] = [document.getElementById('p1'), document.getElementById('p3')];
+				await sleep(400);
+				p1.style.left = '640px';
+				await sleep(1500);
+				p3.style.left = '720px';
+				p3.style.top = '110px';
+				await sleep(1700);
+				p3.style.transformOrigin = '60% 100%';
+				p3.style.transform = 'scale(1.45)';
+				await sleep(3200);
+				window.done = true;
+			}
+
+			async function verticalPdf() {
+				const sheet = document.getElementById('vp');
+				await sleep(600);
+				sheet.style.opacity = 1;
+				await sleep(900);
+				sheet.style.height = '270px';
+				sheet.style.marginTop = '120px';
+				await sleep(2800);
+				window.done = true;
+			}
+
+			// the scenes that end by themselves; the others stay for ?ms=
+			const animated = new Map([
+				['terminal', terminal],
+				['pdf', pdf],
+				['v-pdf', verticalPdf]
+			]);
+			const still = () => sleep(Number(query.get('ms') || 3500)).then(() => (window.done = true));
+			document.fonts.ready.then(animated.get(scene) ?? still);
+		</script>
+	</body>
+</html>

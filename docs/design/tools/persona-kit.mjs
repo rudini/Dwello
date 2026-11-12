@@ -13,8 +13,9 @@ const BASE = 'http://localhost:3300';
 const SECRET = 'persona-secret-key-at-least-32-characters-long';
 const sizes = { desktop: { width: 1440, height: 900 }, mobile: { width: 390, height: 844 } };
 
-export async function open({ viewport = 'desktop', zoom = 1, keyboardOnly = false } = {}) {
-	const token = await new SignJWT({ email: 'verwalter@example.com', name: 'Vera Verwalter', provider: 'google' })
+// The session cookie of the persona stack's Liegenschaftsverwalter (also docs/marketing-video/rec.mjs)
+export const sessionToken = () =>
+	new SignJWT({ email: 'verwalter@example.com', name: 'Vera Verwalter', provider: 'google' })
 		.setProtectedHeader({ alg: 'HS256' })
 		.setSubject('persona')
 		.setIssuer('dwello')
@@ -22,6 +23,9 @@ export async function open({ viewport = 'desktop', zoom = 1, keyboardOnly = fals
 		.setIssuedAt()
 		.setExpirationTime('8h')
 		.sign(new TextEncoder().encode(SECRET));
+
+export async function open({ viewport = 'desktop', zoom = 1, keyboardOnly = false } = {}) {
+	const token = await sessionToken();
 	// without a UTF-8 locale Chromium names a download with a non-ASCII name «download» (#496, #1122)
 	const browser = await chromium.launch({ env: { ...process.env, LC_ALL: 'C.UTF-8' } });
 	const context = await browser.newContext({

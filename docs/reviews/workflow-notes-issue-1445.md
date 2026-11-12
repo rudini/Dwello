@@ -1,0 +1,6 @@
+# Workflow notes: issue #1445 (marketing videos)
+
+| Rule | What happened | Proposal |
+|---|---|---|
+| `CLAUDE.md`, Gotchas, «Commit gates» and «Before marking anything complete» (fallow, fitness `structure-health`); `.fallowrc.json` `entry` | Scripts run by hand (`docs/marketing-video/*.mjs`, like `docs/design/tools/persona-kit.mjs`) are not reachable from an entry point: fallow audit reported them as unused files, and their shared module's exports as 100 % dead, which dropped the health score by 0.1 and failed fitness. Listing them in `entry` is a gate change (needs an issue decision), so the task suppressed both in the files (`fallow-ignore-file unused-file`, `unused-export`), which fallow then reports as diff risk «added-suppression». | Decide once how hand-run scripts outside `src/` are declared: an `entry` glob such as `docs/**/*.mjs` in `.fallowrc.json`, or a line in skill `commit-gates` that in-file suppression is the way for them. |
+| `CLAUDE.md`, «Before marking anything complete» (`bun run fitness -- --base origin/main --structure`) | Fitness measures the committed state only (`tools/fitness/fitness.ts`, each commit in a worktree): after a fix in the working tree it still reported the old score until the fix was committed, which cost one run. | Add «it measures commits: commit before running it» to that line. |

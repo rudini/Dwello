@@ -1,0 +1,13 @@
+{
+	"voice": "English_Wiselady",
+	"emotion": "happy",
+	"speed": 1.1,
+	"lines": [
+		{ "id": "r1", "text": "Nebenkostenabrechnung? Die mache ich jetzt am Handy." },
+		{ "id": "r2", "text": "Rechnung fotografieren – die KI liest Betrag, Datum und Kategorie." },
+		{ "id": "r3", "text": "Dwello rechnet aus, was jeder Mieter bezahlt." },
+		{ "id": "r4", "text": "Und die Abrechnung geht mit QR-Rechnung per E-Mail raus." },
+		{ "id": "r5", "text": "In wenigen Minuten erledigt." },
+		{ "id": "r6", "text": "Dwello – gratis und Open Source. dwello.ch", "say": "Dwello – gratis und Open Source! dwello Punkt Zeh Ha." }
+	]
+}
