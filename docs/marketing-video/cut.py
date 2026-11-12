@@ -17,7 +17,7 @@ REEL = json.load(open(os.path.join(HERE, "reel.json")))
 
 def piece(clip, speed=1.0, start=0.0, end=None, captions=(), group=None):
     """A part of a clip, or of a still of people/ (a .jpg, `end` seconds long, with a slow zoom).
-    captions: (name, from, to) in the piece's own seconds, to < 0 counts from its end.
+    captions: (name, from, to) in seconds of the piece as cut (after its speed), to < 0 counts from its end.
     group: a caption shown over all consecutive pieces of the same group."""
     return dict(clip=clip, speed=speed, start=start, end=end, captions=captions, group=group)
 
@@ -182,8 +182,8 @@ def cut(name):
     encode = ["-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-t", f"{total:.3f}", "-movflags", "+faststart", final]
     fade = f"afade=in:st=0:d=0.8,afade=out:st={total - 2.0:.3f}:d=2.0"
     if name == "vertical":
-        # the music stays under the voice, both levelled first
-        mix = (f"[1:a]loudnorm=I=-16:TP=-1.5,volume=0.2,{fade}[m];[2:a]loudnorm=I=-16:TP=-1.5[s];"
+        # the music stays under the voice, both levelled first; padded with silence, should the track be shorter
+        mix = (f"[1:a]loudnorm=I=-16:TP=-1.5,volume=0.2,{fade},apad[m];[2:a]loudnorm=I=-16:TP=-1.5[s];"
                "[m][s]amix=inputs=2:normalize=0:duration=first,alimiter=limit=0.9[a]")
         ffmpeg("-i", silent, "-i", music, "-i", speak(work, spoken), "-filter_complex", mix, *encode)
     else:

@@ -375,7 +375,7 @@
 				https://raw.githubusercontent.com/rudini/Dwello/main/install/macos.sh)"
 			</div>
 			<div class="tags in" style="animation-delay: 1.1s">
-				Windows · macOS · Linux — Ihre Daten bleiben auf Ihrem Computer
+				Windows · macOS · Linux — läuft auf Ihrem eigenen Computer
 			</div>
 			<div class="cta in" style="animation-delay: 1.6s">dwello.ch</div>
 		</section>
@@ -401,10 +401,6 @@
 				for (const part of ['number', 'title', 'text'])
 					document.getElementById(`chapter-${part}`).textContent = query.get(part);
 			}
-			// the statement PDF's pages, made by scenes.mjs (pdftoppm), from ?pdf=<folder>
-			const pages = (query.get('pages') || '').split(',');
-			for (const img of document.querySelectorAll('.pdf-page-1')) img.src = `${query.get('pdf')}/${pages[0]}`;
-			for (const img of document.querySelectorAll('.pdf-page-last')) img.src = `${query.get('pdf')}/${pages.at(-1)}`;
 
 			const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 			window.done = false;
@@ -490,10 +486,14 @@
 				window.done = true;
 			}
 
-			const run = { terminal, pdf, 'v-pdf': verticalPdf }[scene];
-			document.fonts.ready.then(() =>
-				run ? run() : sleep(Number(query.get('ms') || 3500)).then(() => (window.done = true))
-			);
+			// the scenes that end by themselves; the others stay for ?ms=
+			const animated = new Map([
+				['terminal', terminal],
+				['pdf', pdf],
+				['v-pdf', verticalPdf]
+			]);
+			const still = () => sleep(Number(query.get('ms') || 3500)).then(() => (window.done = true));
+			document.fonts.ready.then(animated.get(scene) ?? still);
 		</script>
 	</body>
 </html>

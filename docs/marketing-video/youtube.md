@@ -11,7 +11,7 @@ Thumbnail: `thumbnail-short.png`
 **Description:**
 
 ```
-Dwello macht die Nebenkostenabrechnung für private Vermieterinnen und Vermieter in der Schweiz – gratis und Open Source. Dwello läuft auf Ihrem eigenen Computer, Ihre Daten bleiben bei Ihnen.
+Dwello macht die Nebenkostenabrechnung für private Vermieterinnen und Vermieter in der Schweiz – gratis und Open Source. Dwello läuft auf Ihrem eigenen Computer; mit der lokalen KI verlassen Ihre Belege ihn nicht.
 
 Im Video:
 – Installation mit einem Befehl (Windows, macOS, Linux)
@@ -74,7 +74,7 @@ Nebenkostenabrechnung am Handy? Geht. 📱
 
 Rechnung fotografieren, die KI liest Betrag, Datum und Kategorie. Dwello rechnet aus, was jeder Mieter bezahlt, und verschickt die Abrechnung mit QR-Rechnung per E-Mail.
 
-Dwello ist gratis und Open Source, für private Vermieterinnen und Vermieter in der Schweiz. Ihre Daten bleiben auf Ihrem eigenen Computer.
+Dwello ist gratis und Open Source, für private Vermieterinnen und Vermieter in der Schweiz. Dwello läuft auf Ihrem eigenen Computer; mit der lokalen KI verlassen Ihre Belege ihn nicht.
 
 👉 dwello.ch
 

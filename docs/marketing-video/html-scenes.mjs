@@ -9,10 +9,18 @@ import { execFileSync } from 'child_process';
 import { chromium, launch, record, BUILD, OUT } from './rec.mjs';
 
 const PAGE = 'file://' + new URL('./html/scenes.html', import.meta.url).pathname;
-const pdfPages = (dir) => {
+// The statement PDF's pages (scenes.mjs, pdftoppm) as the PDF scenes' images: the first and the last one
+async function showPdf(page, dir) {
 	const pages = existsSync(BUILD + dir) ? readdirSync(BUILD + dir).filter((f) => f.endsWith('.png')).sort() : [];
-	return `pdf=${encodeURIComponent('file://' + BUILD + dir)}&pages=${pages.join(',')}`;
-};
+	const src = (name) => `file://${BUILD}${dir}/${name}`;
+	await page.evaluate(
+		([first, last]) => {
+			for (const img of document.querySelectorAll('.pdf-page-1')) img.src = first;
+			for (const img of document.querySelectorAll('.pdf-page-last')) img.src = last;
+		},
+		[src(pages[0]), src(pages.at(-1))]
+	);
+}
 const chapter = (number, title, text) =>
 	`scene=chapter&ms=3600&number=${encodeURIComponent(number)}&title=${encodeURIComponent(title)}&text=${encodeURIComponent(text)}`;
 const LANDSCAPE = { signedIn: false };
@@ -27,9 +35,9 @@ const SCENES = {
 	ch4: [chapter('4 · Nebenkostenabrechnung', 'Abrechnungen in fünf Schritten.', 'Periode, Gebäude, Heizprofil, Vorschau mit Kostenabstimmung – fertig sind die Entwürfe für alle Mieter.'), LANDSCAPE],
 	ch5: [chapter('5 · Berichte', 'Den Überblick behalten.', 'Kostenabstimmung pro Periode und Jahresbericht für Steuererklärung und Treuhand.'), LANDSCAPE],
 	terminal: ['scene=terminal', LANDSCAPE],
-	pdf: [`scene=pdf&${pdfPages('pdf')}`, LANDSCAPE],
+	pdf: ['scene=pdf', LANDSCAPE, 'pdf'],
 	outro: ['scene=outro&ms=5500', LANDSCAPE],
-	'v-pdf': [`scene=v-pdf&${pdfPages('pdf-mobile')}`, VERTICAL],
+	'v-pdf': ['scene=v-pdf', VERTICAL, 'pdf-mobile'],
 	'v-outro': ['scene=v-outro&ms=6200', VERTICAL]
 };
 
@@ -43,7 +51,7 @@ const CAPTIONS = {
 	upb1: 'Betrag, Datum, Zeitraum, Kategorie: von der KI erkannt, von Ihnen geprüft',
 	upb2: '3 Rechnungen erstellt – die PDF bleibt als Beleg',
 	st1: 'Abrechnungsperiode und Gebäude wählen',
-	st2: 'Vorschau mit Kostenabstimmung: was die Mieter tragen und was Sie',
+	st2: 'Kostenabstimmung: was die Mieter tragen und was Sie selbst tragen',
 	st3: 'Entwürfe für alle Mieter erstellt',
 	st4: 'Jede Position nachvollziehbar – bis zur einzelnen Rechnung',
 	rep: 'Kostenabstimmung für jede Abrechnungsperiode',
@@ -128,12 +136,13 @@ async function thumbnails() {
 }
 
 const only = process.argv.slice(2);
-for (const [name, [query, options]] of Object.entries(SCENES)) {
+for (const [name, [query, options, pdf]] of Object.entries(SCENES)) {
 	if (only.length && !only.includes(name)) continue;
 	const h = await launch(options);
 	await h.page.goto('about:blank');
 	await record(h, name, async () => {
 		await h.page.goto(`${PAGE}?${query}`);
+		if (pdf) await showPdf(h.page, pdf);
 		await h.page.waitForFunction(() => window.done === true, null, { timeout: 60000 });
 	});
 	await h.browser.close();
