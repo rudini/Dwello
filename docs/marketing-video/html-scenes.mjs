@@ -4,7 +4,7 @@
 // fallow-ignore-file unused-file
 /* global URL, process -- Node globals; document, window -- in page.evaluate */
 /* global document, window */
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import { execFileSync } from 'child_process';
 import { chromium, launch, record, BUILD, OUT } from './rec.mjs';
 
@@ -29,9 +29,8 @@ const SCENES = {
 	terminal: ['scene=terminal', LANDSCAPE],
 	pdf: [`scene=pdf&${pdfPages('pdf')}`, LANDSCAPE],
 	outro: ['scene=outro&ms=5500', LANDSCAPE],
-	'v-intro': ['scene=v-intro&ms=2800', VERTICAL],
 	'v-pdf': [`scene=v-pdf&${pdfPages('pdf-mobile')}`, VERTICAL],
-	'v-outro': ['scene=v-outro&ms=4200', VERTICAL]
+	'v-outro': ['scene=v-outro&ms=6200', VERTICAL]
 };
 
 // captions over the app clips; cut.py places them by name
@@ -54,13 +53,13 @@ const CAPTIONS = {
 	s2: 'Adresse eingeben: Gebäude und Wohnungen kommen aus dem Gebäuderegister',
 	s3: 'Rechnungen hochladen – die KI liest Betrag, Datum und Kategorie',
 	s4: 'Nebenkostenabrechnung in fünf Schritten, mit Kostenabstimmung',
-	s5: 'Berichte für Steuererklärung und Treuhand',
-	// the vertical cut
-	v1: 'Rechnung als PDF hochladen',
-	v2: 'Die KI liest Betrag, Datum und Kategorie',
-	v3: 'Abrechnung in fünf Schritten',
-	v4: 'Entwürfe für alle Mieter – fertig'
+	s5: 'Berichte für Steuererklärung und Treuhand'
 };
+
+// the vertical cut's captions are what its voice says
+const REEL = JSON.parse(readFileSync(new URL('./reel.json', import.meta.url), 'utf8'));
+for (const line of REEL.lines) CAPTIONS[line.id] = line.text;
+const SPOKEN = new Set(REEL.lines.map((line) => line.id));
 
 const FONT = new URL('../../marketing/fonts/inter-latin.woff2', import.meta.url).href;
 const LOGO = new URL('../../marketing/assets/dwello-logo-inverse.svg', import.meta.url).href;
@@ -77,7 +76,7 @@ async function snapshot(browser, size, css, body, path) {
 	await page.close();
 }
 
-// landscape: bottom left, clear of the app's toasts at the bottom right; vertical (v…): centred, above the content
+// landscape: bottom left, clear of the app's toasts at the bottom right; vertical (the spoken lines): centred
 const CAPTION_LAYOUT = {
 	landscape: [[1920, 1080], 'left:48px;bottom:56px;white-space:nowrap;font-size:40px'],
 	vertical: [[1080, 1920], 'left:60px;right:60px;bottom:220px;text-align:center;font-size:50px']
@@ -89,7 +88,7 @@ async function captions() {
 	mkdirSync(BUILD + 'captions', { recursive: true });
 	const browser = await chromium.launch();
 	for (const [name, text] of Object.entries(CAPTIONS)) {
-		const [size, place] = CAPTION_LAYOUT[name.startsWith('v') ? 'vertical' : 'landscape'];
+		const [size, place] = CAPTION_LAYOUT[SPOKEN.has(name) ? 'vertical' : 'landscape'];
 		const css = `div{position:absolute;${place};font-weight:600;line-height:1.25}${CAPTION_CSS}`;
 		await snapshot(browser, size, css, `<div><span>${text}</span></div>`, `${BUILD}captions/${name}.png`);
 	}

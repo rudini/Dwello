@@ -1,6 +1,6 @@
-# YouTube texts
+# YouTube and Instagram texts
 
-Title, description, chapter marks and thumbnail of each cut (#1445). The chapter marks fit the cuts as `cut.py` makes them today; after a change to a cut, take the new times from `build/marketing-video/timeline-<cut>.json` (`starts`, one per piece). YouTube shows chapters only from three of them, each at least 10 s long, and none on Shorts.
+Title, description, chapter marks and thumbnail of each YouTube cut, and the post text of the Instagram Reel (#1445). The chapter marks fit the cuts as `cut.py` makes them today; after a change to a cut, take the new times from `build/marketing-video/timeline-<cut>.json` (`starts`, one per piece). YouTube shows chapters only from three of them, each at least 10 s long, and none on Shorts.
 
 ## Short cut (`dwello-short.mp4`, 0:59, 16:9)
 
@@ -63,20 +63,24 @@ Quellcode (AGPL-3.0): https://github.com/rudini/Dwello
 Die Aufnahmen zeigen die echte App mit Beispieldaten; Wartezeiten sind gekürzt. Die Lieferanten auf den Rechnungen sind erfunden.
 ```
 
-## Vertical cut (`dwello-vertical.mp4`, 0:43, 9:16, YouTube Shorts)
+## Vertical cut (`dwello-vertical.mp4`, 0:37, 9:16, Instagram Reel)
 
-Thumbnail: `thumbnail-vertical.png`
+Cover: `thumbnail-vertical.png`. When uploading, set Instagram's label «KI-Info»: the woman in the video is AI-generated.
 
-**Title:** Von der Rechnung zur QR-Rechnung – Nebenkostenabrechnung mit Dwello #Shorts
-
-**Description:**
+**Post text:**
 
 ```
-Rechnung als PDF hochladen, die KI liest sie, die Nebenkostenabrechnung mit Swiss QR-Rechnung ist fertig. Dwello ist gratis und Open Source, für private Vermieterinnen und Vermieter in der Schweiz.
+Nebenkostenabrechnung am Handy? Geht. 📱
 
-Gratis installieren: https://dwello.ch
+Rechnung fotografieren, die KI liest Betrag, Datum und Kategorie. Dwello rechnet aus, was jeder Mieter bezahlt, und verschickt die Abrechnung mit QR-Rechnung per E-Mail.
 
-Die Aufnahmen zeigen die echte App mit Beispieldaten; Wartezeiten sind gekürzt.
+Dwello ist gratis und Open Source, für private Vermieterinnen und Vermieter in der Schweiz. Ihre Daten bleiben auf Ihrem eigenen Computer.
+
+👉 dwello.ch
+
+Person im Video: KI-generiert. App-Aufnahmen: echte App mit Beispieldaten, gerafft.
+
+#Nebenkostenabrechnung #Vermieter #Vermieten #Immobilien #Schweiz #Nebenkosten #OpenSource #QRRechnung
 ```
 
-Chapter marks: none. Shorts show no chapters, and the cut has only two parts of at least 10 s (upload, statement).
+Chapter marks: none (a Reel has none).

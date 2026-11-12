@@ -12,6 +12,7 @@ import { execFileSync } from 'child_process';
 // the demo building Alpenblick: its 2025 statements are not made yet, and it lacks the invoices invoices.mjs writes
 const ALPENBLICK = '33333333-3333-3333-3333-333333333333';
 const INVOICES = BUILD + 'invoices/';
+const PHOTOS = BUILD + 'photos/';
 const tid = (page, id) => page.getByTestId(id);
 const notReading = (page) =>
 	page.waitForFunction(() => !document.body.innerText.includes('Wird gelesen'), null, { timeout: 280000 });
@@ -225,30 +226,30 @@ const scenes = {
 		}
 	},
 
-	// the vertical cut on a phone: the invoices to the statement with its QR-bill. All three, as in the long cut: with
-	// the Kaminfeger alone the tenants get money back, and a refund has no QR-bill
+	// the vertical cut on a phone: photos of the invoices to the statement, sent by e-mail with its QR-bill. All three
+	// invoices, as in the long cut: with the Kaminfeger alone the tenants get money back, and a refund has no QR-bill
 	mobile: {
 		options: { width: 390, height: 693, out: [1080, 1920], mobile: true },
 		async run(h) {
 			const { page } = h;
 			await page.goto('/invoices');
 			await h.moveTo([200, 400], { ms: 10 });
-			const files = readdirSync(INVOICES).filter((f) => f.endsWith('.pdf')).sort();
+			// the invoices as photos, as the phone's camera takes them
 			await record(h, 'm-upload-a', async () => {
 				await h.wait(700);
-				await chooseInvoices(h, files.map((f) => INVOICES + f));
+				await chooseInvoices(h, readdirSync(PHOTOS).sort().map((f) => PHOTOS + f));
 				await h.wait(1500);
 			});
 			await notReading(page);
 			// not filmed: the other two rows' Verteilschlüssel, so the clip shows one invoice
-			for (const name of ['Wasserversorgung', 'Gartenbau']) {
+			for (const name of ['IMG_4822', 'IMG_4823']) {
 				const row = await checkRow(h, name, { linger: false });
 				await h.click(row.getByTestId('invoice-upload-row-toggle'), { ms: 300 });
 			}
 			await h.page.getByText('Rechnungen hochladen').first().scrollIntoViewIfNeeded();
 			await record(h, 'm-upload-b', async () => {
 				await h.wait(800);
-				await checkRow(h, 'Kaminfeger', { linger: true });
+				await checkRow(h, 'IMG_4821', { linger: true });
 				await h.click(tid(page, 'invoice-upload-create-button'), { ms: 900 });
 				await tid(page, 'invoice-upload-result').waitFor();
 				await h.wait(2200);
@@ -264,7 +265,19 @@ const scenes = {
 				await h.scroll(500, 1800);
 				await h.wait(1200);
 			});
-			await savePdf(h, page.url(), 'pdf-mobile');
+			const statement = page.url();
+			await savePdf(h, statement, 'pdf-mobile');
+			// «Per E-Mail senden»: the persona stack's mail catcher takes the mail
+			await page.goto(statement);
+			await record(h, 'm-send', async () => {
+				await h.wait(900);
+				await h.click(tid(page, 'statement-send-button'), { ms: 900 });
+				await tid(page, 'send-recipient').waitFor();
+				await h.wait(1600);
+				await h.click(tid(page, 'statement-send-confirm'), { ms: 900 });
+				await tid(page, 'statement-status').filter({ hasText: 'Versendet' }).waitFor({ timeout: 60000 });
+				await h.wait(2200);
+			});
 		}
 	}
 };
