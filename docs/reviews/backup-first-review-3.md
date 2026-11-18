@@ -1,0 +1,15 @@
+# Code-Review backup-first, Runde 3 (Abschlussrunde, Delta 009b7bf..dfaefd6)
+
+Geschlossen: C-3
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-4 | Minor | docs/test-pyramid.md:30 | Die Zeile «Acceptance (E2E)» zählt die Test-Doubles des Stacks abschliessend auf (Mail-Catcher, KI-Stand-in, Session-JWT). Den neuen pg_dump-Stand-in (`backend/scripts/e2e-bin/pg_dump`, `playwright.config.ts:236`) nennt sie nicht; damit stimmt die Zeile nicht mehr. Ein Halbsatz dort (z. B. «a pg_dump stand-in last on the fresh installation's PATH, where the image has none») genügt; `tests/e2e/CLAUDE.md` ist eine Gate-Datei und bleibt unberührt. |
+
+Geprüft: Der Stand-in steht zuletzt im PATH (`playwright.config.ts:236`), daher gewinnt ein echtes pg_dump. Er gibt Exit 0 und etwas auf stdout aus, also endet `createBackup` (`backup.service.ts:116-150`) erfolgreich. Kein E2E-Szenario stellt eine Sicherung der frischen Installation wieder her. Das Szenario mit der fehlgeschlagenen Sicherung (`aktualisierung.feature:111`) hängt nicht an pg_dump: Der Schlüssel kann nicht verschlüsseln (`backend/scripts/e2e-backup-reset.ts`). Inhalt und Wiederherstellung prüft `backup.pg.test.ts` weiterhin mit dem echten pg_dump. Das ist unter `docs/test-pyramid.md:81` (externe Systeme an der Grenze ersetzt) zulässig. Nach dem Entfernen der Statusfrage bleiben kein toter Import und kein irreführender Kommentar zurück; der Kommentar `update.service.ts:60` beschreibt richtig `starting`. Der Test mit zwei gleichzeitigen Anfragen wird ohne `starting` weiterhin rot (zwei Aufträge an `/update`). «hält die Anfrage offen» verzögert jetzt jede Antwort des Stand-ins (`whenAsked`) über das idleTimeout hinaus. Der Vertragstest erreicht `fetch` nicht, weil die Sicherung vorher scheitert. Der 409 des Update-Diensts nach der Sicherung ist abgedeckt (`update.pg.test.ts:205-208`). Das Zurücknehmen von Fachreview V-3 (Minor) ist ein bewusster Tausch: Bei laufendem Update entsteht eine zusätzliche Sicherung, danach folgt UPDATE_RUNNING. Am Ziel des Requirements ändert das nichts, denn auch dann gilt: zuerst sichern, bei Fehlschlag kein Start.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: `bun run lint`; `cd backend && bun run type-check`; `bun test src/__tests__/update.pg.test.ts src/__tests__/api-contracts.pg.test.ts` (138 pass); «erstellt eine Sicherung …» rot ohne pg_dump im PATH und grün mit dem Stand-in; E2E chromium `-g " update-|backup-stale|Dwello aktualisieren"` mit 26 von 27 bestanden, dazu `dashboard backup-stale` einzeln (2 bestanden); Commit-Hooks.
+- Nicht prüfbar: ob das CI-Image beim nächsten Lauf mit dem Stand-in grün wird. Gelesen wurden nur `playwright.config.ts:222-240` und `.github/workflows/ci.yml:137-141, 326`; laut Commit 4911912 war CI auf a122625 rot.
+- Nicht prüfbar: ob `dashboard backup-stale` (Zeitüberschreitung beim parallelen Lauf) mit diesem Delta zusammenhängt. Grund ist die Wartezeit auf die frische Installation, die Ursache wurde nicht untersucht.
