@@ -136,7 +136,7 @@ Funktionalität: Datenschutz
 
   # #458 (#347); #1176: Stand der Ergänzung zum Kontoinhaber
   Szenario: Stand der Datenschutzerklärung
-    Dann nennt die Seite den Stand "7. November 2026"
+    Dann nennt die Seite den Stand "18. November 2026"
 
   # Gebäuderegister (#479): der Server von Dwello fragt geo.admin.ch, nicht der Browser
   Szenario: Die Adresssuche fragt das Gebäuderegister des Bundes
@@ -159,3 +159,11 @@ Funktionalität: Datenschutz
   Szenario: Ohne Sicherung nennt die Datenschutzerklärung keine
     Dann nennt die Datenschutzerklärung unter "Aufbewahrung" "löscht Dwello keine gespeicherten Daten von selbst"
     Und nennt die Datenschutzerklärung unter "Aufbewahrung" nicht "Sicherung"
+
+  # #1453 (Fachreview update-1 R-1 bis R-3): die tägliche Suche nach neuen Versionen, das Update und «Was ist neu?» gehen
+  # zu GitHub; der Stack läuft wie eine Installation aus den veröffentlichten Images
+  Szenario: Die Suche nach neuen Versionen und das Update bei GitHub
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Einmal am Tag fragt der Server von Dwello bei GitHub (GitHub, Inc., USA) nach, welches die neueste Version von Dwello ist."
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "GitHub erhält dabei die IP-Adresse des Servers, keine Daten, die Sie in Dwello erfassen"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "GitHub" in "USA" mit seiner Datenschutzerklärung "https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement"
+    Und nennt die Datenschutzerklärung unter "Cookies" "dwello_update_later"

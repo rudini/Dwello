@@ -18,6 +18,10 @@ export async function backupState(fetch: Fetch): Promise<BackupState> {
 	}
 }
 
+/** A Wiederherstellungscode is confirmed: Dwello backs up, an update may start (#1453) */
+export const backupReady = async (fetch: Fetch) =>
+	['ok', 'stale'].includes((await backupState(fetch)).backup);
+
 /** «Sicherung einrichten»: the code to confirm and the day it was made; once one is confirmed, the Übersicht */
 export async function backupSetup(fetch: Fetch) {
 	const state = (await (await fetch(`${BACKEND}/api/v1/backup`)).json()) as BackupState & {

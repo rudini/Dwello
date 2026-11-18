@@ -31,7 +31,7 @@ const usesExtraInstances =
 const usesFreshInstallation =
 	!existsSync('.features-gen') ||
 	// settings and statement-detail: their scenarios without Firmenadresse (#690, @frische-installation)
-	['einrichtung', 'sicherung', 'ki-einstellungen', 'accessibility', 'sprachen-bildschirme', 'settings', 'statement-detail'].some((feature) =>
+	['einrichtung', 'sicherung', 'aktualisierung', 'ki-einstellungen', 'accessibility', 'sprachen-bildschirme', 'settings', 'statement-detail'].some((feature) =>
 		existsSync(generated(feature))
 	);
 const freshDatabaseUrl = (() => {
@@ -139,7 +139,10 @@ export default defineConfig<{ driver: Driver }>({
 				SMTP_HOST: '127.0.0.1',
 				SMTP_PORT: '2525',
 				// The KI stand-in, whatever the developer's .env sets: it categorizes only the upload scenarios' invoices
-				LLM_BASE_URL: 'http://127.0.0.1:2527/v1'
+				LLM_BASE_URL: 'http://127.0.0.1:2527/v1',
+				// #1453: an installation from the published images, whose newest release is the build's own version
+				// (backend/scripts/update-stub.ts), so the privacy statement names GitHub and no notice shows
+				DWELLO_RELEASES: 'http://127.0.0.1:2527/releases/latest'
 			}
 		},
 		{
@@ -229,7 +232,10 @@ export default defineConfig<{ driver: Driver }>({
 						LLM_LOCAL_URL: 'http://127.0.0.1:2530/v1',
 						ENCRYPTION_KEY: 'e2e-encryption-key-of-the-fresh-installation',
 						// a folder for the Sicherung (#718), so the fresh installation asks to set it up
-						BACKUP_DIR: freshBackups
+						BACKUP_DIR: freshBackups,
+						// #1453: GitHub's newest release and the update service, both the stand-in (aktualisierung.feature)
+						DWELLO_RELEASES: 'http://127.0.0.1:2530/releases/latest',
+						UPDATER_URL: 'http://127.0.0.1:2530'
 					}
 				},
 				{
@@ -243,6 +249,8 @@ export default defineConfig<{ driver: Driver }>({
 						PORT: '3106',
 						ORIGIN: 'http://localhost:3106',
 						BACKEND_URL: 'http://localhost:3105',
+						// #1453: how far the update is, asked of the update service's stand-in
+						UPDATER_URL: 'http://127.0.0.1:2530',
 						OAUTH_GOOGLE_CLIENT_ID: '',
 						OAUTH_GOOGLE_CLIENT_SECRET: '',
 						OAUTH_GOOGLE_REDIRECT_URI: ''

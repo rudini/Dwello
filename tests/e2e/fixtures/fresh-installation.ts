@@ -81,6 +81,15 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 			buildings.push(id);
 			this.buildingId = id;
 		},
+		/** A newer Dwello published (#1453), which the backend learns at once when the search is switched off and on */
+		async newVersion(release: string) {
+			await kiStub.post('stub/update', { release });
+			// only a switch makes the backend ask again
+			await api.put('config', { update_check: 'off' });
+			await api.put('config', { update_check: 'on' });
+		},
+		/** How the next update ends: the previous version keeps running, or it no longer starts (#1453) */
+		updateFails: (outcome: 'failed' | 'restore') => kiStub.post('stub/update', { outcome }),
 		/** No KI chosen (#620: «Später entscheiden» at the setup) */
 		kiNone: () => api.put('ki-settings', { mode: 'none' }),
 		/** A provider of the KI saved through the API (#580); the clean-up returns to the local KI */
@@ -106,6 +115,10 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 			for (const id of buildings) await api.remove(`buildings/${id}`);
 			for (const email of accounts) await api.remove(`local-accounts/${encodeURIComponent(email)}`);
 			resetFreshBackup();
+			// #1453: no newer version, the search on and the next update succeeding
+			await kiStub.post('stub/update', { release: '1.4.0', outcome: 'done' });
+			await api.put('config', { update_check: 'off' });
+			await api.put('config', { update_check: 'on' });
 		}
 	};
 }

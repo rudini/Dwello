@@ -11,6 +11,10 @@
 	type Paragraph = { text: string; policy?: { provider: string; href: string } };
 
 	const GOOGLE = { provider: 'Google', href: 'https://policies.google.com/privacy' };
+	const GITHUB = {
+		provider: 'GitHub',
+		href: 'https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement'
+	};
 	// What each sign-in provider learns, and its policy; only configured providers are named (#82)
 	const signIn: Record<string, () => Paragraph> = {
 		Google: () => ({ text: m.privacy_login_google(), policy: GOOGLE }),
@@ -139,6 +143,8 @@
 				{ text: m.privacy_third_4(), policy: GOOGLE },
 				// the local KI fetches a missing model from Ollama by itself (#577, fach review 577 R-2)
 				...(llmNotice === m.privacy_llm_local() ? [{ text: m.privacy_third_ollama() }] : []),
+				// #1453: the search for new versions, the update and «Was ist neu?» (Fachreview update-1 R-1, R-3)
+				...(data.updates ? [{ text: m.privacy_third_github(), policy: GITHUB }] : []),
 				{ text: m.privacy_third_5() }
 			]
 		},
@@ -159,6 +165,8 @@
 				// only an installation with a provider sets the cookies of the OAuth flow (fach review 576 R-10)
 				...(data.providers.length ? [m.privacy_cookies_3()] : []),
 				m.privacy_cookies_4(),
+				// #1453: «Später» of the notice of a new version (Fachreview update-1 R-2)
+				...(data.updates ? [m.privacy_cookies_6({ lifetime: lifetime(data.sessionSeconds) })] : []),
 				m.privacy_cookies_5()
 			].map((text) => ({ text }))
 		}
@@ -170,7 +178,7 @@
 </svelte:head>
 
 <div class="flex max-w-3xl flex-col gap-8">
-	<LegalHeader title={m.privacy_title()} purpose={m.privacy_purpose()} asOf="2026-11-07" />
+	<LegalHeader title={m.privacy_title()} purpose={m.privacy_purpose()} asOf="2026-11-18" />
 
 	{#if data.demo}
 		<Panel title={m.demo_notice_title()} testid="page-section">

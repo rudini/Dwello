@@ -374,6 +374,18 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract-missing-statements'), actual)).toEqual([]);
 	});
 
+	// #1453: public, read by the privacy statement (fallback review of #1455)
+	it('GET /update/checks liefert die Felder von update-checks.json', async () => {
+		const actual = await (await callApi('/api/v1/update/checks')).json();
+		expect(drift(await sample('update-checks'), actual)).toEqual([]);
+	});
+
+	// #1453: the newest version, read by the layout's notice
+	it('GET /update liefert die Felder von update.json', async () => {
+		const actual = await (await callApi('/api/v1/update')).json();
+		expect(drift(await sample('update'), actual)).toEqual([]);
+	});
+
 	it('GET /contracts/missing-statements liefert die Felder von contracts-missing-statements.json', async () => {
 		const byContract = (await (await callApi('/api/v1/contracts/missing-statements')).json()) as Record<string, unknown>;
 		expect(drift(await sample('contracts-missing-statements'), { c1: byContract[rental.contract] })).toEqual([]);

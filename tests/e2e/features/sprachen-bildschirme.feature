@@ -29,6 +29,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | login                  | demo                |
       | backup                 | default             |
       | backup                 | backup-error        |
+      | backup                 | update-backup       |
       | setup                  | default             |
       | setup                  | setup-error         |
       | error-404              | default             |
@@ -37,6 +38,11 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | dashboard              | default             |
       | dashboard              | backup-confirmed    |
       | dashboard              | backup-stale        |
+      | dashboard              | update-available    |
+      | dashboard              | update-confirm      |
+      | dashboard              | update-running      |
+      | dashboard              | update-failed       |
+      | dashboard              | update-restore      |
       | dashboard              | old-address-task    |
       | dashboard              | discontinued-figure |
       | dashboard              | first-use           |

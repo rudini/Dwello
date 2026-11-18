@@ -67,6 +67,8 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 		])
 	);
 	typed.account_holder_separate = holderIsSender ? '' : 'true';
+	// #1453: the search for new versions, where the page offers it
+	if (formData.has('updateCheckShown')) typed.update_check = formData.has('updateCheck') ? 'on' : 'off';
 	const saved = await fetch(API, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },

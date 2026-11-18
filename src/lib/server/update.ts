@@ -1,0 +1,45 @@
+/**
+ * A new version of Dwello (#1453): the notice after sign-in, «Später» until the next sign-in, the start of an update
+ * and how far it is
+ */
+
+import type { Cookies } from '@sveltejs/kit';
+import { appVersion } from '$lib/app-version';
+import type { UpdateNotice } from '$lib/update';
+import { buildBackendUrl } from './api-proxy';
+import { backupReady } from './backup';
+
+type Fetch = typeof globalThis.fetch;
+
+/** «Später»: the sign-in it was chosen in; a new sign-in shows the notice again (privacy statement, «Cookies») */
+export const LATER_COOKIE = 'dwello_update_later';
+
+// «1.10.0» after «1.4.0»; a development build («1.4.0+3-gabc1234») is not older than its release
+const newer = (version: string, than: string) =>
+	version.localeCompare(than, 'en', { numeric: true }) > 0;
+
+export async function updateNotice(
+	fetch: Fetch,
+	cookies: Pick<Cookies, 'get'>,
+	signedInAt: number
+): Promise<UpdateNotice | null> {
+	if (!appVersion || cookies.get(LATER_COOKIE) === String(signedInAt)) return null;
+	const { latest, releaseUrl, updater } = (await fetch(buildBackendUrl('/update'))
+		.then((response) => response.json())
+		.catch(() => ({}))) as { latest?: string | null; releaseUrl: string; updater?: boolean };
+	// none known (or no answer) is never newer
+	if (!newer(latest ?? '', appVersion)) return null;
+	return {
+		latest: latest!,
+		current: appVersion,
+		releaseUrl,
+		variant: updater ? ((await backupReady(fetch)) ? 'update' : 'backup') : 'manual'
+	};
+}
+
+/** Whether this installation asks GitHub for new versions: the privacy statement names it then (Fachreview update-1 R-3) */
+export const asksGitHub = (fetch: Fetch): Promise<boolean> =>
+	fetch(buildBackendUrl('/update/checks'))
+		.then((response) => response.json())
+		.then(({ checks }) => checks === true)
+		.catch(() => false);

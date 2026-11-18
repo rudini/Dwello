@@ -135,7 +135,9 @@ export const CONFIG_KEYS = {
 		type: 'string',
 		validator: (v: string) => ['de', 'fr', 'it', 'en'].includes(v),
 		default: 'de'
-	}
+	},
+	// #1453: the daily search for new versions at GitHub
+	update_check: { type: 'string', validator: (v: string) => v === 'on' || v === 'off', default: 'on' }
 } as const;
 
 export type ConfigKey = keyof typeof CONFIG_KEYS;

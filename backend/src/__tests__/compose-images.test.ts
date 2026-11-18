@@ -92,19 +92,38 @@ describe('Installation mit compose.yaml', () => {
 	it('startet dieselben Dienste mit denselben Einstellungen wie docker-compose.prod.yml', () => {
 		// a service of a profile (Caddy, #722) is compose.yaml's own: deploy/demo/ brings its own Caddy for the clone, which
 		// would inherit the profile if docker-compose.prod.yml had one
+		// #1453: the update of the published images is compose.yaml's own; a clone updates with git pull
+		const forUpdates = /^(UPDATER_URL|DWELLO_VERSION|DWELLO_RELEASES)=/;
 		const same = ({ services }: Compose) =>
 			Object.fromEntries(
 				Object.entries(services)
-					.filter(([, service]) => !service.profiles)
-					.map(([name, { image, build: _build, volumes, configs: _configs, ...rest }]) => [
+					.filter(([name, service]) => !service.profiles && name !== 'updater')
+					.map(([name, { image, build: _build, volumes, configs: _configs, environment, ...rest }]) => [
 					name,
 					{
 						...rest,
 						image: name === 'secrets' || /dwello/.test(image ?? '') ? undefined : image,
-						volumes: volumes?.filter((volume) => !volume.includes('init-secrets'))
+						volumes: volumes?.filter((volume) => !volume.includes('init-secrets')),
+						environment: Array.isArray(environment) ? environment.filter((entry) => !forUpdates.test(entry)) : environment
 					}
 				])
 			);
 		expect(same(published)).toEqual(same(built));
+	});
+
+	// #1453: only the update service reaches Docker, only on the internal network; a clone asks GitHub for nothing
+	it('gibt nur dem Update-Dienst den Docker-Socket und lässt einen Klon nicht nach neuen Versionen fragen', () => {
+		const withSocket = Object.entries(published.services).filter(([, service]) => service.volumes?.some((volume) => volume.includes('docker.sock')));
+		expect(withSocket.map(([name]) => name)).toEqual(['updater']);
+		expect(published.services.updater.image).toBe(IMAGE('backend'));
+		expect(published.services.updater.ports).toBeUndefined();
+		// code review update-1 C-1: the backend image says PORT=3001; the service listens where UPDATER_URL points, and the
+		// image's health check of the backend does not judge it
+		expect(published.services.updater.environment).toContain('PORT=3002');
+		expect((published.services.updater as { healthcheck?: { disable?: boolean } }).healthcheck).toEqual({ disable: true });
+		expect(published.services.backend.environment).toContain('DWELLO_VERSION=${DWELLO_VERSION:-}');
+		expect(published.services.backend.environment).toContain('UPDATER_URL=http://updater:3002');
+		expect(built.services.backend.environment).toContain('DWELLO_RELEASES=');
+		expect(read('backend/Dockerfile')).toContain('ENV DWELLO_RELEASES=https://api.github.com/repos/rudini/Dwello/releases/latest');
 	});
 });

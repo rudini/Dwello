@@ -9,11 +9,12 @@ const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const get = (path: string) => fetch(`${API}/${path}`).then((response) => response.json());
-	const [config, heatingProfiles, distributionKeys, { backup }] = await Promise.all([
+	const [config, heatingProfiles, distributionKeys, { backup }, { checks }] = await Promise.all([
 		get('config'),
 		get('heating-profiles?limit=all'), // all of them (#588)
 		get('distribution-keys?limit=all'),
-		backupState(fetch)
+		backupState(fetch),
+		get('update') // #1453: whether this installation may search for new versions at all
 	]);
 
 	return {
@@ -25,7 +26,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			id: key.id,
 			name: localName(key)
 		})),
-		backup
+		backup,
+		updateCheck: checks ? config.data.update_check !== 'off' : null
 	};
 };
 

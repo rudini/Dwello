@@ -15,6 +15,7 @@ import {
 	type ConfigKey
 } from '../services/config.service';
 import { errorBody, fieldsRefused } from '../services/coded-error';
+import { askingWhenSwitched } from '../services/update.service';
 import { paymentPartWarning } from '../services/statement-pdf.service';
 
 export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
@@ -62,7 +63,10 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 		'/',
 		async ({ body, set }) => {
 			const { account_holder_separate: separate, ...typed } = body;
-			const refused = await setMultipleConfig(typed as Partial<Record<ConfigKey, string>>, separate === 'true');
+			// #1453: a switched search for new versions asks GitHub at once
+			const refused = await askingWhenSwitched(typed.update_check, () =>
+				setMultipleConfig(typed as Partial<Record<ConfigKey, string>>, separate === 'true')
+			);
 			if (refused.length) {
 				set.status = 400;
 				return fieldsRefused(refused);
@@ -93,7 +97,8 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 				account_holder_separate: t.Optional(t.String()), // #1166: the form's checkbox cleared, not stored
 				payment_deadline_days: t.Optional(t.String()),
 				reminder_after_days: t.Optional(t.String()),
-				default_language: t.Optional(t.String())
+				default_language: t.Optional(t.String()),
+				update_check: t.Optional(t.String())
 			})
 		}
 	)

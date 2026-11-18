@@ -5,6 +5,7 @@ import { getConfiguredProviders, PROVIDER_NAMES } from '$lib/server/oauth';
 import { loadHosting, loadOperator } from '$lib/server/operator';
 import { passwordAvailable, setupNeeded } from '$lib/server/password-login';
 import { backupState } from '$lib/server/backup';
+import { asksGitHub } from '$lib/server/update';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -24,9 +25,10 @@ export const load: PageServerLoad = async ({
 		operator: ReturnType<typeof loadOperator>;
 		sessionSeconds: number;
 		backup: boolean; // Dwello backs up once a Wiederherstellungscode is confirmed (#718, Fachreview 718b R-4)
+		updates: boolean; // the installation asks GitHub for new versions, also while switched off (#1453, Fachreview update-1 R-3)
 	} & ReturnType<typeof loadHosting>
 > => {
-	const [[llm, mail], password, backup] = await Promise.all([
+	const [[llm, mail], password, backup, updates] = await Promise.all([
 		Promise.all(
 		['invoices/llm-recipient', 'mail-transport'].map((path) =>
 				fetchRecord(fetch, `${BACKEND_URL}/api/v1/${path}`, m.privacy_record())
@@ -34,7 +36,8 @@ export const load: PageServerLoad = async ({
 		),
 		// a Konto mit Passwort exists, or is about to be made in the setup (#577, fach review 577 R-1)
 		Promise.all([passwordAvailable(fetch), setupNeeded(fetch)]).then((answers) => answers.some(Boolean)),
-		backupState(fetch)
+		backupState(fetch),
+		asksGitHub(fetch)
 	]);
 	return {
 		...llm,
@@ -45,6 +48,7 @@ export const load: PageServerLoad = async ({
 		...loadHosting(),
 		sessionSeconds: jwtConfig.expirySeconds,
 		// also before the code is confirmed: «Sicherung einrichten» sends the landlord here to read about it (persona weber-718b P-1)
-		backup: backup.backup !== 'off'
+		backup: backup.backup !== 'off',
+		updates
 	};
 };

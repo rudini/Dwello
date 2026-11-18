@@ -2,7 +2,8 @@
 # Installs Dwello on Linux (Debian, Ubuntu, Fedora, CentOS, Raspberry Pi OS) (#579). Paste into a terminal:
 #   bash -c "$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/linux.sh)"
 # It installs Docker if it is missing, puts Dwello into ~/dwello, starts it and opens the browser at the setup.
-# Run it again to update Dwello; the data stays. The steps by hand: docs/installation.md.
+# Run it again to update Dwello by hand; the data stays. From then on Dwello updates itself after the landlord
+# confirms it in the browser (the service updater of compose.yaml, #1453). The steps by hand: docs/installation.md.
 set -euo pipefail
 
 source_url=${DWELLO_SOURCE:-https://raw.githubusercontent.com/rudini/Dwello/main}

@@ -500,7 +500,7 @@ describe('Stand der Datenschutzerklärung', () => {
 	it('nennt den Stand in der Sprache der Oberfläche', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
-		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 7. November 2026');
+		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 18. November 2026');
 	});
 });
 
@@ -559,5 +559,31 @@ describe('Datenschutzerklärung zum Download des KI-Modells', () => {
 
 		expect(third()).toContain('swisstopo');
 		expect(third()).not.toContain('Ollama');
+	});
+});
+
+// #1453 (Fachreview update-1 R-3): only where Dwello may ask GitHub, also while the search is switched off
+describe('Datenschutzerklärung zur Suche nach neuen Versionen', () => {
+	const section = (id: string) => document.getElementById(id)?.textContent ?? '';
+
+	it('nennt GitHub und das Cookie für «Später» auf einer Installation, die nach neuen Versionen fragt', () => {
+		show(PrivacyPage, {
+			data: { recipient: null, providers: [], password: true, updates: true }
+		} as never);
+
+		expect(section('third')).toContain(
+			'Einmal am Tag fragt der Server von Dwello bei GitHub (GitHub, Inc., USA) nach'
+		);
+		expect(section('cookies')).toContain('dwello_update_later');
+	});
+
+	it('nennt GitHub nicht auf einer Installation aus einem Klon oder mit fester Version', () => {
+		show(PrivacyPage, {
+			data: { recipient: null, providers: [], password: true, updates: false }
+		} as never);
+
+		expect(section('third')).toContain('swisstopo');
+		expect(section('third')).not.toContain('GitHub');
+		expect(section('cookies')).not.toContain('dwello_update_later');
 	});
 });

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Starts the app for persona runs: fresh database dwello_persona (unless --keep-db) with demo data, backend :3301, frontend :3300 (built into /tmp/persona-app)
+# RELEASE=1.5.0: GitHub's newest version as the stand-in reports it (#1453; else 0.0.0, no notice of a new version);
+# its update service is the stand-in too (backend/scripts/update-stub.ts)
 # --fresh: a fresh installation instead (#774): no demo data, no OAuth, Einrichtungscode PERS-FRSH, a KI stand-in that is
 # still downloading the model and a folder for the Sicherung (#718: «Sicherung einrichten» after the account, emptied
 # at each start); --second with it: a second one on :3310/:3311 and dwello_persona_2, beside the first
@@ -35,18 +37,18 @@ cp package.json /tmp/persona-app/ && ln -sfn "$PWD/node_modules" /tmp/persona-ap
 # --fresh: the stand-in also answers like an Ollama without the model, at 40 % (POST :2528/stub/pull {percent} changes it)
 if [ -z "$SECOND" ]; then
 fuser -k 2528/tcp 2>/dev/null || true
-(cd backend && env LLM_STUB_PORT=2528 ${FRESH:+LLM_STUB_PULL=on} setsid nohup bun run llm-stub > /tmp/persona-llm.log 2>&1 &) < /dev/null > /dev/null 2>&1
+(cd backend && env LLM_STUB_PORT=2528 UPDATE_STUB_RELEASE=${RELEASE:-0.0.0} ${FRESH:+LLM_STUB_PULL=on} setsid nohup bun run llm-stub > /tmp/persona-llm.log 2>&1 &) < /dev/null > /dev/null 2>&1
 fi
 # e-mail goes to the mail catcher of the acceptance tests (shared with E2E, which reuses it): read on :2526/messages
 fuser 2525/tcp > /dev/null 2>&1 || (cd backend && setsid nohup bun run mail-catcher > /tmp/persona-mail.log 2>&1 &) < /dev/null > /dev/null 2>&1
 [ -z "$FRESH" ] || { rm -rf /tmp/persona-backups$SECOND; mkdir -p /tmp/persona-backups$SECOND; }
-(cd backend && env PORT=$API DATABASE_URL=$DB ${FRESH:+SETUP_CODE=PERS-FRSH} ${FRESH:+BACKUP_DIR=/tmp/persona-backups$SECOND} LLM_LOCAL_URL=http://127.0.0.1:2528/v1 ENCRYPTION_KEY=persona-encryption-key-of-the-persona-stack MAIL_TRANSPORT=smtp MAIL_FROM=verwaltung@dwello.test SMTP_HOST=127.0.0.1 SMTP_PORT=2525 setsid nohup bun run src/index.ts > /tmp/persona-backend$SECOND.log 2>&1 &) < /dev/null > /dev/null 2>&1
+(cd backend && env PORT=$API DATABASE_URL=$DB ${FRESH:+SETUP_CODE=PERS-FRSH} ${FRESH:+BACKUP_DIR=/tmp/persona-backups$SECOND} LLM_LOCAL_URL=http://127.0.0.1:2528/v1 DWELLO_RELEASES=http://127.0.0.1:2528/releases/latest UPDATER_URL=http://127.0.0.1:2528 ENCRYPTION_KEY=persona-encryption-key-of-the-persona-stack MAIL_TRANSPORT=smtp MAIL_FROM=verwaltung@dwello.test SMTP_HOST=127.0.0.1 SMTP_PORT=2525 setsid nohup bun run src/index.ts > /tmp/persona-backend$SECOND.log 2>&1 &) < /dev/null > /dev/null 2>&1
 # only the persona-kit's Liegenschaftsverwalter may sign in, as in production (#51); a fresh installation has no OAuth,
 # so «Dwello einrichten» shows
 # the address search asks the real Gebäuderegister (geo.admin.ch, #479): Node's fetch takes HTTPS_PROXY only with NODE_USE_ENV_PROXY
 OAUTH="ALLOWED_EMAILS=verwalter@example.com OAUTH_GOOGLE_CLIENT_ID=x OAUTH_GOOGLE_CLIENT_SECRET=x OAUTH_GOOGLE_REDIRECT_URI=http://localhost:$APP/auth/callback"
 [ -z "$FRESH" ] || OAUTH=
-env NODE_USE_ENV_PROXY=1 $OAUTH PORT=$APP ORIGIN=http://localhost:$APP BODY_SIZE_LIMIT=11M BACKEND_URL=http://localhost:$API setsid nohup node /tmp/persona-app < /dev/null > /tmp/persona-frontend$SECOND.log 2>&1 &
+env NODE_USE_ENV_PROXY=1 $OAUTH UPDATER_URL=http://127.0.0.1:2528 PORT=$APP ORIGIN=http://localhost:$APP BODY_SIZE_LIMIT=11M BACKEND_URL=http://localhost:$API setsid nohup node /tmp/persona-app < /dev/null > /tmp/persona-frontend$SECOND.log 2>&1 &
 for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:$APP/login && curl -s -o /dev/null http://localhost:$API/health && break; sleep 1; done
 { curl -s -o /dev/null http://localhost:$APP/login && curl -s -o /dev/null http://localhost:$API/health; } || { echo "not ready"; tail -n 5 /tmp/persona-backend$SECOND.log /tmp/persona-frontend$SECOND.log; exit 1; }
 # the download at 40 %, as the README says (code review 774 C-1)
