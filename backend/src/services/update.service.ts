@@ -31,7 +31,7 @@ export async function checkForUpdate() {
 			// saving the settings waits for it (code review update-1 C-5)
 			signal: AbortSignal.timeout(10_000)
 		});
-		// an answer without them (an error) throws here
+		if (!response.ok) throw new Error(`GitHub answered ${response.status}`);
 		const { tag_name, html_url } = (await response.json()) as { tag_name: string; html_url: string };
 		if (!html_url.startsWith('https://github.com/')) throw new Error(`release notes at ${html_url}`);
 		known = { latest: tag_name.replace(/^v/, ''), releaseUrl: html_url };
