@@ -81,7 +81,7 @@
 			<ol class="flex flex-col gap-2">
 				{#each steps as { name, heard, current, look, testid } (name)}
 					<li aria-current={current} class={look} data-testid={testid}>
-						{name()} <span class="sr-only">({heard})</span>
+						{name()} <span>({heard})</span>
 					</li>
 				{/each}
 			</ol>
