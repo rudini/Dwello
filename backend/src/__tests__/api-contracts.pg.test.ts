@@ -376,7 +376,7 @@ describe('API-Verträge des Frontends', () => {
 
 	// #1457: the Sicherung before the update fails (a confirmed code whose key cannot encrypt)
 	it('POST /update mit fehlgeschlagener Sicherung liefert die Felder von update-backup-refused.json', async () => {
-		const updater = Bun.serve({ port: 0, fetch: () => new Response(null, { status: 202 }) });
+		const updater = Bun.serve({ port: 0, fetch: () => Response.json({ state: 'idle' }) });
 		process.env.BACKUP_DIR = tmpdir();
 		process.env.UPDATER_URL = `http://localhost:${updater.port}`;
 		try {

@@ -70,7 +70,7 @@ import {
 	signedInFreshWithGoogleAnHourAgo
 } from './sicherung';
 import { withLock } from '../fixtures/settings-lock';
-import { askToUpdate, confirmUpdate, noNewVersionAfterTheLook, publishedForTheLook, waitForFailure } from './aktualisierung';
+import { askToUpdate, confirmUpdate, holdNextUpdate, noNewVersionAfterTheLook, publishedForTheLook, waitForFailure } from './aktualisierung';
 import { updateNotice } from '../targets/aktualisierung';
 import { formErrors } from '../targets/form';
 import { creditorWarning } from '../targets/statement-detail';
@@ -309,7 +309,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'update-available': () => Wait.until(updateNotice),
 	'update-backup': () => Wait.until(updateNotice),
 	'update-confirm': () => askToUpdate,
-	'update-running': () => confirmUpdate,
+	// each look starts its own update: the stand-in still holds the one of the look before
+	'update-running': (example) => (actor) =>
+		actor.attemptsTo(holdNextUpdate, Navigate.to(instanceOf(example) + example.path), confirmUpdate),
 	'update-failed': () => (actor) => actor.attemptsTo(confirmUpdate, waitForFailure),
 	'update-restore': () => (actor) => actor.attemptsTo(confirmUpdate, waitForFailure),
 	// #718, part 3: «Neuer Wiederherstellungscode» signed in with a password (the account made by inTurn), with Google an

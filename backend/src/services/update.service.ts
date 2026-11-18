@@ -8,6 +8,7 @@ import { DATABASE_URL } from '../db/connection';
 import { backupState, createBackup } from './backup.service';
 import { CodedError } from './coded-error';
 import { getConfig } from './config.service';
+import type { UpdateStatus } from '../updater/updater';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -70,6 +71,9 @@ export async function startUpdate() {
 	try {
 		const { backup } = await backupState(DATABASE_URL);
 		if (backup !== 'ok' && backup !== 'stale') throw new CodedError('UPDATE_BACKUP_MISSING', 'The Sicherung is not set up');
+		// asked first, so a second click makes no Sicherung of its own (Fachreview backup-first-1 V-3)
+		const { state } = (await (await fetch(`${updater}/status`)).json()) as UpdateStatus;
+		if (!['idle', 'done', 'failed'].includes(state)) throw new CodedError('UPDATE_RUNNING', 'An update is running');
 		try {
 			await createBackup(DATABASE_URL, process.env.BACKUP_DIR!);
 		} catch (error) {

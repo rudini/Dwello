@@ -25,7 +25,7 @@ export const updateStub: Record<string, (request: Request) => Response | Promise
 	'/releases/latest': () =>
 		Response.json({ tag_name: `v${release}`, html_url: `https://github.com/rudini/Dwello/releases/tag/v${release}` }),
 	'/status': () => Response.json(status),
-	// also while one runs: every look of the axe check starts its own
+	// also while one runs (the real service answers 409); the backend asks /status first and starts none then
 	'/stub/asked': () => Response.json({ at: askedAt }),
 	'/update': () => {
 		askedAt = new Date().toISOString();
