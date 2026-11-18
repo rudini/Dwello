@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { pageTitle } from '../questions/navigation';
-import { atBackupCode, updateRunning, failureText, noticeShown, noticeText, shownStep, unsavedWarningText, updateOffered, whatsNewAddress } from '../questions/aktualisierung';
+import { atBackupCode, updateRunning, failureText, noticeShown, orderOfUpdate, noticeText, shownStep, unsavedWarningText, updateOffered, updateServiceState, whatsNewAddress } from '../questions/aktualisierung';
 import {
 	cancelUpdate,
 	askToUpdate,
@@ -117,4 +117,14 @@ Then('meldet das Update {string}', async ({ verwalter }, text: string) => {
 // after the notice, which the step before checks; the update would start at once
 Then('läuft kein Update', async ({ verwalter }) => {
 	await verwalter.sees(updateRunning).toBe(false);
+});
+
+// #1457: after the message of the failed Sicherung, which the step before checks
+Then('hat Dwello nichts heruntergeladen', async ({ verwalter, frisch }) => {
+	await verwalter.sees(updateServiceState(frisch)).toBe('idle');
+});
+
+// #1457: the Sicherung after the version appeared (not the one of the setup) and before the update service was asked
+Then('hat Dwello eine Sicherung erstellt, bevor das Update etwas heruntergeladen hat', async ({ verwalter, frisch }) => {
+	await verwalter.sees(orderOfUpdate(frisch)).toEqual(['erschienen', 'gesichert', 'heruntergeladen']);
 });

@@ -12,14 +12,17 @@
 	// then the update with its step until the page loads again; Fachreview update-1 gives the texts
 	let { notice }: { notice: UpdateNotice } = $props();
 
-	// the update service's states, in the order of the steps (UpdateProgress)
-	const STEP_OF: Record<string, number> = { pulling: 0, backend: 1, frontend: 2 };
+	// the step of each of the update service's states (UpdateProgress); before them «Sichern», while the backend backs
+	// up and has not asked the update service yet (#1457)
+	const STEP_OF: Record<string, number> = { pulling: 1, backend: 2, frontend: 2 };
 	const SLOW_MS = 15 * 60_000;
 	const POLL_MS = 2000;
 
 	let hidden = $state(false);
 	let confirming = $state(false);
 	let refusal = $state('');
+	// why no update started: the Sicherung before it failed
+	let notStarted = $state('');
 	let phase = $state<'idle' | 'running' | 'failed' | 'restore'>('idle');
 	let step = $state(0);
 	let slow = $state(false);
@@ -32,15 +35,23 @@
 
 	async function start() {
 		confirming = false;
-		const { error } = await apiCall('/update', { method: 'POST' });
-		if (error) {
-			refusal = backendMessage(error, m.backend_unknown_error());
-			return;
-		}
+		refusal = notStarted = '';
 		phase = 'running';
 		step = 0;
 		slow = false;
 		const slowTimer = setTimeout(() => (slow = true), SLOW_MS);
+		const { error } = await apiCall('/update', { method: 'POST' });
+		if (error) {
+			clearTimeout(slowTimer);
+			const text = backendMessage(error, m.backend_unknown_error());
+			// no update failed with the other refusals: they stay in the line (Fachreview backup-first-1 V-4)
+			if (error.code !== 'UPDATE_BACKUP_FAILED') return (refusal = text), closeFailure();
+			notStarted = text;
+			phase = 'failed';
+			return;
+		}
+		step = 1;
+		// only now: the update service keeps the end of its last update until the next one starts
 		const poll = setInterval(async () => {
 			// while the frontend restarts nothing answers: the last step stays
 			const state = await fetch('/api/update')
@@ -137,5 +148,5 @@
 </Dialog>
 
 {#if phase !== 'idle'}
-	<UpdateProgress {phase} {step} {slow} {notice} onclose={closeFailure} />
+	<UpdateProgress {phase} {step} {slow} {notice} {notStarted} onclose={closeFailure} />
 {/if}

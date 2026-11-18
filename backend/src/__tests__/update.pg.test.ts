@@ -8,6 +8,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test';
 import { mkdtemp, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { backupCodes } from '../db/schema';
 import { setConfig } from '../services/config.service';
@@ -17,11 +18,16 @@ import { callApi, sendJson } from './helpers/auth';
 // GitHub and the update service, at the boundary
 const asked: { path: string; agent: string | null }[] = [];
 let updaterAnswer = 202;
+let whenAsked = async () => {};
+let updaterState = 'idle';
 const outside = Bun.serve({
 	port: 0,
-	fetch(request) {
+	async fetch(request) {
 		const path = new URL(request.url).pathname;
+		// how far the update service is: asked before every update, not counted as a request
+		if (path === '/status') return Response.json({ state: updaterState });
 		asked.push({ path, agent: request.headers.get('user-agent') });
+		await whenAsked();
 		if (path === '/releases/latest') return Response.json({ tag_name: 'v1.5.0', html_url: 'https://github.com/rudini/Dwello/releases/tag/v1.5.0' });
 		return new Response(null, { status: updaterAnswer });
 	}
@@ -35,9 +41,12 @@ beforeAll(async () => {
 afterEach(async () => {
 	asked.length = 0;
 	updaterAnswer = 202;
+	whenAsked = async () => {};
+	updaterState = 'idle';
 	for (const name of ['DWELLO_RELEASES', 'DWELLO_VERSION', 'UPDATER_URL', 'BACKUP_DIR']) delete process.env[name];
 	await setConfig('update_check', 'on');
 	await db.delete(backupCodes);
+	await db.execute(sql`DELETE FROM backup_runs`);
 	await checkForUpdate();
 });
 afterAll(async () => {
@@ -127,6 +136,45 @@ describe('Update starten', () => {
 		const response = await sendJson('POST', '/api/v1/update');
 		expect(response.status).toBe(202);
 		expect(asked).toEqual([{ path: '/update', agent: expect.anything() }]);
+	});
+
+	// #1457: also a version that does not change the database
+	it('erstellt eine Sicherung, bevor es den Update-Dienst beauftragt', async () => {
+		process.env.UPDATER_URL = UPDATER();
+		await confirmBackup();
+		// the first Sicherung, made when the code is confirmed, and the one before this update: one at a time, in order
+		const succeeded = async () =>
+			(await db.execute(sql`SELECT 1 FROM backup_runs WHERE finished_at IS NOT NULL AND error IS NULL`)).rows.length;
+		let whenUpdaterAsked = -1;
+		whenAsked = async () => void (whenUpdaterAsked = await succeeded());
+
+		expect((await sendJson('POST', '/api/v1/update')).status).toBe(202);
+		expect(whenUpdaterAsked).toBe(2);
+	});
+
+	it('lehnt ab und beauftragt den Update-Dienst nicht, wenn die Sicherung fehlschlägt', async () => {
+		process.env.UPDATER_URL = UPDATER();
+		await confirmBackup();
+		// a key that cannot encrypt, as backend/scripts/e2e-backup-reset.ts sets it
+		await db.execute(sql`UPDATE backup_codes SET public_key = ''`);
+		asked.length = 0;
+
+		const response = await sendJson('POST', '/api/v1/update');
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ code: 'UPDATE_BACKUP_FAILED' });
+		expect(asked).toEqual([]);
+	});
+
+	// Fachreview backup-first-1 V-3: a second tab, or a click while one runs
+	it('lehnt ab, ohne noch einmal zu sichern, während ein Update läuft', async () => {
+		process.env.UPDATER_URL = UPDATER();
+		await confirmBackup();
+		updaterState = 'backend';
+
+		expect(await (await sendJson('POST', '/api/v1/update')).json()).toMatchObject({ code: 'UPDATE_RUNNING' });
+		// only the first Sicherung, made when the code was confirmed
+		expect((await db.execute(sql`SELECT 1 FROM backup_runs`)).rows).toHaveLength(1);
+		expect(asked.filter(({ path }) => path === '/update')).toEqual([]);
 	});
 
 	it('lehnt ab ohne eingerichtete Sicherung, ohne Update-Dienst und während ein Update läuft', async () => {
