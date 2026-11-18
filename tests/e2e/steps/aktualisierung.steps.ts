@@ -124,7 +124,8 @@ Then('hat Dwello nichts heruntergeladen', async ({ verwalter, frisch }) => {
 	await verwalter.sees(updateServiceState(frisch)).toBe('idle');
 });
 
-// #1457: the Sicherung after the version appeared (not the one of the setup) and before the update service was asked
+// #1457: a Sicherung begun after the version appeared (not the one of the setup) and before the update service was
+// asked; that it had ended by then: backend/src/__tests__/update.pg.test.ts
 Then('hat Dwello eine Sicherung erstellt, bevor das Update etwas heruntergeladen hat', async ({ verwalter, frisch }) => {
 	await verwalter.sees(orderOfUpdate(frisch)).toEqual(['erschienen', 'gesichert', 'heruntergeladen']);
 });
