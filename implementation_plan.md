@@ -13,13 +13,16 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 #1453: update Dwello from the browser (branch `ccr-153ae8d3-conoid-1453`)
 
-- [ ] `@wip` scenarios `tests/e2e/features/aktualisierung.feature`
-- [ ] fach-reviewer step 1 (texts in four languages, privacy statement)
-- [ ] update service (`backend/src/updater`, `backend/scripts/updater.ts`), lower-layer tests with a Docker API stand-in
-- [ ] version check and setting `update_check` (backend), `POST /api/v1/update`
-- [ ] notice, confirmation, animation, failure (frontend), settings switch, privacy statement
-- [ ] E2E stand-in `backend/scripts/update-stub.ts`, scenarios green
+- [x] `@wip` scenarios `tests/e2e/features/aktualisierung.feature`
+- [x] fach-reviewer step 1 (texts in four languages, privacy statement): `docs/reviews/update-fachreview-1.md`; V-1 and the missing terms in #1454
+- [x] update service (`backend/src/updater/updater.ts`), lower-layer tests with a Docker API stand-in
+- [x] version check and setting `update_check` (backend), `POST /api/v1/update`
+- [x] notice, confirmation, animation, failure (frontend), settings switch, privacy statement
+- [x] E2E stand-in `backend/scripts/update-stub.ts`, scenarios green
 - [ ] a11y rows, `accessibility.feature`, `sprachen-bildschirme.feature`
-- [ ] `compose.yaml`, `docker-compose.prod.yml`, installers, `docs/installation.md`, `marketing/index.html`
-- [ ] slice reviews, feature review (personas, fach-reviewer)
+- [x] `compose.yaml`, `docker-compose.prod.yml`, installers, `docs/installation.md`, `marketing/index.html`
+- [ ] code-reviewer round 1: `docs/reviews/update-review-1.md`
+- [ ] Workflow note: the scenarios ran first after the code; their red was shown by three mutation runs
+- [ ] feature review (personas, fach-reviewer step 5)
+- [ ] No scenario: new version running after the update (`updater.test.ts`), variant without update service and fixed version (`update.pg.test.ts`, `update-notice.test.ts`), the 15-minute sentence (`update-notice.dom.test.ts`)
 - [ ] Before marking complete; archive; PR

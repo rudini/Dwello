@@ -11,7 +11,8 @@
 import type { UpdateStatus } from '../src/updater/updater';
 
 const STEP_MS = 2000;
-let release = '1.4.0';
+// the E2E build's version unless the persona stack sets another (docs/design/tools/persona-stack.sh)
+let release = process.env.UPDATE_STUB_RELEASE ?? '1.4.0';
 let outcome: 'done' | 'failed' | 'restore' | 'hold' = 'done';
 let status: UpdateStatus = { state: 'idle' };
 
