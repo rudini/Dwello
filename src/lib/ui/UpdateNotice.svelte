@@ -39,6 +39,7 @@
 		}
 		phase = 'running';
 		step = 0;
+		slow = false;
 		const slowTimer = setTimeout(() => (slow = true), SLOW_MS);
 		const poll = setInterval(async () => {
 			// while the frontend restarts nothing answers: the last step stays

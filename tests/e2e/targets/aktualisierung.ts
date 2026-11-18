@@ -13,7 +13,5 @@ export const unsavedWarning = target('Warnung vor ungespeicherten Eingaben', (pa
 export const updateOverlay = target('Update', (page) => page.getByTestId('update-overlay'));
 export const currentStep = target('laufender Schritt des Updates', (page) => page.getByTestId('update-step-current'));
 export const updateFailure = target('Meldung des fehlgeschlagenen Updates', (page) => page.getByTestId('update-failed'));
-export const backupCodeShown = target('Wiederherstellungscode der Sicherung', (page) => page.locator('#backup-code-shown'));
+export const backupCodeShown = target('Wiederherstellungscode der Sicherung', (page) => page.getByTestId('backup-code-shown'));
 export const updateCheckBox = target('Täglich nach neuen Versionen suchen', (page) => page.getByTestId('setting-updateCheck'));
-export const settingsSave = target('Einstellungen speichern', (page) => page.getByTestId('settings-submit'));
-export const settingsSaved = target('Bestätigung der Einstellungen', (page) => page.getByTestId('settings-saved'));

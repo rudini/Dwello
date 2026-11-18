@@ -123,6 +123,17 @@ describe('Update-Dienst', () => {
 		expect(backend.Config.NetworkingConfig).toEqual({ EndpointsConfig: { dwello_dwello: { Aliases: ['dwello-backend', 'backend'] } } });
 	});
 
+	// code review update-1 C-3: a previous container that cannot be removed is left, the new ones keep running
+	it('lässt die neuen Container laufen, wenn ein bisheriger sich nicht entfernen lässt', async () => {
+		const engine = fakeDocker();
+		const docker: typeof engine.docker = (path, init) =>
+			init?.method === 'DELETE' && path.includes('-previous') ? Promise.resolve(new Response('busy', { status: 500 })) : engine.docker(path, init);
+		expect(await finished(withStart(createUpdater(docker, quick)))).toEqual({ state: 'done' });
+
+		expect(engine.containers.get('dwello-backend')!.Image).toBe('sha-new-b');
+		expect(engine.containers.get('dwello-frontend')!.Image).toBe('sha-new-f');
+	});
+
 	it('startet die bisherigen Container wieder, wenn das neue Frontend nicht startet', async () => {
 		const engine = fakeDocker((name, image) => (name === 'dwello-frontend' && image === 'sha-new-f' ? 'exited' : 'healthy'));
 		expect(await finished(withStart(createUpdater(engine.docker, quick)))).toEqual({ state: 'failed', restore: false });

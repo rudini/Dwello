@@ -25,7 +25,12 @@
 
 	<Panel>
 		<!-- the notice of a new version leads here (#1453) -->
-		<div id="backup-code-shown" tabindex="-1" class="flex flex-col gap-4">
+		<div
+			id="backup-code-shown"
+			tabindex="-1"
+			class="flex flex-col gap-4"
+			data-testid="backup-code-shown"
+		>
 			<p class="text-ink-muted">{m.backup_code_label()}</p>
 			<p class="text-3xl font-bold break-all text-ink" data-testid="backup-code">{data.code}</p>
 			<p>{m.backup_keep_sheet()}</p>

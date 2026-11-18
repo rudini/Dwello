@@ -34,4 +34,18 @@ describe('Update im Browser', () => {
 		);
 		expect(byTestId('update-step-current')?.textContent).toContain('Sichern');
 	});
+
+	// code review update-1 C-2: the page behind the update cannot be reached, and its «Aktualisieren» not pressed again
+	it('nimmt den Fokus ins Update und nach einem Fehlschlag auf «Schliessen»', async () => {
+		vi.useFakeTimers();
+		let state = 'pulling';
+		await startUpdate(() => state);
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(byTestId('update-overlay')?.contains(document.activeElement)).toBe(true);
+		expect(byTestId('update-notice-update')?.closest('[inert]')).not.toBeNull();
+		state = 'failed';
+		await vi.advanceTimersByTimeAsync(2000);
+		expect(document.activeElement).toBe(byTestId('update-failed-close'));
+	});
 });

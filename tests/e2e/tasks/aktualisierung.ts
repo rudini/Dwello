@@ -5,8 +5,6 @@ import { Click, Cookies, Navigate, Uncheck, Wait } from '../screenplay/interacti
 import {
 	backupLink,
 	laterButton,
-	settingsSave,
-	settingsSaved,
 	updateButton,
 	updateCancelButton,
 	updateCheckBox,
@@ -17,6 +15,7 @@ import {
 	unsavedWarning
 } from '../targets/aktualisierung';
 import { pageTitle } from '../targets/app-frame';
+import { saveSettingsButton, savedNotice } from '../targets/settings';
 
 // The update of the fresh installation (#1453), signed in like the Liegenschaftsverwalter of the main stack
 const openFresh =
@@ -34,7 +33,7 @@ export const cancelUpdate: Activity = (actor) => actor.attemptsTo(askToUpdate, C
 export const confirmUpdate: Activity = (actor) => actor.attemptsTo(askToUpdate, Click.on(updateConfirmButton), Wait.until(updateOverlay));
 export const followBackupLink: Activity = (actor) => actor.attemptsTo(Click.on(backupLink));
 export const switchOffUpdateCheck: Activity = (actor) =>
-	actor.attemptsTo(openFreshSettings, Uncheck.the(updateCheckBox), Click.on(settingsSave), Wait.until(settingsSaved));
+	actor.attemptsTo(openFreshSettings, Uncheck.the(updateCheckBox), Click.on(saveSettingsButton), Wait.until(savedNotice));
 /** Until the page loads again after the update (the stand-in's three steps of 2 s and the browser's asking) */
 export const waitForUpdate: Activity = (actor) => actor.attemptsTo(Wait.untilGone(updateOverlay, 30_000), Wait.until(pageTitle));
 /** Until the update ends without success (the stand-in's three steps of 2 s) */
@@ -46,8 +45,8 @@ const publish = (release: string, outcome: string): Activity => (actor) =>
 	actor.attemptsTo(
 		Navigate.outsideApp(`${FRESH_KI_STUB}/stub/update?release=${release}&outcome=${outcome}`),
 		openFreshSettings,
-		Click.on(settingsSave),
-		Wait.until(settingsSaved)
+		Click.on(saveSettingsButton),
+		Wait.until(savedNotice)
 	);
 export const publishedForTheLook = (outcome: 'done' | 'failed' | 'restore' | 'hold') => publish('1.5.0', outcome);
 export const noNewVersionAfterTheLook = publish('1.4.0', 'done');

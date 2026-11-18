@@ -150,6 +150,12 @@ services:
     # the socket belongs to root (Linux) or is handed over as root (Docker Desktop)
     user: root
     command: ["bun", "src/updater/updater.ts"]
+    # the image says 3001, the backend's port; UPDATER_URL of frontend and backend points here
+    environment:
+      - PORT=3002
+    # the image's check asks the backend's /health, which this service does not have
+    healthcheck:
+      disable: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:

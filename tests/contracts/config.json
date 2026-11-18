@@ -15,7 +15,8 @@
 		"account_holder_postal_code": "6003",
 		"account_holder_city": "Luzern",
 		"payment_deadline_days": "45",
-		"reminder_after_days": "10"
+		"reminder_after_days": "10",
+		"update_check": "on"
 	},
 	"creditorMissing": [],
 	"paymentPartWarning": null

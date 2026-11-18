@@ -117,6 +117,10 @@ describe('Installation mit compose.yaml', () => {
 		expect(withSocket.map(([name]) => name)).toEqual(['updater']);
 		expect(published.services.updater.image).toBe(IMAGE('backend'));
 		expect(published.services.updater.ports).toBeUndefined();
+		// code review update-1 C-1: the backend image says PORT=3001; the service listens where UPDATER_URL points, and the
+		// image's health check of the backend does not judge it
+		expect(published.services.updater.environment).toContain('PORT=3002');
+		expect((published.services.updater as { healthcheck?: { disable?: boolean } }).healthcheck).toEqual({ disable: true });
 		expect(published.services.backend.environment).toContain('DWELLO_VERSION=${DWELLO_VERSION:-}');
 		expect(published.services.backend.environment).toContain('UPDATER_URL=http://updater:3002');
 		expect(built.services.backend.environment).toContain('DWELLO_RELEASES=');

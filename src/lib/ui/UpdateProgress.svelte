@@ -3,6 +3,7 @@
 	import Button from './Button.svelte';
 	import Icon from './Icon.svelte';
 	import ProgressBar from './ProgressBar.svelte';
+	import { makeInert } from '$lib/inert';
 
 	// The update after its confirmation (#1453): its steps until the page loads again, or why it failed
 	let {
@@ -45,6 +46,18 @@
 			? [m.update_failed_restore()]
 			: [m.update_failed({ version: notice.current }), m.update_failed_log()]
 	);
+
+	// the page behind stays out of reach (code review update-1 C-2): the focus on the heading, after a failure on
+	// «Schliessen»
+	let overlay = $state<HTMLElement>();
+	$effect(() => (overlay ? makeInert(overlay) : undefined));
+	$effect(() => {
+		void phase;
+		(
+			overlay?.querySelector<HTMLElement>('[data-testid="update-failed-close"]') ??
+			overlay?.querySelector<HTMLElement>('h2')
+		)?.focus();
+	});
 </script>
 
 <div
@@ -53,12 +66,13 @@
 	aria-modal="true"
 	aria-labelledby="update-title"
 	data-testid="update-overlay"
+	bind:this={overlay}
 >
 	<div
 		class="flex w-full max-w-xl flex-col gap-4 rounded-panel border border-line bg-surface p-6 text-ink"
 	>
 		{#if phase === 'running'}
-			<h2 id="update-title" class="flex items-center gap-2 text-xl font-semibold">
+			<h2 id="update-title" tabindex="-1" class="flex items-center gap-2 text-xl font-semibold">
 				<span class="motion-safe:animate-spin"><Icon name="loading" /></span>
 				{m.update_overlay_title({ latest: notice.latest })}
 			</h2>
@@ -76,7 +90,9 @@
 				{#if slow}<p data-testid="update-slow">{m.update_overlay_slow()}</p>{/if}
 			</div>
 		{:else}
-			<h2 id="update-title" class="text-xl font-semibold">{m.update_failed_restore_title()}</h2>
+			<h2 id="update-title" tabindex="-1" class="text-xl font-semibold">
+				{m.update_failed_restore_title()}
+			</h2>
 			<div role="alert" class="flex flex-col gap-2" data-testid="update-failed">
 				{#each failure as text (text)}<p>{text}</p>{/each}
 			</div>

@@ -120,8 +120,12 @@ export function createUpdater(docker: Docker, { pollMs = 2000, timeoutMs = TIMEO
 				status = { state: part };
 				await recreate(part, recreated);
 			}
-			for (const part of PARTS) await call(`/containers/dwello-${part}-previous`, { method: 'DELETE' });
 			status = { state: 'done' };
+			// the new ones run; a previous one that stays only takes room (code review update-1 C-3)
+			for (const part of PARTS)
+				await call(`/containers/dwello-${part}-previous`, { method: 'DELETE' }).catch((error) =>
+					console.error('[update] previous container not removed:', error instanceof Error ? error.message : error)
+				);
 		} catch (error) {
 			console.error('[update] failed, back to the previous version:', error instanceof Error ? error.message : error);
 			let started = true;

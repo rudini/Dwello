@@ -19,13 +19,17 @@ let latest: { version: string; url: string } | null = null;
 
 /** Asks GitHub now (at the start, daily, when the setting is saved); turned off, it forgets the known version */
 export async function checkForUpdate() {
-	if (!updateChecks() || (await getConfig('update_check')) === 'off') {
-		latest = null;
-		return;
-	}
 	try {
+		if (!updateChecks() || (await getConfig('update_check')) === 'off') {
+			latest = null;
+			return;
+		}
 		// only «Dwello», no version or mark of the installation (Fachreview update-1 R-4)
-		const response = await fetch(process.env.DWELLO_RELEASES!, { headers: { 'user-agent': 'Dwello', accept: 'application/vnd.github+json' } });
+		const response = await fetch(process.env.DWELLO_RELEASES!, {
+			headers: { 'user-agent': 'Dwello', accept: 'application/vnd.github+json' },
+			// saving the settings waits for it (code review update-1 C-5)
+			signal: AbortSignal.timeout(10_000)
+		});
 		if (!response.ok) throw new Error(`${response.status}`);
 		const { tag_name, html_url } = (await response.json()) as { tag_name: string; html_url: string };
 		if (!html_url.startsWith('https://github.com/')) throw new Error(`release notes at ${html_url}`);
