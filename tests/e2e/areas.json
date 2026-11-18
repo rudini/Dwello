@@ -135,6 +135,14 @@
 				"features/analytics.feature"
 			]
 		},
+		"update": {
+			"paths": [
+				"^src/routes/api/update/"
+			],
+			"features": [
+				"features/aktualisierung.feature"
+			]
+		},
 		"backup": {
 			"paths": [
 				"^src/routes/config/backup/",
