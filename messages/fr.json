@@ -2561,7 +2561,7 @@
 	"update_step_done": "terminé",
 	"update_step_current": "en cours",
 	"update_step_pending": "à venir",
-	"update_overlay_slow": "La mise à jour prend plus de temps que d’habitude. Laissez cette page ouverte ; si cela dure plus d’une heure, adressez-vous à la personne qui a installé Dwello.",
+	"update_overlay_slow": "La mise à jour prend plus de temps que d’habitude. Laissez cette page ouverte ; si cela dure plus d’une heure, adressez-vous à la personne qui s’occupe de Dwello.",
 	"update_failed": "La mise à jour n’a pas abouti. Dwello continue de fonctionner dans la version {version}.",
 	"update_failed_log": "La cause figure dans le journal du serveur. Contactez la personne qui s’occupe de Dwello ; elle peut l’y consulter.",
 	"update_failed_close": "Fermer",

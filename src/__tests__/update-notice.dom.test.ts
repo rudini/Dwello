@@ -30,7 +30,7 @@ describe('Update im Browser', () => {
 		expect(byTestId('update-slow')).toBeNull();
 		await vi.advanceTimersByTimeAsync(60_000);
 		expect(byTestId('update-slow')?.textContent).toBe(
-			'Das Update dauert länger als üblich. Lassen Sie diese Seite offen; dauert es mehr als eine Stunde, wenden Sie sich an die Person, die Dwello eingerichtet hat.'
+			'Das Update dauert länger als üblich. Lassen Sie diese Seite offen; dauert es mehr als eine Stunde, wenden Sie sich an die Person, die Dwello betreut.'
 		);
 		expect(byTestId('update-step-current')?.textContent).toContain('Sichern');
 		// personas Helga P-1, Marco P-2: done and coming steps differ on screen too, not only for a screen reader

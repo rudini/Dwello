@@ -8,7 +8,6 @@
 	import UpdateProgress from './UpdateProgress.svelte';
 	import type { UpdateNotice } from '$lib/update';
 
-	// TODO(fachlich prüfen, #1454): the terms «Update» and «Hinweis zur neuen Version» are not in the glossary yet
 	// A new version after sign-in (#1453): one line at the top of every page, «Aktualisieren» after a confirmation,
 	// then the update with its step until the page loads again; Fachreview update-1 gives the texts
 	let { notice }: { notice: UpdateNotice } = $props();

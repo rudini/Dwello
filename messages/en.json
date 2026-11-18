@@ -2561,7 +2561,7 @@
 	"update_step_done": "done",
 	"update_step_current": "in progress",
 	"update_step_pending": "to come",
-	"update_overlay_slow": "The update is taking longer than usual. Keep this page open; if it takes more than an hour, contact the person who set up Dwello.",
+	"update_overlay_slow": "The update is taking longer than usual. Keep this page open; if it takes more than an hour, contact the person who looks after Dwello.",
 	"update_failed": "The update did not work. Dwello keeps running in version {version}.",
 	"update_failed_log": "The cause is in the server log. Contact the person who looks after Dwello; they can look it up there.",
 	"update_failed_close": "Close",
