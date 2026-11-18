@@ -22,7 +22,7 @@ const outside = Bun.serve({
 	fetch(request) {
 		const path = new URL(request.url).pathname;
 		asked.push({ path, agent: request.headers.get('user-agent') });
-		if (path === '/releases/latest') return Response.json({ tag_name: 'v1.5.0', html_url: 'x' });
+		if (path === '/releases/latest') return Response.json({ tag_name: 'v1.5.0', html_url: 'https://github.com/rudini/Dwello/releases/tag/v1.5.0' });
 		return new Response(null, { status: updaterAnswer });
 	}
 });
@@ -52,7 +52,11 @@ describe('Suche nach neuen Versionen', () => {
 		process.env.DWELLO_RELEASES = RELEASES;
 		await checkForUpdate();
 
-		expect(await update()).toMatchObject({ checks: true, latest: '1.5.0' });
+		expect(await update()).toMatchObject({
+			checks: true,
+			latest: '1.5.0',
+			releaseUrl: 'https://github.com/rudini/Dwello/releases/tag/v1.5.0'
+		});
 		expect(asked).toEqual([{ path: '/releases/latest', agent: 'Dwello' }]);
 	});
 
@@ -78,6 +82,14 @@ describe('Suche nach neuen Versionen', () => {
 		await checkForUpdate();
 		expect(await update()).toMatchObject({ checks: false, latest: null });
 		expect(asked).toEqual([]);
+	});
+
+	it('sagt auch ohne Anmeldung, ob die Installation GitHub fragt, für die Datenschutzerklärung', async () => {
+		const { app } = await import('../app');
+		const ask = async () => (await app.handle(new Request('http://localhost/api/v1/update/checks'))).json();
+		expect(await ask()).toEqual({ checks: false });
+		process.env.DWELLO_RELEASES = RELEASES;
+		expect(await ask()).toEqual({ checks: true });
 	});
 });
 

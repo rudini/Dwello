@@ -23,6 +23,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3001
+# #1453: where the published image asks once a day for the newest version; docker-compose.prod.yml (a clone) empties it
+ENV DWELLO_RELEASES=https://api.github.com/repos/rudini/Dwello/releases/latest
 
 # pg_dump and pg_restore of the database's major version (postgres:16), for the Sicherung (#718); Debian has only 15
 # the key download retries: www.postgresql.org closed the connection mid-transfer on several CI runs (#1165)

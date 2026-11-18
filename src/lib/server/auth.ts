@@ -162,6 +162,9 @@ export function clearAuthCookies(cookies: Cookies): void {
 		path: cookieConfig.path,
 		domain: cookieConfig.domain
 	});
+
+	// «Später» of the notice of a new version (#1453) ends with the sign-out
+	cookies.delete('dwello_update_later', { path: cookieConfig.path, domain: cookieConfig.domain });
 }
 
 /**

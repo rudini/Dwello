@@ -12,6 +12,7 @@
 	import Footer from '$lib/ui/Footer.svelte';
 	import ToastRegion from '$lib/ui/ToastRegion.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
+	import UpdateNotice from '$lib/ui/UpdateNotice.svelte';
 	import { isListNavigation } from '$lib/list-url';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
@@ -118,13 +119,15 @@
 
 <!-- Public demo (DEMO=on): one line before the header, outside main, so the skip link leads to the h1 (#675);
      the sign-in page shows the full notice itself, the help explains it under #demo -->
-{#snippet demoLine()}
+{#snippet topLines()}
 	{#if data.demo && $page.url.pathname !== '/login'}
 		<p class="bg-caution-soft px-4 py-2 text-ink" data-testid="demo-notice">
 			{m.demo_line_text()}
 			<a href="/help#demo" class={publicLink}>{m.demo_line_link()}</a>
 		</p>
 	{/if}
+	<!-- #1453: a new version, after sign-in; also on «Sicherung einrichten», where every page leads before the Sicherung -->
+	{#if data.update}<UpdateNotice notice={data.update} />{/if}
 {/snippet}
 
 <div aria-live="assertive" aria-atomic="true" class="sr-only" data-testid="page-title-announcer">
@@ -136,7 +139,7 @@
 {#if showAuthenticatedLayout}
 	<div class="flex min-h-screen flex-col bg-canvas">
 		<!-- inside the frame, so a short page still fits the screen (code review 675 C-2) -->
-		{@render demoLine()}
+		{@render topLines()}
 		<Header user={data.user} />
 		<div class="flex flex-1">
 			<Navigation />
@@ -154,7 +157,7 @@
 {:else}
 	<div class="flex min-h-screen flex-col bg-canvas">
 		<!-- inside the frame, so a short page still fits the screen (code review 675 C-2) -->
-		{@render demoLine()}
+		{@render topLines()}
 		<!-- Without the header the language choice stands alone at the top; links to signing in and to help, the footer to the legal pages;
 		     a header of its own, so the links sit in a landmark (#656) -->
 		<header class="flex items-center justify-end gap-4 px-4 pt-4">

@@ -98,6 +98,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
+      # #1453: an installation from a clone updates with git pull (the demo with deploy/demo/update.sh): it asks GitHub for
+      # no new version and offers no update
+      - DWELLO_RELEASES=
       - BACKUP_DIR=/backups
       # The KI (#580): the landlord sets it under «Einstellungen» › «KI»; any LLM_* set in .env takes precedence and
       # locks that page. LLM_LOCAL_URL only says where the local KI runs

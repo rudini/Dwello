@@ -310,6 +310,21 @@
 			distributionKeys={data.distributionKeys}
 		/>
 
+		<!-- #1453: only where Dwello may ask GitHub (an installation from the published images, no fixed version) -->
+		{#if data.updateCheck !== null}
+			<Panel title={m.settings_updates_title()} id="updates">
+				<input type="hidden" name="updateCheckShown" value="1" />
+				<Checkbox
+					id="updateCheck"
+					name="updateCheck"
+					label={m.settings_updates_check_label()}
+					checked={data.updateCheck}
+					help={m.settings_updates_check_help()}
+					testid="setting-updateCheck"
+				/>
+			</Panel>
+		{/if}
+
 		<!-- #690 (persona Helga 450): every refused save says that none of the fields was saved -->
 		{#if result?.errors}
 			<Alert tone="critical" title={m.settings_not_saved()} testid="form-error">

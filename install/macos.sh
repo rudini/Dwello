@@ -2,7 +2,8 @@
 # Installs Dwello on a Mac (#579). Paste into the Terminal app:
 #   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/macos.sh)"
 # It installs Homebrew and Docker Desktop if they are missing, puts Dwello into ~/dwello, starts it and opens the browser
-# at the setup. Run it again to update Dwello; the data stays. The steps by hand: docs/installation.md.
+# at the setup. Run it again to update Dwello by hand; the data stays. From then on
+# Dwello updates itself after the landlord confirms it in the browser (the service updater of compose.yaml, #1453). The steps by hand: docs/installation.md.
 set -euo pipefail
 
 source_url=${DWELLO_SOURCE:-https://raw.githubusercontent.com/rudini/Dwello/main}

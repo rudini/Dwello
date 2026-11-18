@@ -162,7 +162,6 @@ Funktionalität: Datenschutz
 
   # #1453 (Fachreview update-1 R-1 bis R-3): die tägliche Suche nach neuen Versionen, das Update und «Was ist neu?» gehen
   # zu GitHub; der Stack läuft wie eine Installation aus den veröffentlichten Images
-  @wip
   Szenario: Die Suche nach neuen Versionen und das Update bei GitHub
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Einmal am Tag fragt der Server von Dwello bei GitHub (GitHub, Inc., USA) nach, welches die neueste Version von Dwello ist."
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "GitHub erhält dabei die IP-Adresse des Servers, keine Daten, die Sie in Dwello erfassen"

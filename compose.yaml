@@ -1,7 +1,8 @@
 # Dwello from the published images (#578): download this one file into an empty folder, then
 #   docker compose up -d
-# An update: docker compose pull && docker compose up -d (the data stays in the volumes). A fixed version instead of
-# the newest: DWELLO_VERSION=1.4.0 in .env. Installation and settings: docs/installation.md.
+# An update: Dwello offers it after sign-in and runs it with one click (the service updater, #1453); by hand:
+# docker compose pull && docker compose up -d (the data stays in the volumes). A fixed version instead of the newest:
+# DWELLO_VERSION=1.4.0 in .env (then Dwello offers no update). Installation and settings: docs/installation.md.
 # docker-compose.prod.yml builds the same from a clone (backend/src/__tests__/compose-images.test.ts keeps both alike).
 
 # the volumes of an installation from a clone of «Dwello» carry this name too: moving to this file keeps the data
@@ -51,6 +52,8 @@ services:
       - MAIL_PROVIDER_NAME=${MAIL_PROVIDER_NAME:-}
       - MAIL_PROVIDER_COUNTRY=${MAIL_PROVIDER_COUNTRY:-}
       - PUBLIC_APP_NAME=Dwello
+      # #1453: asks the update service how far an update is, also while the backend restarts
+      - UPDATER_URL=http://updater:3002
       - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
       # the address Dwello is opened at: without it the Node server takes every request for https and refuses forms sent over http
       - ORIGIN=${PUBLIC_APP_URL:-http://localhost:3000}
@@ -98,6 +101,10 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - BACKUP_DIR=/backups
+      # #1453: once a day the newest version from GitHub (the image sets where), not with a fixed version; the update
+      # service runs the update the landlord confirms
+      - DWELLO_VERSION=${DWELLO_VERSION:-}
+      - UPDATER_URL=http://updater:3002
       # The KI (#580): the landlord sets it under «Einstellungen» › «KI»; any LLM_* set in .env takes precedence and
       # locks that page. LLM_LOCAL_URL only says where the local KI runs
       - LLM_LOCAL_URL=http://ollama:11434/v1
@@ -129,6 +136,24 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # ============================================
+  # Update service (#1453): the only container with the Docker socket, reachable only on dwello-network; on request
+  # of the backend it pulls the images of frontend and backend and recreates those two containers, back to the
+  # previous ones when a new one does not start (backend/src/updater/updater.ts). PostgreSQL, Ollama and Caddy stay on
+  # the versions this file pins: a new compose.yaml from the installer brings theirs
+  # ============================================
+  updater:
+    image: ghcr.io/rudini/dwello-backend:${DWELLO_VERSION:-latest}
+    container_name: dwello-updater
+    restart: unless-stopped
+    # the socket belongs to root (Linux) or is handed over as root (Docker Desktop)
+    user: root
+    command: ["bun", "src/updater/updater.ts"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - dwello-network
 
   # ============================================
   # Wiederherstellung (#718): only on request, docs/installation.md «Wiederherstellung»

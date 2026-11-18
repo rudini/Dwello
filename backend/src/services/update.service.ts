@@ -12,9 +12,10 @@ import { getConfig } from './config.service';
 const DAY = 24 * 60 * 60 * 1000;
 
 /** Whether this installation may ask GitHub at all: the privacy statement names the request exactly then */
-const updateChecks = () => !!process.env.DWELLO_RELEASES && !process.env.DWELLO_VERSION;
+export const updateChecks = () => !!process.env.DWELLO_RELEASES && !process.env.DWELLO_VERSION;
 
-let latest: string | null = null;
+// the newest version and its release notes on GitHub («Was ist neu?»)
+let latest: { version: string; url: string } | null = null;
 
 /** Asks GitHub now (at the start, daily, when the setting is saved); turned off, it forgets the known version */
 export async function checkForUpdate() {
@@ -26,8 +27,9 @@ export async function checkForUpdate() {
 		// only «Dwello», no version or mark of the installation (Fachreview update-1 R-4)
 		const response = await fetch(process.env.DWELLO_RELEASES!, { headers: { 'user-agent': 'Dwello', accept: 'application/vnd.github+json' } });
 		if (!response.ok) throw new Error(`${response.status}`);
-		const { tag_name } = (await response.json()) as { tag_name: string };
-		latest = tag_name.replace(/^v/, '');
+		const { tag_name, html_url } = (await response.json()) as { tag_name: string; html_url: string };
+		if (!html_url.startsWith('https://github.com/')) throw new Error(`release notes at ${html_url}`);
+		latest = { version: tag_name.replace(/^v/, ''), url: html_url };
 	} catch (error) {
 		console.warn('⚠️ Neueste Version nicht abgefragt', error instanceof Error ? error.message : error);
 	}
@@ -40,7 +42,12 @@ export function startUpdateChecks() {
 
 // updater: the update service of compose.yaml; an installation from an older compose.yaml has none (it runs the
 // installer once more)
-export const updateState = () => ({ checks: updateChecks(), latest, updater: !!process.env.UPDATER_URL });
+export const updateState = () => ({
+	checks: updateChecks(),
+	latest: latest?.version ?? null,
+	releaseUrl: latest?.url ?? null,
+	updater: !!process.env.UPDATER_URL
+});
 
 /** Has the update service start an update: only with a set-up Sicherung, since the new version backs up before it
  * changes the database */

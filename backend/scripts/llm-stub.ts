@@ -14,6 +14,8 @@
  * download with an error or lets Ollama answer nothing.
  */
 
+import { updateStub } from './update-stub';
+
 const PORT = Number(process.env.LLM_STUB_PORT ?? 2527);
 const PULL = process.env.LLM_STUB_PULL; // 'on' or 'fail'
 let pulled = 0; // percent of the model download
@@ -193,7 +195,8 @@ function connectionCheck(request: Request, model: string) {
 	return Response.json({ choices: [{ message: { content: 'OK' } }] });
 }
 // the OpenAI-compatible API; Ollama's own only with LLM_STUB_PULL=on
-const routes: Record<string, Route> = { '/v1/chat/completions': chat, '/chat/completions': chat, ...(PULL ? ollama() : {}) };
+// and GitHub's newest release with the update service of #1453 (update-stub.ts)
+const routes: Record<string, Route> = { '/v1/chat/completions': chat, '/chat/completions': chat, ...(PULL ? ollama() : {}), ...updateStub };
 
 function ollama(): Record<string, Route> {
 	const down = () => new Response(null, { status: 503 });

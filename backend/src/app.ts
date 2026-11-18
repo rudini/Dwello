@@ -33,6 +33,7 @@ import { refusal } from './services/coded-error';
 import { backupState } from './services/backup.service';
 import { backupRoutes } from './routes/backup';
 import { updateRoutes } from './routes/update';
+import { updateChecks } from './services/update.service';
 import { DATABASE_URL } from './db/connection';
 
 restoreElysiaFormats();
@@ -96,6 +97,8 @@ export const app = new Elysia()
 		service: 'dwello-backend',
 		...(await backupState(DATABASE_URL))
 	}))
+	// #1453: whether this installation asks GitHub for new versions; the privacy notice names it, so this is public
+	.get('/api/v1/update/checks', () => ({ checks: updateChecks() }))
 	// Who receives invoice data for the KI categorisation: the privacy notice is public, so this is too
 	.get('/api/v1/invoices/llm-recipient', async () => ({
 		recipient: await kiRecipient(),

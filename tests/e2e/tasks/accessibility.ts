@@ -70,6 +70,8 @@ import {
 	signedInFreshWithGoogleAnHourAgo
 } from './sicherung';
 import { withLock } from '../fixtures/settings-lock';
+import { askToUpdate, confirmUpdate, noNewVersionAfterTheLook, publishedForTheLook, waitForFailure } from './aktualisierung';
+import { updateNotice } from '../targets/aktualisierung';
 import { formErrors } from '../targets/form';
 import { creditorWarning } from '../targets/statement-detail';
 import { settingField } from '../targets/settings';
@@ -303,6 +305,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(confirmBackupCode('AAAA-BBBB-CCCC-DDDD-EEEE-FFFF'), Wait.until(backupError)),
 	'backup-confirmed': () => Wait.until(backupConfirmation),
 	'backup-stale': () => Wait.until(backupWarning),
+	// #1453: the notice of a new version, with and without a Sicherung, its confirmation and the update itself
+	'update-available': () => Wait.until(updateNotice),
+	'update-backup': () => Wait.until(updateNotice),
+	'update-confirm': () => askToUpdate,
+	'update-running': () => confirmUpdate,
+	'update-failed': () => (actor) => actor.attemptsTo(confirmUpdate, waitForFailure),
+	'update-restore': () => (actor) => actor.attemptsTo(confirmUpdate, waitForFailure),
 	// #718, part 3: «Neuer Wiederherstellungscode» signed in with a password (the account made by inTurn), with Google an
 	// hour ago, and with the new code shown, refused and confirmed
 	'backup-links': () => Wait.until(backupSettingsLink),
@@ -1010,9 +1019,16 @@ export const instanceOf = ({ state, path }: Example) =>
 		? EMPTY_INSTANCE
 		: state === 'demo'
 			? DEMO_INSTANCE
-			: path === '/backup' || path.startsWith('/config/backup') || ['backup-stale', 'backup-links', 'ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none', 'upload-ki-none'].includes(state)
+			: path === '/backup' || path.startsWith('/config/backup') || state.startsWith('update-') || ['backup-stale', 'backup-links', 'ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none', 'upload-ki-none'].includes(state)
 				? FRESH_APP
 				: '';
+
+// #1453: how the stand-in ends the update a look starts
+const UPDATE_OUTCOMES: Record<string, 'failed' | 'restore' | 'hold'> = {
+	'update-running': 'hold',
+	'update-failed': 'failed',
+	'update-restore': 'restore'
+};
 
 // The scenarios of the KI settings (#580) change the fresh installation's KI: a look at it waits for their turn
 const inTurn =
@@ -1025,6 +1041,9 @@ const inTurn =
 						// #718: only the fresh installation has a folder for the Sicherung; «Sicherung einrichten» is seen
 						// before a code is confirmed, every other screen after (else it leads there)
 						if (example.state.startsWith('new-code-password')) freshLocalAccount('add');
+						// #1453: a newer version published, asked for with a Sicherung (else every page leads to it)
+						if (example.state.startsWith('update-'))
+							await actor.attemptsTo(freshBackupSetUp, publishedForTheLook(UPDATE_OUTCOMES[example.state] ?? 'done'));
 						// «Neuer Wiederherstellungscode» starts without a new code from an earlier look
 						if (example.path === '/backup' || example.path.startsWith('/config/backup')) resetFreshBackup();
 						if (example.state === 'backup-stale') resetFreshBackup('stale');
@@ -1035,6 +1054,7 @@ const inTurn =
 						if (example.state === 'backup-stale') resetFreshBackup();
 						if (example.state.startsWith('new-code-password')) freshLocalAccount('remove');
 						if (['ki-model-offline', 'ki-none', 'upload-ki-none'].includes(example.state)) await actor.attemptsTo(localKiAnswersAgain);
+						if (example.state.startsWith('update-')) await actor.attemptsTo(freshBackupSetUp, noNewVersionAfterTheLook);
 					}
 				})
 			: actor.attemptsTo(look);
