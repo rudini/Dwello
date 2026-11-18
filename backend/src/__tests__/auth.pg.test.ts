@@ -59,6 +59,7 @@ describe('API-Zugriff', () => {
 		'GET /swagger/json': 'the API description, no data',
 		'GET /api/v1/invoices/llm-recipient': 'the privacy statement, which is public, names the KI',
 		'GET /api/v1/mail-transport': 'the privacy statement, which is public, names the mail provider',
+		'GET /api/v1/update/checks': 'the privacy statement, which is public, names GitHub where Dwello asks it (#1453)',
 		'GET /api/v1/auth/password/': 'the sign-in page asks whether a Konto mit Passwort exists',
 		'POST /api/v1/auth/password/': 'the sign-in with a Konto mit Passwort, before there is a session',
 		'GET /api/v1/setup/': 'the setup page asks whether Dwello is set up',
