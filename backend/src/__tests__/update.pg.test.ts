@@ -77,10 +77,10 @@ describe('Suche nach neuen Versionen', () => {
 		await checkForUpdate();
 		asked.length = 0;
 
-		await sendJson('PUT', '/api/v1/config', { update_check: 'on', company_name: 'Muster AG' });
+		// the settings form sends the search with every save; other settings are global records of parallel tests
+		expect((await sendJson('PUT', '/api/v1/config', { update_check: 'on' })).status).toBe(200);
 
 		expect(asked).toEqual([]);
-		await sendJson('PUT', '/api/v1/config', { company_name: '' });
 	});
 
 	it('fragt nicht mit einer festen Version und nicht in einer Installation aus einem Klon', async () => {
