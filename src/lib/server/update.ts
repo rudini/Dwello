@@ -6,7 +6,7 @@
 import type { Cookies } from '@sveltejs/kit';
 import { appVersion } from '$lib/app-version';
 import type { UpdateNotice } from '$lib/update';
-import { backupState } from './backup';
+import { backupReady } from './backup';
 
 type Fetch = typeof globalThis.fetch;
 const BACKEND = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -17,12 +17,6 @@ export const LATER_COOKIE = 'dwello_update_later';
 // «1.10.0» after «1.4.0»; a development build («1.4.0+3-gabc1234») is not older than its release
 const newer = (version: string, than: string) =>
 	version.localeCompare(than, 'en', { numeric: true }) > 0;
-
-// one click once the Sicherung is set up, else the Sicherung first
-const variantOf = async (fetch: Fetch) =>
-	['ok', 'stale'].includes((await backupState(fetch)).backup)
-		? ('update' as const)
-		: ('backup' as const);
 
 export async function updateNotice(
 	fetch: Fetch,
@@ -39,7 +33,7 @@ export async function updateNotice(
 		latest: latest!,
 		current: appVersion,
 		releaseUrl,
-		variant: updater ? await variantOf(fetch) : 'manual'
+		variant: updater ? ((await backupReady(fetch)) ? 'update' : 'backup') : 'manual'
 	};
 }
 
