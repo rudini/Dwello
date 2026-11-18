@@ -8,3 +8,18 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and write the session to its own archive file at the end. A session that appears on `main` after this one started makes this one parallel from then on: at the merge before the push take `main`'s plan and move this checklist into the pull request.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History: `docs/archive/implementation-plan-verlauf.md` (phases 0–22 and the sessions up to 2026-11-08, closed: add nothing) and `docs/archive/sessions/` (one file per later session).
+
+## Session
+
+#1453: update Dwello from the browser (branch `ccr-153ae8d3-conoid-1453`)
+
+- [ ] `@wip` scenarios `tests/e2e/features/aktualisierung.feature`
+- [ ] fach-reviewer step 1 (texts in four languages, privacy statement)
+- [ ] update service (`backend/src/updater`, `backend/scripts/updater.ts`), lower-layer tests with a Docker API stand-in
+- [ ] version check and setting `update_check` (backend), `POST /api/v1/update`
+- [ ] notice, confirmation, animation, failure (frontend), settings switch, privacy statement
+- [ ] E2E stand-in `backend/scripts/update-stub.ts`, scenarios green
+- [ ] a11y rows, `accessibility.feature`, `sprachen-bildschirme.feature`
+- [ ] `compose.yaml`, `docker-compose.prod.yml`, installers, `docs/installation.md`, `marketing/index.html`
+- [ ] slice reviews, feature review (personas, fach-reviewer)
+- [ ] Before marking complete; archive; PR
