@@ -8,7 +8,10 @@ import { startUpdate, updateState } from '../services/update.service';
 
 export const updateRoutes = new Elysia({ prefix: '/api/v1/update' })
 	.get('/', () => updateState())
-	.post('/', async ({ set }) => {
+	.post('/', async ({ set, server, request }) => {
+		// the Sicherung before the update can take longer than the server keeps a silent connection open; cut off, the
+		// landlord would read an error while the update starts (code review backup-first-1 C-1)
+		server?.timeout(request, 0);
 		try {
 			await startUpdate();
 			set.status = 202;
