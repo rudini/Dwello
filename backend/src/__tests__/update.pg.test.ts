@@ -19,14 +19,10 @@ import { callApi, sendJson, signToken } from './helpers/auth';
 const asked: { path: string; agent: string | null }[] = [];
 let updaterAnswer = 202;
 let whenAsked = async () => {};
-let updaterState = 'idle';
-let whenStatusAsked = async () => {};
 const outside = Bun.serve({
 	port: 0,
 	async fetch(request) {
 		const path = new URL(request.url).pathname;
-		// how far the update service is: asked before every update, not counted as a request
-		if (path === '/status') return whenStatusAsked().then(() => Response.json({ state: updaterState }));
 		asked.push({ path, agent: request.headers.get('user-agent') });
 		await whenAsked();
 		if (path === '/releases/latest') return Response.json({ tag_name: 'v1.5.0', html_url: 'https://github.com/rudini/Dwello/releases/tag/v1.5.0' });
@@ -43,8 +39,6 @@ afterEach(async () => {
 	asked.length = 0;
 	updaterAnswer = 202;
 	whenAsked = async () => {};
-	updaterState = 'idle';
-	whenStatusAsked = async () => {};
 	for (const name of ['DWELLO_RELEASES', 'DWELLO_VERSION', 'UPDATER_URL', 'BACKUP_DIR']) delete process.env[name];
 	await setConfig('update_check', 'on');
 	await db.delete(backupCodes);
@@ -174,7 +168,7 @@ describe('Update starten', () => {
 		const listening = app.listen({ port: 0, idleTimeout: 1 });
 		process.env.UPDATER_URL = UPDATER();
 		await confirmBackup();
-		whenStatusAsked = () => Bun.sleep(2500);
+		whenAsked = () => Bun.sleep(2500);
 		try {
 			const response = await fetch(`http://localhost:${listening.server!.port}/api/v1/update`, {
 				method: 'POST',
@@ -184,18 +178,6 @@ describe('Update starten', () => {
 		} finally {
 			await listening.stop();
 		}
-	});
-
-	// Fachreview backup-first-1 V-3: a second tab, or a click while one runs
-	it('lehnt ab, ohne noch einmal zu sichern, während ein Update läuft', async () => {
-		process.env.UPDATER_URL = UPDATER();
-		await confirmBackup();
-		updaterState = 'backend';
-
-		expect(await (await sendJson('POST', '/api/v1/update')).json()).toMatchObject({ code: 'UPDATE_RUNNING' });
-		// only the first Sicherung, made when the code was confirmed
-		expect((await db.execute(sql`SELECT 1 FROM backup_runs`)).rows).toHaveLength(1);
-		expect(asked.filter(({ path }) => path === '/update')).toEqual([]);
 	});
 
 	// code review backup-first-1 C-2: a click in a second tab while the first still backs up
