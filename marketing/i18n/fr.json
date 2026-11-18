@@ -249,5 +249,9 @@
 	"code:# Zuerst Domain und HTTPS in ~/dwello/.env eintragen: Anleitung, Abschnitt 7": "# D’abord, inscrire le domaine et HTTPS dans ~/dwello/.env : guide, section 7",
 	"code:# Dann auf dem frischen Linux-Server: Docker und Dwello installieren": "# Ensuite, sur le serveur Linux neuf : installer Docker et Dwello",
 	"Installer in einem Schritt": "Installateur en une étape",
-	"Eine Zeile zum Einfügen installiert Docker und Dwello, danach geht es im Browser weiter.": "Une ligne à coller installe Docker et Dwello, la suite se fait dans le navigateur."
+	"Eine Zeile zum Einfügen installiert Docker und Dwello, danach geht es im Browser weiter.": "Une ligne à coller installe Docker et Dwello, la suite se fait dans le navigateur.",
+	"Gehostete Lösung": "Solution hébergée",
+	"Lieber ohne eigene Einrichtung?": "Vous préférez ne pas l’installer vous-même ?",
+	"E-Mail an info@dwello.ch schreiben": "Écrire à info@dwello.ch",
+	"Wir prüfen, Dwello auch als gehostete Lösung anzubieten. Dann betreiben wir Dwello für Sie und kümmern uns um Updates und Sicherungen; Sie arbeiten nur noch im Browser. Für Dwello, das Sie selbst einrichten, ändert sich nichts: Es bleibt kostenlos, und Ihre Daten bleiben auf Ihrem Server. Was die gehostete Lösung kostet und wie sie Ihre Daten schützt, legen wir offen, bevor wir sie anbieten. Wenn Sie daran interessiert sind, schreiben Sie uns an info@dwello.ch. Wir melden uns persönlich bei Ihnen.": "Nous étudions la possibilité de proposer aussi Dwello comme solution hébergée. Nous exploiterions alors Dwello pour vous et nous occuperions des mises à jour et des sauvegardes ; vous travaillez simplement dans votre navigateur. Rien ne change pour le Dwello que vous installez vous-même : il reste gratuit, et vos données restent sur votre serveur. Avant de proposer la solution hébergée, nous indiquerons ce qu’elle coûte et comment elle protège vos données. Si cela vous intéresse, écrivez-nous à info@dwello.ch. Nous vous répondrons personnellement."
 }
