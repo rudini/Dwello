@@ -40,6 +40,14 @@ export async function checkForUpdate() {
 	}
 }
 
+/** Saves the settings; GitHub is asked again only when they switch the search (fallback review of #1455) */
+export async function askingWhenSwitched<T>(wanted: string | undefined, save: () => Promise<T>) {
+	const before = await getConfig('update_check');
+	const saved = await save();
+	if (wanted && wanted !== before) await checkForUpdate();
+	return saved;
+}
+
 export function startUpdateChecks() {
 	void checkForUpdate();
 	setInterval(() => void checkForUpdate(), DAY);
