@@ -90,6 +90,8 @@ export function createUpdater(docker: Docker, { pollMs = 2000, timeoutMs = TIMEO
 		const name = `dwello-${part}`;
 		const old = await inspect(name);
 		const settings = await settingsFor(old);
+		// one the last update could not remove, while the current one runs (fallback review of #1455)
+		if (old.State.Health?.Status === 'healthy') await docker(`/containers/${name}-previous?force=true`, { method: 'DELETE' });
 		await post(`/containers/${name}/rename?name=${name}-previous`);
 		renamed.unshift(part);
 		await post(`/containers/${name}-previous/stop`);

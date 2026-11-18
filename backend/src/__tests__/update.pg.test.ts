@@ -71,6 +71,18 @@ describe('Suche nach neuen Versionen', () => {
 		expect(asked).toEqual([]);
 	});
 
+	// fallback review of #1455: saving other settings asks GitHub no more often than once a day
+	it('fragt nicht, wenn die gespeicherten Einstellungen die Suche nicht ändern', async () => {
+		process.env.DWELLO_RELEASES = RELEASES;
+		await checkForUpdate();
+		asked.length = 0;
+
+		await sendJson('PUT', '/api/v1/config', { update_check: 'on', company_name: 'Muster AG' });
+
+		expect(asked).toEqual([]);
+		await sendJson('PUT', '/api/v1/config', { company_name: '' });
+	});
+
 	it('fragt nicht mit einer festen Version und nicht in einer Installation aus einem Klon', async () => {
 		process.env.DWELLO_RELEASES = RELEASES;
 		process.env.DWELLO_VERSION = '1.4.0';

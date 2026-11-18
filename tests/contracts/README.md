@@ -80,3 +80,4 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `tenant-export.json` | `GET /api/v1/tenants/:id/export` (#435: Name der ZIP-Datei, ihre Datendatei und ihre Dateien; das BFF schreibt `data` unverändert) |
 | `data-export.json` | `GET /api/v1/export?language=` (#496: Name der ZIP-Datei, Datendatei, Tabellen als Zeilen, die Tabelle des Protokolls, deren Eintrag das BFF einsetzt, und die Dateien) |
 | `update.json` | `GET /api/v1/update` (#1453: ob die Installation nach neuen Versionen fragt, die neueste Version und ob es den Update-Dienst gibt) |
+| `update-checks.json` | `GET /api/v1/update/checks` (#1453: öffentlich, ob die Installation GitHub nach neuen Versionen fragt; die Datenschutzerklärung nennt GitHub dann) |

@@ -81,9 +81,11 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 			buildings.push(id);
 			this.buildingId = id;
 		},
-		/** A newer Dwello published (#1453), which the backend learns at once, as when the search is switched on */
+		/** A newer Dwello published (#1453), which the backend learns at once when the search is switched off and on */
 		async newVersion(release: string) {
 			await kiStub.post('stub/update', { release });
+			// only a switch makes the backend ask again
+			await api.put('config', { update_check: 'off' });
 			await api.put('config', { update_check: 'on' });
 		},
 		/** How the next update ends: the previous version keeps running, or it no longer starts (#1453) */
@@ -115,6 +117,7 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 			resetFreshBackup();
 			// #1453: no newer version, the search on and the next update succeeding
 			await kiStub.post('stub/update', { release: '1.4.0', outcome: 'done' });
+			await api.put('config', { update_check: 'off' });
 			await api.put('config', { update_check: 'on' });
 		}
 	};

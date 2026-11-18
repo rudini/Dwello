@@ -63,13 +63,15 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 		'/',
 		async ({ body, set }) => {
 			const { account_holder_separate: separate, ...typed } = body;
+			// #1453: GitHub is asked again only when the search is switched (fallback review of #1455)
+			const switched = typed.update_check !== undefined && typed.update_check !== (await getConfig('update_check'));
 			const refused = await setMultipleConfig(typed as Partial<Record<ConfigKey, string>>, separate === 'true');
 			if (refused.length) {
 				set.status = 400;
 				return fieldsRefused(refused);
 			}
 
-			if (typed.update_check) await checkForUpdate();
+			if (switched) await checkForUpdate();
 			const updatedConfig = await getAllConfig();
 			return {
 				message: 'Configuration updated',

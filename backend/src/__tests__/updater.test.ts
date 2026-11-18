@@ -74,6 +74,8 @@ function fakeDocker(health: (name: string, image: string) => 'healthy' | 'exited
 			container.State = ending === 'healthy' ? { Running: true, Restarting: false, Health: { Status: 'healthy' } } : { Running: false, Restarting: true };
 		}
 		if (action === 'rename') {
+			// as Docker: a name in use is refused
+			if (containers.has(url.searchParams.get('name')!)) return json({ message: 'Conflict' }, 409);
 			containers.delete(name);
 			container.Name = `/${url.searchParams.get('name')}`;
 			containers.set(container.Name.slice(1), container);
@@ -132,6 +134,19 @@ describe('Update-Dienst', () => {
 
 		expect(engine.containers.get('dwello-backend')!.Image).toBe('sha-new-b');
 		expect(engine.containers.get('dwello-frontend')!.Image).toBe('sha-new-f');
+	});
+
+	// fallback review of #1455: a previous container left by the last update does not block the next one
+	it('räumt vor dem nächsten Update einen liegengebliebenen bisherigen Container weg', async () => {
+		const engine = fakeDocker();
+		let keep = true;
+		const docker: typeof engine.docker = (path, init) =>
+			keep && init?.method === 'DELETE' && path.includes('-previous') ? Promise.resolve(new Response('busy', { status: 500 })) : engine.docker(path, init);
+		await finished(withStart(createUpdater(docker, quick)));
+		keep = false;
+
+		expect(await finished(withStart(createUpdater(docker, quick)))).toEqual({ state: 'done' });
+		expect([...engine.containers.keys()].sort()).toEqual(['dwello-backend', 'dwello-frontend']);
 	});
 
 	it('startet die bisherigen Container wieder, wenn das neue Frontend nicht startet', async () => {

@@ -1,7 +1,7 @@
 import { FRESH_APP, FRESH_KI_STUB } from '../fixtures/fresh-installation';
 import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
-import { Click, Cookies, Navigate, Uncheck, Wait } from '../screenplay/interactions';
+import { Check, Click, Cookies, Navigate, Uncheck, Wait } from '../screenplay/interactions';
 import {
 	backupLink,
 	laterButton,
@@ -39,12 +39,18 @@ export const waitForUpdate: Activity = (actor) => actor.attemptsTo(Wait.untilGon
 /** Until the update ends without success (the stand-in's three steps of 2 s) */
 export const waitForFailure: Activity = (actor) => actor.attemptsTo(Wait.until(updateFailure, 30_000));
 
-// The axe and language check (#1453): the stand-in publishes 1.5.0 and ends the next update as the look needs; saving
-// the settings has the backend ask at once. Afterwards no newer version again, as the scenarios expect
+// The axe and language check (#1453): the stand-in publishes 1.5.0 and ends the next update as the look needs;
+// switching the search off and on has the backend ask at once. Afterwards no newer version again, as the scenarios expect
 const publish = (release: string, outcome: string): Activity => (actor) =>
 	actor.attemptsTo(
 		Navigate.outsideApp(`${FRESH_KI_STUB}/stub/update?release=${release}&outcome=${outcome}`),
+		// only a switch makes the backend ask again
 		openFreshSettings,
+		Uncheck.the(updateCheckBox),
+		Click.on(saveSettingsButton),
+		Wait.until(savedNotice),
+		openFreshSettings,
+		Check.the(updateCheckBox),
 		Click.on(saveSettingsButton),
 		Wait.until(savedNotice)
 	);
