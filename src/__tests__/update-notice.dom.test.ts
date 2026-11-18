@@ -47,5 +47,9 @@ describe('Update im Browser', () => {
 		state = 'failed';
 		await vi.advanceTimersByTimeAsync(2000);
 		expect(document.activeElement).toBe(byTestId('update-failed-close'));
+		// code review update-2 C-13: back where the update began
+		click('update-failed-close');
+		await vi.advanceTimersByTimeAsync(0);
+		expect(document.activeElement).toBe(byTestId('update-notice-update'));
 	});
 });

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { apiCall } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
+	import { tick } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 	import Button from './Button.svelte';
 	import Dialog from './Dialog.svelte';
@@ -58,6 +59,14 @@
 		}, POLL_MS);
 	}
 
+	// back to «Aktualisieren», where the update began (code review update-2 C-13)
+	let line = $state<HTMLElement>();
+	async function closeFailure() {
+		phase = 'idle';
+		await tick();
+		line?.querySelector('button')?.focus();
+	}
+
 	// on «Sicherung einrichten», where every page leads without a Sicherung: to the Wiederherstellungscode
 	function toBackupCode(event: MouseEvent) {
 		const code = document.getElementById('backup-code-shown');
@@ -79,6 +88,7 @@
 	<div
 		class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-accent-soft px-4 py-2 text-ink"
 		data-testid="update-notice"
+		bind:this={line}
 	>
 		<p>
 			<strong>{m.update_notice_label()}:</strong>
@@ -128,5 +138,5 @@
 </Dialog>
 
 {#if phase !== 'idle'}
-	<UpdateProgress {phase} {step} {slow} {notice} onclose={() => (phase = 'idle')} />
+	<UpdateProgress {phase} {step} {slow} {notice} onclose={closeFailure} />
 {/if}
