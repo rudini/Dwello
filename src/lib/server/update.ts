@@ -42,16 +42,6 @@ export async function updateNotice(
 	};
 }
 
-/** The layout's part (#1453): the notice for the signed-in landlord, none without one */
-export async function updateFor(
-	fetch: Fetch,
-	cookies: Pick<Cookies, 'get'>,
-	user?: { signedInAt: number }
-) {
-	const update = user && (await updateNotice(fetch, cookies, user.signedInAt));
-	return update ? { update } : {};
-}
-
 /** Whether this installation asks GitHub for new versions: the privacy statement names it then (Fachreview update-1 R-3) */
 export const asksGitHub = (fetch: Fetch): Promise<boolean> =>
 	fetch(`${BACKEND}/api/v1/update/checks`)
