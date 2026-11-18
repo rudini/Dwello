@@ -5,6 +5,9 @@ Funktionalität: Dwello aktualisieren
   möchte ich erfahren, dass es eine neue Version von Dwello gibt, und sie selbst einspielen
   damit meine Installation ohne technische Hilfe aktuell bleibt
 
+  # Nicht hier (#1453, No scenario): dass danach die neue Version läuft (eine Version, die der E2E-Build nicht hat:
+  # backend/src/__tests__/updater.test.ts), die Variante ohne Update-Dienst und die feste Version (der Start des Backends:
+  # backend/src/__tests__/update.pg.test.ts) und der Satz nach 15 Minuten (die Uhr des Browsers: ein DOM-Test).
   # #1453: die frische Installation des Stacks fragt einen Stand-in nach der neuesten Version und lässt ihn das Update
   # ausführen (backend/scripts/update-stub.ts); ihr Frontend hat die Version 1.4.0 (playwright.config.ts)
 
@@ -53,11 +56,20 @@ Funktionalität: Dwello aktualisieren
     Und ist der Liegenschaftsverwalter nach dem Update wieder auf der Seite "Mieter"
 
   @wip
+  Szenario: Wer das Update abbricht, bleibt auf der Seite
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und Dwello 1.5.0 ist erschienen
+    Und der Liegenschaftsverwalter hat die Mieter der frischen Installation geöffnet
+    Wenn der Liegenschaftsverwalter das Update starten will, es aber abbricht
+    Dann ist der Liegenschaftsverwalter auf der Seite "Mieter"
+    Und sagt der Hinweis zur neuen Version "Dwello 1.5.0 ist verfügbar (Sie haben 1.4.0)."
+
+  @wip
   Szenario: Ohne eingerichtete Sicherung startet kein Update
     Angenommen Dwello ist eingerichtet, die Sicherung aber noch nicht
     Und Dwello 1.5.0 ist erschienen
-    Wenn der Liegenschaftsverwalter die Sicherung einrichtet
-    Dann sagt der Hinweis zur neuen Version "Richten Sie zuerst die Sicherung ein"
+    Wenn der Liegenschaftsverwalter die Sicherung der frischen Installation öffnet
+    Dann sagt der Hinweis zur neuen Version "Vor dem Update sichert Dwello Ihre Daten. Dafür muss die Sicherung eingerichtet sein."
     Und kann der Liegenschaftsverwalter das Update nicht starten
 
   @wip
@@ -66,7 +78,7 @@ Funktionalität: Dwello aktualisieren
     Und Dwello 1.5.0 ist erschienen
     Und der Liegenschaftsverwalter hat die Sicherung geöffnet
     Wenn der Liegenschaftsverwalter dem Hinweis zur Sicherung folgt
-    Dann ist der Liegenschaftsverwalter auf der Seite "Sicherung einrichten"
+    Dann steht der Liegenschaftsverwalter beim Wiederherstellungscode
 
   @wip
   Szenario: Ein fehlgeschlagenes Update lässt die bisherige Version laufen
@@ -84,7 +96,7 @@ Funktionalität: Dwello aktualisieren
     Und das Update auf Dwello 1.5.0 wird fehlschlagen, nachdem es die Datenbank geändert hat
     Und der Liegenschaftsverwalter hat die Mieter der frischen Installation geöffnet
     Wenn der Liegenschaftsverwalter das Update bestätigt
-    Dann meldet das Update, dass die Person, die Dwello eingerichtet hat, die Sicherung wiederherstellen muss
+    Dann meldet das Update "Die neue Version hatte die Datenbank schon geändert, darum kann die bisherige Version nicht mehr starten."
 
   @wip
   Szenario: Ohne die tägliche Suche nach neuen Versionen meldet Dwello keine

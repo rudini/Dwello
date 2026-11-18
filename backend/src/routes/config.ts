@@ -15,6 +15,7 @@ import {
 	type ConfigKey
 } from '../services/config.service';
 import { errorBody, fieldsRefused } from '../services/coded-error';
+import { checkForUpdate } from '../services/update.service';
 import { paymentPartWarning } from '../services/statement-pdf.service';
 
 export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
@@ -68,6 +69,7 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 				return fieldsRefused(refused);
 			}
 
+			if (typed.update_check) await checkForUpdate();
 			const updatedConfig = await getAllConfig();
 			return {
 				message: 'Configuration updated',
@@ -93,7 +95,8 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 				account_holder_separate: t.Optional(t.String()), // #1166: the form's checkbox cleared, not stored
 				payment_deadline_days: t.Optional(t.String()),
 				reminder_after_days: t.Optional(t.String()),
-				default_language: t.Optional(t.String())
+				default_language: t.Optional(t.String()),
+				update_check: t.Optional(t.String())
 			})
 		}
 	)

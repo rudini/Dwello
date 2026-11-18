@@ -8,6 +8,7 @@ import { checkJwtSecret } from './config/jwt';
 import { checkLocalKi, llmConfig, llmRecipient } from './config/llm';
 import { DATABASE_URL, testConnection } from './db/connection';
 import { startBackups } from './services/backup.service';
+import { startUpdateChecks } from './services/update.service';
 import { loadModel } from './services/ki-model.service';
 import { checkEncryptionKey, currentKi } from './services/ki-settings.service';
 import { announceSetupCode } from './services/setup.service';
@@ -32,6 +33,8 @@ app.listen(Number(process.env.PORT) || 3001);
 announceSetupCode().catch((error) => console.warn('⚠️ Einrichtungscode nicht erzeugt', error));
 // #718: the daily Sicherung once a Wiederherstellungscode is confirmed
 startBackups(DATABASE_URL);
+// #1453: the daily search for new versions
+startUpdateChecks();
 currentKi()
 	.then(({ mode, baseUrl, model }) => loadModel({ baseUrl, model, local: mode === 'local' }))
 	.catch((error) => console.warn('⚠️ KI-Modell nicht geprüft', error));
