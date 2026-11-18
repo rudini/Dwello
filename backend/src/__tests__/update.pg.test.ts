@@ -207,7 +207,8 @@ describe('Update starten', () => {
 		const answers = await Promise.all([sendJson('POST', '/api/v1/update'), sendJson('POST', '/api/v1/update')]);
 		const bodies = await Promise.all(answers.map((answer) => answer.json()));
 
-		expect(bodies).toEqual([{ started: true }, expect.objectContaining({ code: 'UPDATE_RUNNING' })]);
+		// whichever arrives first starts it
+		expect(bodies).toEqual(expect.arrayContaining([{ started: true }, expect.objectContaining({ code: 'UPDATE_RUNNING' })]));
 		expect(asked.map(({ path }) => path)).toEqual(['/update']);
 	});
 
