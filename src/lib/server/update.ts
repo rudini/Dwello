@@ -32,10 +32,11 @@ export async function updateNotice(
 	if (!appVersion || cookies.get(LATER_COOKIE) === String(signedInAt)) return null;
 	const { latest, releaseUrl, updater } = (await fetch(`${BACKEND}/api/v1/update`)
 		.then((response) => response.json())
-		.catch(() => ({}))) as { latest?: string | null; releaseUrl?: string; updater?: boolean };
-	if (!latest || !releaseUrl || !newer(latest, appVersion)) return null;
+		.catch(() => ({}))) as { latest?: string | null; releaseUrl: string; updater?: boolean };
+	// none known (or no answer) is never newer
+	if (!newer(latest ?? '', appVersion)) return null;
 	return {
-		latest,
+		latest: latest!,
 		current: appVersion,
 		releaseUrl,
 		variant: updater ? await variantOf(fetch) : 'manual'
