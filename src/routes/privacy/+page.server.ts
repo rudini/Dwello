@@ -5,6 +5,7 @@ import { getConfiguredProviders, PROVIDER_NAMES } from '$lib/server/oauth';
 import { loadHosting, loadOperator } from '$lib/server/operator';
 import { passwordAvailable, setupNeeded } from '$lib/server/password-login';
 import { backupState } from '$lib/server/backup';
+import { asksGitHub } from '$lib/server/update';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -36,10 +37,7 @@ export const load: PageServerLoad = async ({
 		// a Konto mit Passwort exists, or is about to be made in the setup (#577, fach review 577 R-1)
 		Promise.all([passwordAvailable(fetch), setupNeeded(fetch)]).then((answers) => answers.some(Boolean)),
 		backupState(fetch),
-		fetch(`${BACKEND_URL}/api/v1/update/checks`)
-			.then((response) => response.json())
-			.then(({ checks }) => checks === true)
-			.catch(() => false)
+		asksGitHub(fetch)
 	]);
 	return {
 		...llm,

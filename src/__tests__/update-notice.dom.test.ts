@@ -35,11 +35,13 @@ describe('Update im Browser', () => {
 		expect(byTestId('update-step-current')?.textContent).toContain('Sichern');
 		// personas Helga P-1, Marco P-2: done and coming steps differ on screen too, not only for a screen reader
 		const states = [...document.querySelectorAll('[data-testid="update-overlay"] li span')];
-		expect(states.map((state) => [state.textContent, state.classList.contains('sr-only')])).toEqual([
-			['(erledigt)', false],
-			['(läuft)', false],
-			['(folgt)', false]
-		]);
+		expect(states.map((state) => [state.textContent, state.classList.contains('sr-only')])).toEqual(
+			[
+				['(erledigt)', false],
+				['(läuft)', false],
+				['(folgt)', false]
+			]
+		);
 	});
 
 	// code review update-1 C-2: the page behind the update cannot be reached, and its «Aktualisieren» not pressed again

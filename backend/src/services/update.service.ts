@@ -15,13 +15,14 @@ const DAY = 24 * 60 * 60 * 1000;
 export const updateChecks = () => !!process.env.DWELLO_RELEASES && !process.env.DWELLO_VERSION;
 
 // the newest version and its release notes on GitHub («Was ist neu?»)
-let latest: { version: string; url: string } | null = null;
+const NONE = { latest: null, releaseUrl: null };
+let known: { latest: string | null; releaseUrl: string | null } = NONE;
 
 /** Asks GitHub now (at the start, daily, when the setting is saved); turned off, it forgets the known version */
 export async function checkForUpdate() {
 	try {
 		if (!updateChecks() || (await getConfig('update_check')) === 'off') {
-			latest = null;
+			known = NONE;
 			return;
 		}
 		// only «Dwello», no version or mark of the installation (Fachreview update-1 R-4)
@@ -30,12 +31,12 @@ export async function checkForUpdate() {
 			// saving the settings waits for it (code review update-1 C-5)
 			signal: AbortSignal.timeout(10_000)
 		});
-		if (!response.ok) throw new Error(`${response.status}`);
+		// an answer without them (an error) throws here
 		const { tag_name, html_url } = (await response.json()) as { tag_name: string; html_url: string };
 		if (!html_url.startsWith('https://github.com/')) throw new Error(`release notes at ${html_url}`);
-		latest = { version: tag_name.replace(/^v/, ''), url: html_url };
+		known = { latest: tag_name.replace(/^v/, ''), releaseUrl: html_url };
 	} catch (error) {
-		console.warn('⚠️ Neueste Version nicht abgefragt', error instanceof Error ? error.message : error);
+		console.warn(`⚠️ Neueste Version nicht abgefragt: ${error}`);
 	}
 }
 
@@ -46,12 +47,7 @@ export function startUpdateChecks() {
 
 // updater: the update service of compose.yaml; an installation from an older compose.yaml has none (it runs the
 // installer once more)
-export const updateState = () => ({
-	checks: updateChecks(),
-	latest: latest?.version ?? null,
-	releaseUrl: latest?.url ?? null,
-	updater: !!process.env.UPDATER_URL
-});
+export const updateState = () => ({ checks: updateChecks(), ...known, updater: !!process.env.UPDATER_URL });
 
 /** Has the update service start an update: only with a set-up Sicherung, since the new version backs up before it
  * changes the database */

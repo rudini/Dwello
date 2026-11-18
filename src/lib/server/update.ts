@@ -14,12 +14,15 @@ const BACKEND = process.env.BACKEND_URL || 'http://localhost:3001';
 /** «Später»: the sign-in it was chosen in; a new sign-in shows the notice again (privacy statement, «Cookies») */
 export const LATER_COOKIE = 'dwello_update_later';
 
+// «1.10.0» after «1.4.0»; a development build («1.4.0+3-gabc1234») is not older than its release
+const newer = (version: string, than: string) =>
+	version.localeCompare(than, 'en', { numeric: true }) > 0;
 
-const newer = (version: string, than: string) => {
-	const [a, b] = [version, than].map((v) => v.split(/[.+]/).slice(0, 3).map(Number));
-	const differs = a.findIndex((part, i) => part !== b[i]);
-	return differs >= 0 && a[differs] > b[differs];
-};
+// one click once the Sicherung is set up, else the Sicherung first
+const variantOf = async (fetch: Fetch) =>
+	['ok', 'stale'].includes((await backupState(fetch)).backup)
+		? ('update' as const)
+		: ('backup' as const);
 
 export async function updateNotice(
 	fetch: Fetch,
@@ -31,8 +34,27 @@ export async function updateNotice(
 		.then((response) => response.json())
 		.catch(() => ({}))) as { latest?: string | null; releaseUrl?: string; updater?: boolean };
 	if (!latest || !releaseUrl || !newer(latest, appVersion)) return null;
-	const notice = { latest, current: appVersion, releaseUrl };
-	if (!updater) return { ...notice, variant: 'manual' };
-	const { backup } = await backupState(fetch);
-	return { ...notice, variant: backup === 'ok' || backup === 'stale' ? 'update' : 'backup' };
+	return {
+		latest,
+		current: appVersion,
+		releaseUrl,
+		variant: updater ? await variantOf(fetch) : 'manual'
+	};
 }
+
+/** The layout's part (#1453): the notice for the signed-in landlord, none without one */
+export async function updateFor(
+	fetch: Fetch,
+	cookies: Pick<Cookies, 'get'>,
+	user?: { signedInAt: number }
+) {
+	const update = user && (await updateNotice(fetch, cookies, user.signedInAt));
+	return update ? { update } : {};
+}
+
+/** Whether this installation asks GitHub for new versions: the privacy statement names it then (Fachreview update-1 R-3) */
+export const asksGitHub = (fetch: Fetch): Promise<boolean> =>
+	fetch(`${BACKEND}/api/v1/update/checks`)
+		.then((response) => response.json())
+		.then(({ checks }) => checks === true)
+		.catch(() => false);
