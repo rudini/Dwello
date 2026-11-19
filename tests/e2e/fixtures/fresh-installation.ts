@@ -38,6 +38,7 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 	const accounts: string[] = [];
 	const buildings: string[] = [];
 	const account = { email: '', password: '' };
+	let published = '';
 	return {
 		account,
 		/** The account the setup creates, removed afterwards */
@@ -83,11 +84,20 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 		},
 		/** A newer Dwello published (#1453), which the backend learns at once when the search is switched off and on */
 		async newVersion(release: string) {
+			published = new Date().toISOString();
 			await kiStub.post('stub/update', { release });
 			// only a switch makes the backend ask again
 			await api.put('config', { update_check: 'off' });
 			await api.put('config', { update_check: 'on' });
 		},
+		/** #1457: when the version appeared, when the last Sicherung that succeeded began and when the update service
+		 * was asked to update (never: '') */
+		async updateTimes() {
+			const { since } = (await api.get('backup')) as { since: string };
+			const { at } = (await kiStub.get('stub/asked')) as { at: string | null };
+			return { erschienen: published, gesichert: since, heruntergeladen: at ?? '' };
+		},
+		updateServiceState: async () => ((await kiStub.get('status')) as { state: string }).state,
 		/** How the next update ends: the previous version keeps running, or it no longer starts (#1453) */
 		updateFails: (outcome: 'failed' | 'restore') => kiStub.post('stub/update', { outcome }),
 		/** No KI chosen (#620: «Später entscheiden» at the setup) */

@@ -1,0 +1,5 @@
+{
+	"error": "The Sicherung before the update failed",
+	"code": "UPDATE_BACKUP_FAILED",
+	"params": {}
+}

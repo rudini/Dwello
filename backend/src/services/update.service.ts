@@ -5,9 +5,10 @@
  */
 
 import { DATABASE_URL } from '../db/connection';
-import { backupState } from './backup.service';
+import { backupState, createBackup } from './backup.service';
 import { CodedError } from './coded-error';
 import { getConfig } from './config.service';
+import type { UpdateStatus } from '../updater/updater';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -57,14 +58,32 @@ export function startUpdateChecks() {
 // installer once more)
 export const updateState = () => ({ checks: updateChecks(), ...known, updater: !!process.env.UPDATER_URL });
 
-/** Has the update service start an update: only with a set-up Sicherung, since the new version backs up before it
- * changes the database */
+// one start at a time: a click in a second tab while the first still backs up makes no Sicherung of its own
+let starting = false;
+
+/** Has the update service start an update: only with a set-up Sicherung, and after a Sicherung made now (#1457), also
+ * for a version that does not change the database; when it fails nothing was asked of the update service */
 export async function startUpdate() {
 	const updater = process.env.UPDATER_URL;
 	if (!updater) throw new CodedError('UPDATE_UNAVAILABLE', 'This installation has no update service');
-	const { backup } = await backupState(DATABASE_URL);
-	if (backup !== 'ok' && backup !== 'stale') throw new CodedError('UPDATE_BACKUP_MISSING', 'The Sicherung is not set up');
-	const response = await fetch(`${updater}/update`, { method: 'POST' });
-	if (response.status === 409) throw new CodedError('UPDATE_RUNNING', 'An update is running');
-	if (!response.ok) throw new Error(`update service: ${response.status}`);
+	if (starting) throw new CodedError('UPDATE_RUNNING', 'An update is starting');
+	starting = true;
+	try {
+		const { backup } = await backupState(DATABASE_URL);
+		if (backup !== 'ok' && backup !== 'stale') throw new CodedError('UPDATE_BACKUP_MISSING', 'The Sicherung is not set up');
+		// asked first, so a second click makes no Sicherung of its own (Fachreview backup-first-1 V-3)
+		const { state } = (await (await fetch(`${updater}/status`)).json()) as UpdateStatus;
+		if (!['idle', 'done', 'failed'].includes(state)) throw new CodedError('UPDATE_RUNNING', 'An update is running');
+		try {
+			await createBackup(DATABASE_URL, process.env.BACKUP_DIR!);
+		} catch (error) {
+			console.error(`Sicherung vor dem Update fehlgeschlagen: ${error instanceof Error ? error.message : error}`);
+			throw new CodedError('UPDATE_BACKUP_FAILED', 'The Sicherung before the update failed');
+		}
+		const response = await fetch(`${updater}/update`, { method: 'POST' });
+		if (response.status === 409) throw new CodedError('UPDATE_RUNNING', 'An update is running');
+		if (!response.ok) throw new Error(`update service: ${response.status}`);
+	} finally {
+		starting = false;
+	}
 }

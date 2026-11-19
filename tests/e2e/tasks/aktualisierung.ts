@@ -56,3 +56,6 @@ const publish = (release: string, outcome: string): Activity => (actor) =>
 	);
 export const publishedForTheLook = (outcome: 'done' | 'failed' | 'restore' | 'hold') => publish('1.5.0', outcome);
 export const noNewVersionAfterTheLook = publish('1.4.0', 'done');
+/** #1457: the stand-in holds the next update again: each look of the axe and language check starts its own, and the
+ * backend starts none while the update service says one runs */
+export const holdNextUpdate: Activity = (actor) => actor.attemptsTo(Navigate.outsideApp(`${FRESH_KI_STUB}/stub/update?outcome=hold`));

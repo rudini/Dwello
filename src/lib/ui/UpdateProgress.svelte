@@ -11,16 +11,19 @@
 		step,
 		slow,
 		notice,
+		notStarted,
 		onclose
 	}: {
 		phase: 'running' | 'failed' | 'restore';
 		step: number;
 		slow: boolean;
 		notice: { latest: string; current: string };
+		/** why no update started (the Sicherung before it failed), in place of why one failed */
+		notStarted: string;
 		onclose: () => void;
 	} = $props();
 
-	const STEPS = [m.update_step_download, m.update_step_backup, m.update_step_restart];
+	const STEPS = [m.update_step_backup, m.update_step_download, m.update_step_restart];
 	const status = $derived(m.update_step_status({ number: step + 1, step: STEPS[step]() }));
 	// each step as it looks, and what a screen reader hears after its name
 	const steps = $derived(
@@ -42,9 +45,11 @@
 	);
 	// the restore needs the person who looks after Dwello; else the previous version runs on
 	const failure = $derived(
-		phase === 'restore'
-			? [m.update_failed_restore()]
-			: [m.update_failed({ version: notice.current }), m.update_failed_log()]
+		notStarted
+			? [notStarted]
+			: phase === 'restore'
+				? [m.update_failed_restore()]
+				: [m.update_failed({ version: notice.current }), m.update_failed_log()]
 	);
 
 	// the page behind stays out of reach (code review update-1 C-2): the focus on the heading, after a failure on

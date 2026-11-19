@@ -1,0 +1,6 @@
+#!/bin/sh
+# Stand-in for pg_dump in the acceptance tests of the fresh installation (#1457), last on its PATH
+# (playwright.config.ts): CI's Playwright image has no pg_dump, and since every update backs up first the update
+# scenarios need a Sicherung that succeeds. A real pg_dump on the PATH wins; what a Sicherung holds and its restore
+# are checked with the real one in backend/src/__tests__/backup.pg.test.ts.
+echo "Dwello E2E stand-in for pg_dump"

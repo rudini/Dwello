@@ -187,7 +187,7 @@
 		"update-available": "The notice of a new version at the top of the overview (#1453): new and current version, «Was ist neu?», «Aktualisieren» and «Später». On the fresh installation, whose look has the stand-in publish 1.5.0 and the backend ask at once.",
 		"update-backup": "«Sicherung einrichten» while a new version exists (#1453): the notice says the Sicherung comes first and links to the code instead of offering «Aktualisieren». On the fresh installation.",
 		"update-confirm": "The confirmation before the update (#1453): what happens and that unsaved input on the page is lost. On the fresh installation.",
-		"update-running": "The update after its confirmation (#1453): the moving sign, the three steps with the current one (the stand-in holds it at «Sichern»). On the fresh installation.",
+		"update-running": "The update after its confirmation (#1453): the moving sign, the three steps with the current one (the stand-in holds it at «Neu starten»). On the fresh installation.",
 		"update-failed": "An update that failed (#1453): the previous version keeps running, where the cause is written, «Schliessen». On the fresh installation, whose stand-in fails it.",
 		"update-restore": "An update that failed after the new version had changed the database (#1453): the restore by the person who looks after Dwello. On the fresh installation, whose stand-in fails it so."
 	},

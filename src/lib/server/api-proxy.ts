@@ -49,6 +49,12 @@ function getBackendTimeout(): number {
 // without a GPU (#419)
 const KI_PATH = /^\/invoices(\/extract|\/categorize|\/[^/]+\/recategorize)?$/;
 const KI_TIMEOUT = 300_000;
+// The start of an update (#1457): the backend makes a Sicherung of the whole database before it answers.
+// ponytail: 5 minutes, as long as Node's fetch waits for an answer at all; a Sicherung that takes longer needs the
+// backend to answer at once and report the Sicherung as a state the update's window asks for
+const UPDATE_TIMEOUT = 300_000;
+const slowPost = (path: string) =>
+	path === '/update' ? UPDATE_TIMEOUT : KI_PATH.test(path) ? KI_TIMEOUT : undefined;
 
 /**
  * Build the full backend URL for an API path
@@ -116,9 +122,7 @@ export async function forwardRequest<T = unknown>(
 	const fetchOptions: RequestInit = {
 		method: verb,
 		headers,
-		signal: AbortSignal.timeout(
-			verb === 'POST' && KI_PATH.test(path) ? KI_TIMEOUT : getBackendTimeout()
-		)
+		signal: AbortSignal.timeout((verb === 'POST' && slowPost(path)) || getBackendTimeout())
 	};
 
 	// Add body for mutation requests

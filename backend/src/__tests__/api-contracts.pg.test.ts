@@ -374,6 +374,25 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract-missing-statements'), actual)).toEqual([]);
 	});
 
+	// #1457: the Sicherung before the update fails (a confirmed code whose key cannot encrypt)
+	it('POST /update mit fehlgeschlagener Sicherung liefert die Felder von update-backup-refused.json', async () => {
+		const updater = Bun.serve({ port: 0, fetch: () => Response.json({ state: 'idle' }) });
+		process.env.BACKUP_DIR = tmpdir();
+		process.env.UPDATER_URL = `http://localhost:${updater.port}`;
+		try {
+			await db.insert(backupCodes).values({ publicKey: '', salt: '', confirmedAt: new Date() });
+			const response = await sendJson('POST', '/api/v1/update');
+			expect(response.status).toBe(409);
+			expect(drift(await sample('update-backup-refused'), await response.json())).toEqual([]);
+		} finally {
+			delete process.env.BACKUP_DIR;
+			delete process.env.UPDATER_URL;
+			await db.delete(backupCodes);
+			await db.execute(sql`DELETE FROM backup_runs`);
+			updater.stop(true);
+		}
+	});
+
 	// #1453: public, read by the privacy statement (fallback review of #1455)
 	it('GET /update/checks liefert die Felder von update-checks.json', async () => {
 		const actual = await (await callApi('/api/v1/update/checks')).json();

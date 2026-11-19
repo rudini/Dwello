@@ -233,6 +233,8 @@ export default defineConfig<{ driver: Driver }>({
 						ENCRYPTION_KEY: 'e2e-encryption-key-of-the-fresh-installation',
 						// a folder for the Sicherung (#718), so the fresh installation asks to set it up
 						BACKUP_DIR: freshBackups,
+						// #1457: every update backs up first; where no pg_dump is installed (CI's Playwright image) a stand-in
+						PATH: `${process.env.PATH}:${join(process.cwd(), 'backend/scripts/e2e-bin')}`,
 						// #1453: GitHub's newest release and the update service, both the stand-in (aktualisierung.feature)
 						DWELLO_RELEASES: 'http://127.0.0.1:2530/releases/latest',
 						UPDATER_URL: 'http://127.0.0.1:2530'

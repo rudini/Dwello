@@ -96,3 +96,23 @@ Funktionalität: Dwello aktualisieren
     Und der Liegenschaftsverwalter der frischen Installation die Übersicht öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Übersicht"
     Und meldet Dwello keine neue Version
+
+  # #1457: Dwello sichert vor jedem Update, bevor es etwas herunterlädt (der Stand-in des Update-Diensts ändert die
+  # Datenbank nicht). Nicht hier (No scenario): dass «Sichern» der erste Schritt ist (die Sicherung der leeren
+  # Installation dauert nur einen Augenblick: ein DOM-Test)
+  Szenario: Vor jedem Update erstellt Dwello zuerst eine Sicherung, auch wenn die neue Version die Datenbank nicht ändert
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und Dwello 1.5.0 ist erschienen
+    Und der Liegenschaftsverwalter hat die Mieter der frischen Installation geöffnet
+    Wenn der Liegenschaftsverwalter das Update bestätigt
+    Dann ist der Liegenschaftsverwalter nach dem Update wieder auf der Seite "Mieter"
+    Und hat Dwello eine Sicherung erstellt, bevor das Update etwas heruntergeladen hat
+
+  Szenario: Schlägt die Sicherung vor dem Update fehl, startet kein Update
+    Angenommen Dwello ist eingerichtet, konnte aber seit 2 Tagen keine Sicherung erstellen
+    Und Dwello 1.5.0 ist erschienen
+    Und der Liegenschaftsverwalter hat die Mieter der frischen Installation geöffnet
+    Wenn der Liegenschaftsverwalter das Update bestätigt
+    Dann meldet das Update "Dwello konnte vor dem Update keine Sicherung erstellen und hat das Update darum nicht gestartet. Es hat sich nichts geändert; Dwello läuft weiter in der bisherigen Version."
+    Und meldet das Update "Melden Sie sich bei der Person, die Dwello betreut; sie kann es dort nachlesen."
+    Und hat Dwello nichts heruntergeladen
