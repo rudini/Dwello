@@ -20,6 +20,7 @@ const FIELDS: Record<string, string> = {
 	'Adresse des Kontoinhabers': 'accountHolderAddress',
 	'PLZ des Kontoinhabers': 'accountHolderPostalCode',
 	'Ort des Kontoinhabers': 'accountHolderCity',
+	'Täglich nach neuen Versionen suchen': 'updateCheck',
 	Zahlungsfrist: 'paymentDeadlineDays',
 	'Zahlungsfrist (Tage)': 'paymentDeadlineDays',
 	Mahnfrist: 'reminderAfterDays',

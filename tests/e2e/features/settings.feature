@@ -114,3 +114,9 @@ Funktionalität: Einstellungen
     Dann bestätigen die Einstellungen beim Schalter "Gespeichert. Dwello sucht nicht mehr nach neuen Versionen."
     Wenn der Liegenschaftsverwalter in den Einstellungen die Suche nach neuen Versionen wieder einschaltet
     Dann bestätigen die Einstellungen beim Schalter "Gespeichert. Dwello sucht täglich nach neuen Versionen."
+
+  # #1456 (Entscheid des Product Owners, 19.11.2026): der Hilfetext sagt, dass der Schalter ohne «Speichern» speichert
+  Szenario: Der Schalter für die Suche nach neuen Versionen sagt, dass er sofort speichert
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Wenn der Liegenschaftsverwalter die Einstellungen der frischen Installation öffnet
+    Dann erklärt die Einstellung "Täglich nach neuen Versionen suchen" "Der Schalter speichert, sobald Sie ihn umlegen."
