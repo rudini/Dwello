@@ -10,6 +10,7 @@ import {
 	goToFreshTenants,
 	openFreshTenants,
 	postponeUpdate,
+	openFreshSettings,
 	switchOffUpdateCheck,
 	waitForFailure,
 	waitForUpdate
@@ -67,6 +68,10 @@ When('der Liegenschaftsverwalter das Update bestätigt', async ({ verwalter }) =
 
 When('der Liegenschaftsverwalter dem Hinweis zur Sicherung folgt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(followBackupLink);
+});
+
+When('der Liegenschaftsverwalter die Einstellungen der frischen Installation öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openFreshSettings);
 });
 
 When('der Liegenschaftsverwalter in den Einstellungen der frischen Installation die Suche nach neuen Versionen ausschaltet', async ({ verwalter }) => {
