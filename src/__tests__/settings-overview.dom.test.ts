@@ -23,4 +23,17 @@ describe('Suche nach neuen Versionen auf der Übersicht der Einstellungen', () =
 
 		expect(submitted).toEqual(['?/updateCheck']);
 	});
+
+	// code review settings-overview-1 C-2: a save the backend refused says so at the switch
+	it('meldet am Schalter, wenn die Änderung nicht gespeichert wurde', () => {
+		show(OverviewPage, {
+			data: { missing: { company: false, holder: false }, backup: 'off', updateCheck: true },
+			form: { error: 'Die Einstellungen konnten nicht gespeichert werden.' }
+		} as never);
+
+		const box = document.querySelector('[data-testid="setting-updateCheck"]')!;
+		expect(
+			document.getElementById(box.getAttribute('aria-describedby')!.split(' ')[0])?.textContent
+		).toContain('Die Einstellungen konnten nicht gespeichert werden.');
+	});
 });

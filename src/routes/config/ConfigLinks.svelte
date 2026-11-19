@@ -62,11 +62,16 @@
 					<a
 						href={link.href}
 						class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
+						aria-describedby={[
+							`${link.key}-text`,
+							...(link.warnings ?? []).map((_, at) => `${link.key}-missing-${at}`)
+						].join(' ')}
 						data-testid="settings-entry-name">{link.label}</a
 					>
-					<p class="text-ink-muted">{link.text}</p>
-					{#each link.warnings ?? [] as warning (warning)}
+					<p id="{link.key}-text" class="text-ink-muted">{link.text}</p>
+					{#each link.warnings ?? [] as warning, at (warning)}
 						<p
+							id="{link.key}-missing-{at}"
 							class="flex items-start gap-2 font-semibold text-critical"
 							data-testid="{link.key}-missing"
 						>

@@ -100,6 +100,10 @@
 						if (result.type !== 'success') updateCheck = stored();
 					}}
 			>
+				<!-- the privacy statement names «Einstellungen» › «Updates» (code review settings-overview-1 C-1) -->
+				<h3 class="text-lg font-semibold text-ink" data-testid="settings-entry-name">
+					{m.settings_updates_title()}
+				</h3>
 				<Checkbox
 					id="updateCheck"
 					name="updateCheck"

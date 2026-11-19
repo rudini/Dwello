@@ -111,6 +111,8 @@ describe('Übersicht der Einstellungen', () => {
 			'href="/config/backup"',
 			'href="/config/access-keys"',
 			'href="/config/audit-log"',
+			// the privacy statement sends the landlord to «Einstellungen» › «Updates» (code review settings-overview-1 C-1)
+			'>Updates</h3>',
 			'name="updateCheck"',
 			'action="/config/export"'
 		].map((part) => body.indexOf(part));
@@ -124,6 +126,9 @@ describe('Übersicht der Einstellungen', () => {
 		expect(body).toContain('href="/config/sender"');
 		expect(body).not.toContain('href="/config/backup"');
 		expect(body).not.toContain('name="updateCheck"');
+		expect(body).not.toContain('Updates');
+		// persona Anna settings-overview P-3: the page's purpose names what it has
+		expect(body).toContain('Ihre Angaben, Vorgaben für die Abrechnung, Daten und Sicherheit.');
 		expect(body).not.toContain('name="iban"');
 	});
 
@@ -133,6 +138,26 @@ describe('Übersicht der Einstellungen', () => {
 		const company = body.indexOf('Es fehlen Angaben zur Firmenadresse.');
 		expect(company).toBeGreaterThan(body.indexOf('href="/config/sender"'));
 		expect(body.indexOf('Es fehlen Angaben zum Kontoinhaber.')).toBeGreaterThan(company);
+	});
+
+	// persona Sven settings-overview P-1: tabbing to the link reads its explanation and what is missing
+	it('liest die Erklärung und die fehlenden Angaben mit dem Link vor', () => {
+		const body = overview({ missing: { company: true, holder: true } });
+
+		const described = body
+			.match(/<a href="\/config\/sender"[^>]*aria-describedby="([^"]+)"/)![1]
+			.split(' ');
+		const texts = described.map((id) =>
+			body
+				.match(new RegExp(`id="${id}"[^>]*>(.*?)</p>`, 's'))?.[1]
+				.replace(/<svg.*?<\/svg>|<!--.*?-->/gs, '')
+				.trim()
+		);
+		expect(texts).toEqual([
+			'Absender, Konto, Fristen, Bezeichnungen und Vorschläge für Ihre Abrechnungen',
+			'Es fehlen Angaben zur Firmenadresse.',
+			'Es fehlen Angaben zum Kontoinhaber.'
+		]);
 	});
 
 	it('sagt ohne fehlende Angaben nichts beim Link zu «Absender und Konto»', () => {

@@ -79,7 +79,7 @@ Funktionalität: Einstellungen
   Szenario: Die Einstellungen zeigen drei Gruppen und kein Formular
     Dann nennen die Einstellungen in der Gruppe "Ihre Angaben" nur "Absender und Konto"
     Und nennen die Einstellungen in der Gruppe "Abrechnung" nur "Kategorien, Verteilschlüssel, Heizprofile"
-    Und nennen die Einstellungen in der Gruppe "Daten und Sicherheit" nur "KI, Zugangsschlüssel für KI-Programme, Protokoll, Alle Daten exportieren"
+    Und nennen die Einstellungen in der Gruppe "Daten und Sicherheit" nur "KI, Zugangsschlüssel für KI-Programme, Protokoll, Updates, Alle Daten exportieren"
     Und fragen die Einstellungen nicht nach der Zahlungsfrist
     Und lässt sich in den Einstellungen nur "Alle Daten exportieren" auslösen
 
@@ -92,7 +92,7 @@ Funktionalität: Einstellungen
     Dann ist der Liegenschaftsverwalter auf der Seite "Absender und Konto"
 
   # Die Einstellungen gelten für alle parallel laufenden Szenarien: die Szenarien mit fehlenden Angaben laufen auf einer
-  # eigenen Installation. Beide Sätze zusammen prüft config-pages.test.ts
+  # eigenen Installation. Beide Sätze zusammen prüft settings-overview.test.ts
   @frische-installation
   Szenario: Die Einstellungen melden eine IBAN ohne Firmenadresse beim Link zu «Absender und Konto»
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" ohne Firmenname, PLZ und Ort hinterlegt
@@ -106,9 +106,8 @@ Funktionalität: Einstellungen
     Und der Liegenschaftsverwalter ist auf den Einstellungen
     Dann melden die Einstellungen bei «Absender und Konto» "Es fehlen Angaben zum Kontoinhaber."
 
-  # #1456: der Schalter aus #1453 steht in «Daten und Sicherheit» und speichert sofort. Ihn gibt es nur, wo Dwello nach
-  # neuen Versionen suchen darf: auf der frischen Installation
-  @frische-installation
+  # #1456: der Schalter aus #1453 steht in «Daten und Sicherheit» und speichert sofort. Die Einstellung gilt für alle
+  # parallel laufenden Szenarien: das Szenario schaltet auf der frischen Installation um (wie aktualisierung.feature)
   Szenario: Die Suche nach neuen Versionen speichert beim Umschalten
     Angenommen Dwello ist eingerichtet und die Sicherung auch
     Wenn der Liegenschaftsverwalter in den Einstellungen der frischen Installation die Suche nach neuen Versionen ausschaltet
