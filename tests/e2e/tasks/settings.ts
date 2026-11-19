@@ -1,8 +1,11 @@
 import type { Activity } from '../screenplay/actor';
 import { Check, Click, DownloadFrom, Enter, Navigate, Uncheck } from '../screenplay/interactions';
-import { exportAllDataButton, holderIsSenderBox, masterDataLink, saveSettingsButton, settingField } from '../targets/settings';
+import { exportAllDataButton, holderIsSenderBox, masterDataLink, saveSettingsButton, senderLink, settingField } from '../targets/settings';
 
 export const openSettings = Navigate.to('/config');
+/** #1456: the form of the settings, on its own page */
+export const openSenderSettings = Navigate.to('/config/sender');
+export const followSenderLink = Click.on(senderLink);
 
 /** #1202: types the settings without saving them */
 export const enterSettings = (fields: Record<string, string>): Activity => (actor) =>

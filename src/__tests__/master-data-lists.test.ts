@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { listDistributionKeys } from '../lib/server/distribution-key';
 import { load as profilesLoad } from '../routes/config/heating-profiles/+page.server';
-import { load as settingsLoad } from '../routes/config/+page.server';
+import { load as settingsLoad } from '../routes/config/sender/+page.server';
 import { load as newInvoiceLoad } from '../routes/invoices/new/+page.server';
 import { load as generateLoad } from '../routes/statements/generate/+page.server';
 import keyList from '../../tests/contracts/distribution-keys.json';

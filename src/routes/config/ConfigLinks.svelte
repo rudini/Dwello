@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 	import Icon from '$lib/ui/Icon.svelte';
 	import type { IconName } from '$lib/ui/icons';
@@ -10,9 +11,11 @@
 		label: string;
 		text: string;
 		icon: IconName;
+		warnings?: string[]; // #1456: what the page behind the link still lacks
 	};
 
-	// The master data pages, named and ordered as in the main navigation; the Protokoll (#357) on its own
+	// #1456: one group of the overview «Einstellungen». By default the master data pages, named and ordered as in the
+	// main navigation
 	const masterData = (): Link[] => [
 		{
 			key: 'categories',
@@ -38,14 +41,15 @@
 	];
 
 	let {
-		title = m.settings_master_data(),
+		title = m.settings_group_statement(),
 		testid = 'quick-links',
-		links = masterData()
-	}: { title?: string; testid?: string; links?: Link[] } = $props();
+		links = masterData(),
+		children
+	}: { title?: string; testid?: string; links?: Link[]; children?: Snippet } = $props();
 </script>
 
-<Panel {title}>
-	<ul class="grid gap-4 md:grid-cols-3" data-testid={testid}>
+<Panel {title} testid="settings-group">
+	<ul class="grid gap-4" class:md:grid-cols-3={links.length > 1} data-testid={testid}>
 		{#each links as link (link.key)}
 			<!-- The whole card opens the page; its name is the link -->
 			<li
@@ -58,11 +62,25 @@
 					<a
 						href={link.href}
 						class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
-						>{link.label}</a
+						aria-describedby="{link.key}-about"
+						data-testid="settings-entry-name">{link.label}</a
 					>
-					<p class="text-ink-muted">{link.text}</p>
+					<!-- read with the link: its explanation and what is missing (persona Sven settings-overview P-1) -->
+					<div id="{link.key}-about" class="flex flex-col gap-1">
+						<p class="text-ink-muted">{link.text}</p>
+						{#each link.warnings ?? [] as warning (warning)}
+							<p
+								class="flex items-start gap-2 font-semibold text-critical"
+								data-testid="{link.key}-missing"
+							>
+								<Icon name="warning" />
+								{warning}
+							</p>
+						{/each}
+					</div>
 				</div>
 			</li>
 		{/each}
 	</ul>
+	{@render children?.()}
 </Panel>

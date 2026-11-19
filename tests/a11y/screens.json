@@ -163,11 +163,12 @@
 		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the line of the demo notice at the top of the page (on the sign-in page the full notice); on the privacy statement and the terms also their section on the demo, on the help its section «Öffentliche Demo».",
 		"backup-error": "«Sicherung einrichten» (#718) with a code typed that is not the one shown: the refusal above the field. The screen runs on the fresh installation of the E2E stack, the only one with a folder for the Sicherung; its look first removes any confirmed code.",
 		"backup-stale": "The overview when no Sicherung succeeded for more than a day (#718, O1): the warning with the link to the installation guide. Seen on the fresh installation, whose look sets a code confirmed two days ago that cannot encrypt.",
-		"account-holder": "The settings with «Kontoinhaber ist der Absender» cleared (#1166): the four fields of the Kontoinhaber in the block «Konto»; nothing is saved.",
-		"save-refused": "The settings after a save the backend refused (#690): the refusal at its field and, above the button, «Die Einstellungen wurden nicht gespeichert» with «Keine Änderung wurde gespeichert, auch nicht in den anderen Feldern.»; nothing is saved.",
-		"creditor-missing": "An IBAN stored without name, postal code and town of the Firmenadresse, on the fresh installation (#690, @frische-installation): the settings mark the empty fields on opening with the refusal's text at the IBAN; the page of a Nachzahlung warns that its Zahlteil lacks the Firmenadresse, with «Zu den Einstellungen».",
-		"account-holder-missing": "The settings after saving an IBAN with «Kontoinhaber ist der Absender» cleared and no Kontoinhaber entered (#1166): the refusal at the name, the missing fields marked; nothing is saved.",
-		"backup-links": "The settings of an installation with a folder for the Sicherung (the fresh installation): the link to «Neuer Wiederherstellungscode» (#718, part 3).",
+		"account-holder": "«Absender und Konto» with «Kontoinhaber ist der Absender» cleared (#1166): the four fields of the Kontoinhaber in the block «Konto»; nothing is saved.",
+		"save-refused": "«Absender und Konto» after a save the backend refused (#690): the refusal at its field and, above the button, «Die Einstellungen wurden nicht gespeichert» with «Keine Änderung wurde gespeichert, auch nicht in den anderen Feldern.»; nothing is saved.",
+		"creditor-missing": "An IBAN stored without name, postal code and town of the Firmenadresse, on the fresh installation (#690, @frische-installation): «Absender und Konto» marks the empty fields on opening with the refusal's text at the IBAN; the settings say «Es fehlen Angaben zur Firmenadresse.» at the link to it (#1456); the page of a Nachzahlung warns that its Zahlteil lacks the Firmenadresse, with «Zu den Einstellungen».",
+		"account-holder-missing": "«Absender und Konto» after saving an IBAN with «Kontoinhaber ist der Absender» cleared and no Kontoinhaber entered (#1166): the refusal at the name, the missing fields marked; nothing is saved.",
+		"backup-links": "The settings of an installation with a folder for the Sicherung that may search for new versions (the fresh installation): the link to «Neuer Wiederherstellungscode» (#718, part 3) and the switch «Täglich nach neuen Versionen suchen» (#1453, #1456).",
+		"update-check-saved": "The settings of the fresh installation right after the switch «Täglich nach neuen Versionen suchen» was switched on (#1456): the confirmation below it; the look switches it off first and leaves it on.",
 		"new-code-password": "«Neuer Wiederherstellungscode» (#718, part 3) signed in with a Konto mit Passwort: the password typed again. Its look makes a Konto mit Passwort on the fresh installation and removes it afterwards.",
 		"new-code-password-error": "«Neuer Wiederherstellungscode» after a wrong password: the refusal above the field.",
 		"new-code-again": "«Neuer Wiederherstellungscode» signed in with Google more than 10 minutes ago: the link to sign in with Google again.",
@@ -1043,6 +1044,15 @@
 			"states": [
 				"default",
 				"backup-links",
+				"update-check-saved",
+				"creditor-missing"
+			]
+		},
+		{
+			"name": "config-sender",
+			"path": "/config/sender",
+			"states": [
+				"default",
 				"account-holder",
 				"account-holder-missing",
 				"save-refused",

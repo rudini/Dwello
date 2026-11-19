@@ -1,0 +1,7 @@
+# Workflow notes: issue #1456 (settings overview)
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| Skill `issue-work` / `grill-me`: an issue whose «Done means» moves a page lists every scenario that reaches it | The issue's list of approved scenarios missed one in `statement-detail.feature` (it follows a link to the moved form and checks the page title), and the rule on stored states missed the incomplete Kontoinhaber the page already handles: two stops with a round through the product owner before any code. | In `grill-me`, step 1: for a page that moves, also `grep` the features for the page's title in «ist … auf der Seite "<Titel>"» and for every link to its address (`href="/config#…"`), and read the page's load for every state it shows on opening. |
+| `tests/e2e/CLAUDE.md`, "Rules", global records | A scenario tagged `@frische-installation` that also uses the step «Dwello ist eingerichtet und die Sicherung auch» takes the lock `installation` twice (fixture `seed` and `frisch`) and hangs without a timeout or message; the run then never ends, and its servers keep the ports for the next run. | Say in "Rules" that a scenario uses either the tag or the steps of the fixture `frisch`, never both; or let `withLock` fail when the same test asks for a lock it holds. |
+| `tests/e2e/CLAUDE.md`, "Run" | A run stopped by a timeout leaves its servers (3100, 3101, 3105, 3106, 2526 to 2530) running; the next run fails with «3101 is already used». | Name the ports to stop after an interrupted run in one line (`for p in …; do fuser -k $p/tcp; done`). |

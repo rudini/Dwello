@@ -18,7 +18,7 @@
 		testid="statement-creditor-missing"
 	>
 		<a
-			href="/config#{section}"
+			href="/config/sender#{section}"
 			class="text-accent underline underline-offset-4 hover:text-accent-strong"
 			data-testid="statement-creditor-missing-settings">{m.documents_to_settings()}</a
 		>

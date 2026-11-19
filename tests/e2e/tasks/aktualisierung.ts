@@ -15,7 +15,7 @@ import {
 	unsavedWarning
 } from '../targets/aktualisierung';
 import { pageTitle } from '../targets/app-frame';
-import { saveSettingsButton, savedNotice } from '../targets/settings';
+import { updateCheckSaved } from '../targets/settings';
 
 // The update of the fresh installation (#1453), signed in like the Liegenschaftsverwalter of the main stack
 const openFresh =
@@ -33,7 +33,9 @@ export const cancelUpdate: Activity = (actor) => actor.attemptsTo(askToUpdate, C
 export const confirmUpdate: Activity = (actor) => actor.attemptsTo(askToUpdate, Click.on(updateConfirmButton), Wait.until(updateOverlay));
 export const followBackupLink: Activity = (actor) => actor.attemptsTo(Click.on(backupLink));
 export const switchOffUpdateCheck: Activity = (actor) =>
-	actor.attemptsTo(openFreshSettings, Uncheck.the(updateCheckBox), Click.on(saveSettingsButton), Wait.until(savedNotice));
+	actor.attemptsTo(openFreshSettings, Uncheck.the(updateCheckBox), Wait.until(updateCheckSaved));
+/** #1456: on the open settings, after switching it off */
+export const switchOnUpdateCheck = Check.the(updateCheckBox);
 /** Until the page loads again after the update (the stand-in's three steps of 2 s and the browser's asking) */
 export const waitForUpdate: Activity = (actor) => actor.attemptsTo(Wait.untilGone(updateOverlay, 30_000), Wait.until(pageTitle));
 /** Until the update ends without success (the stand-in's three steps of 2 s) */
@@ -47,12 +49,10 @@ const publish = (release: string, outcome: string): Activity => (actor) =>
 		// only a switch makes the backend ask again
 		openFreshSettings,
 		Uncheck.the(updateCheckBox),
-		Click.on(saveSettingsButton),
-		Wait.until(savedNotice),
+		Wait.until(updateCheckSaved),
 		openFreshSettings,
 		Check.the(updateCheckBox),
-		Click.on(saveSettingsButton),
-		Wait.until(savedNotice)
+		Wait.until(updateCheckSaved)
 	);
 export const publishedForTheLook = (outcome: 'done' | 'failed' | 'restore' | 'hold') => publish('1.5.0', outcome);
 export const noNewVersionAfterTheLook = publish('1.4.0', 'done');

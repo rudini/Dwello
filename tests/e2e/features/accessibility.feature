@@ -310,9 +310,11 @@ Funktionalität: Barrierefreiheit
       | documents              | tenant-filtered     |
       | config                 | default             |
       | config                 | backup-links        |
-      | config                 | account-holder      |
-      | config                 | account-holder-missing |
-      | config                 | save-refused        |
+      | config                 | update-check-saved  |
+      | config-sender          | default             |
+      | config-sender          | account-holder      |
+      | config-sender          | account-holder-missing |
+      | config-sender          | save-refused        |
       | config-backup          | default             |
       | config-backup          | new-code-password   |
       | config-backup          | new-code-password-error |
@@ -401,4 +403,5 @@ Funktionalität: Barrierefreiheit
     Beispiele:
       | Bildschirm             | Zustand             |
       | config                 | creditor-missing    |
+      | config-sender          | creditor-missing    |
       | statement-detail       | creditor-missing    |

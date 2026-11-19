@@ -7,7 +7,7 @@ vi.mock('$lib/utils/list-filter', async (original) => ({
 }));
 import BuildingField from '../routes/apartments/new/BuildingField.svelte';
 import StatusField from '../routes/apartments/[id]/edit/StatusField.svelte';
-import DefaultsSection from '../routes/config/DefaultsSection.svelte';
+import DefaultsSection from '../routes/config/sender/DefaultsSection.svelte';
 import SettingsStep from '../routes/statements/generate/SettingsStep.svelte';
 import StatementSearch from '../routes/statements/StatementSearch.svelte';
 import { byTestId } from './helpers/dom';
@@ -81,7 +81,7 @@ describe('Auswahl vor der Hydration in Erfassungsformularen', () => {
 			heatingProfiles,
 			distributionKeys: [{ id: 'd1', name: 'Nach Fläche' }]
 		} as never;
-		await serverRender('routes/config/DefaultsSection.svelte', props);
+		await serverRender('routes/config/sender/DefaultsSection.svelte', props);
 		select('setting-defaultHeatingProfileId').value = 'h2';
 		select('setting-defaultDistributionKeyId').value = 'd1';
 

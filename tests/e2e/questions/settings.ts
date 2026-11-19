@@ -1,5 +1,5 @@
 import { Accessible, Attribute, Checked, Count, FocusedElement, FocusedLabel, Text, Value, Visibility } from '../screenplay/questions';
-import { exportAllDataButton, holderIsSenderBox, savedNotice, settingField } from '../targets/settings';
+import { exportAllDataButton, holderIsSenderBox, savedNotice, senderEntry, senderMissing, settingField, settingsButtons, settingsGroupEntries, updateCheckSaved } from '../targets/settings';
 
 export const settingsSaved = Visibility.of(savedNotice);
 export const settingsSavedText = Text.of(savedNotice);
@@ -19,3 +19,9 @@ export const focusedSetting = FocusedLabel;
 export const focusedSettingField = FocusedElement;
 /** #1175: the field's name as a screen reader announces it, its label with «(optional)» */
 export const settingName = (name: string) => Accessible.nameOf(settingField(name));
+/** #1456: the entries of a group of the overview, in page order */
+export const groupEntries = (group: string) => Text.ofAll(settingsGroupEntries(group));
+export const settingsButtonNames = Text.ofAll(settingsButtons);
+export const senderEntryText = Text.of(senderEntry);
+export const senderMissingText = Text.of(senderMissing);
+export const updateCheckSavedText = Text.of(updateCheckSaved);
