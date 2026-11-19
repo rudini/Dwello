@@ -1754,7 +1754,7 @@ Funktionalität: Abrechnungsdetail
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter von der Warnung zu den Einstellungen wechselt
-    Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
+    Dann ist der Liegenschaftsverwalter auf der Seite "Absender und Konto"
     Und steht der Fokus in den Einstellungen auf "Firmenname"
 
   # #690, Punkt 2 (Persona Weber 450, behoben mit #734): fehlt die Firmenadresse erst nach dem letzten PDF, lehnt Dwello

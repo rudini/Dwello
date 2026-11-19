@@ -7,7 +7,7 @@
 	import Field from '$lib/ui/Field.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { controlClass } from '$lib/ui/field';
-	import { help } from './help';
+	import { help } from '../help';
 
 	let {
 		settings,

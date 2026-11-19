@@ -46,3 +46,8 @@ Funktionalität: Breadcrumb
     Beispiele:
       | Ausgangslage                  | Breadcrumb    | Ziel                      |
       | ist auf der Seite "Protokoll" | Einstellungen | der Seite "Einstellungen" |
+
+    # Absender und Konto (#1456)
+    Beispiele:
+      | Ausgangslage                           | Breadcrumb    | Ziel                      |
+      | ist auf der Seite "Absender und Konto" | Einstellungen | der Seite "Einstellungen" |

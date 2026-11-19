@@ -1,7 +1,8 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { ON_FRESH, test } from '../fixtures/test';
-import { focusedSetting, focusedSettingField, holderIsSender, settingCount, settingHelp, settingInvalid, settingName, settingsSaved, settingsSavedText, storedSetting } from '../questions/settings';
-import { enterSettings, giveOwnHolder, giveSenderAsHolder, openMasterData, openSettings, saveSettings } from '../tasks/settings';
+import { focusedSetting, focusedSettingField, groupEntries, holderIsSender, senderEntryText, senderMissingText, settingCount, settingHelp, settingInvalid, settingName, settingsButtonNames, settingsSaved, settingsSavedText, storedSetting, updateCheckSavedText } from '../questions/settings';
+import { switchOnUpdateCheck } from '../tasks/aktualisierung';
+import { enterSettings, followSenderLink, giveOwnHolder, giveSenderAsHolder, openMasterData, openSenderSettings, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -29,6 +30,11 @@ Given('der Liegenschaftsverwalter ist auf den Einstellungen', async ({ verwalter
 	await verwalter.attemptsTo(openSettings);
 });
 
+// #1456: the form of the settings has its own page
+Given('der Liegenschaftsverwalter ist auf der Seite "Absender und Konto"', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openSenderSettings);
+});
+
 // #690: a setting the parallel scenarios would break on: only on the fresh installation
 Given(
 	'die Verwaltung hat die IBAN {string} ohne Firmenname, PLZ und Ort hinterlegt',
@@ -46,7 +52,7 @@ Given('in den Einstellungen fehlt inzwischen {string}', async ({ seed, $tags }, 
 });
 
 When('der Liegenschaftsverwalter die Einstellungen erneut öffnet', async ({ verwalter }) => {
-	await verwalter.attemptsTo(openSettings);
+	await verwalter.attemptsTo(openSenderSettings);
 });
 
 When('der Liegenschaftsverwalter folgende Einstellungen speichert:', async ({ verwalter }, table: DataTable) => {
@@ -74,7 +80,7 @@ Then('bestätigen die Einstellungen {string}', async ({ verwalter }, text: strin
 Then(
 	'nach erneutem Öffnen der Einstellungen ist die IBAN {string} hinterlegt',
 	async ({ verwalter }, iban: string) => {
-		await verwalter.attemptsTo(openSettings);
+		await verwalter.attemptsTo(openSenderSettings);
 		await verwalter.sees(storedSetting('iban')).toBe(iban);
 	}
 );
@@ -82,7 +88,7 @@ Then(
 Then(
 	'nach erneutem Öffnen der Einstellungen sind das Telefon {string} und die E-Mail {string} hinterlegt',
 	async ({ verwalter }, phone: string, email: string) => {
-		await verwalter.attemptsTo(openSettings);
+		await verwalter.attemptsTo(openSenderSettings);
 		await verwalter.sees(storedSetting('companyPhone')).toBe(phone);
 		await verwalter.sees(storedSetting('companyEmail')).toBe(email);
 	}
@@ -145,7 +151,7 @@ Given(
 );
 
 When('der Liegenschaftsverwalter in den Einstellungen den Absender als Kontoinhaber angibt und speichert', async ({ verwalter }) => {
-	await verwalter.attemptsTo(openSettings, giveSenderAsHolder, saveSettings({}));
+	await verwalter.attemptsTo(openSenderSettings, giveSenderAsHolder, saveSettings({}));
 });
 
 Then('ist in den Einstellungen angegeben, dass der Kontoinhaber der Absender ist', async ({ verwalter }) => {
@@ -153,14 +159,14 @@ Then('ist in den Einstellungen angegeben, dass der Kontoinhaber der Absender ist
 });
 
 Then('nach erneutem Öffnen der Einstellungen ist angegeben, dass der Kontoinhaber der Absender ist', async ({ verwalter }) => {
-	await verwalter.attemptsTo(openSettings);
+	await verwalter.attemptsTo(openSenderSettings);
 	await verwalter.sees(holderIsSender).toBe(true);
 });
 
 Then(
 	'nach erneutem Öffnen der Einstellungen ist der Kontoinhaber {string}, {string}, {string} {string} hinterlegt',
 	async ({ verwalter }, name: string, street: string, postalCode: string, city: string) => {
-		await verwalter.attemptsTo(openSettings);
+		await verwalter.attemptsTo(openSenderSettings);
 		await verwalter.sees(holderIsSender).toBe(false);
 		await verwalter.sees(storedSetting('accountHolderName')).toBe(name);
 		await verwalter.sees(storedSetting('accountHolderAddress')).toBe(street);
@@ -221,4 +227,44 @@ Then(
 
 Then('heisst die Einstellung {string} {string}', async ({ verwalter }, label: string, name: string) => {
 	await verwalter.sees(settingName(FIELDS[label])).toBe(name);
+});
+
+// #1456: the overview «Einstellungen» with its three groups
+Then('nennen die Einstellungen in der Gruppe {string} nur {string}', async ({ verwalter }, group: string, entries: string) => {
+	await verwalter.sees(groupEntries(group)).toEqual(entries.split(', '));
+});
+
+// the groups are the anchor: the page shows its entries
+Then('fragen die Einstellungen nicht nach der Zahlungsfrist', async ({ verwalter }) => {
+	await verwalter.sees(settingCount('paymentDeadlineDays')).toBe(0);
+});
+
+Then('lässt sich in den Einstellungen nur {string} auslösen', async ({ verwalter }, button: string) => {
+	await verwalter.sees(settingsButtonNames).toEqual([button]);
+});
+
+Then('erklären die Einstellungen bei «Absender und Konto» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(senderEntryText).toContain(text);
+});
+
+// the entry's explanation is the anchor; «fehl» is in both sentences
+Then('melden die Einstellungen bei «Absender und Konto» keine fehlenden Angaben', async ({ verwalter }) => {
+	await verwalter.sees(senderEntryText).toContain('Absender und Konto');
+	await verwalter.sees(senderEntryText).not.toContain('fehl');
+});
+
+Then('melden die Einstellungen bei «Absender und Konto» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(senderMissingText).toBe(text);
+});
+
+When('der Liegenschaftsverwalter in den Einstellungen «Absender und Konto» öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(followSenderLink);
+});
+
+When('der Liegenschaftsverwalter in den Einstellungen die Suche nach neuen Versionen wieder einschaltet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(switchOnUpdateCheck);
+});
+
+Then('bestätigen die Einstellungen beim Schalter {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(updateCheckSavedText).toBe(text);
 });

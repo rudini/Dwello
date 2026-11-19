@@ -2124,7 +2124,7 @@ describe('Abrechnungsdetail', () => {
 				'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
 			);
 			expect(byTestId('statement-creditor-missing-settings')!.getAttribute('href')).toBe(
-				'/config#sender'
+				'/config/sender#sender'
 			);
 		});
 
@@ -2136,7 +2136,7 @@ describe('Abrechnungsdetail', () => {
 			);
 			// persona Weber 690 W-7: to the Kontoinhaber, not to the Absender
 			expect(byTestId('statement-creditor-missing-settings')!.getAttribute('href')).toBe(
-				'/config#account-holder'
+				'/config/sender#account-holder'
 			);
 		});
 

@@ -187,10 +187,18 @@
 		},
 		"settings": {
 			"paths": [
-				"^src/routes/config/(\\+page\\.svelte|\\+page\\.server\\.ts|ConfigLinks\\.svelte|DefaultsSection\\.svelte|SettingField\\.svelte)$"
+				"^src/routes/config/(\\+page\\.svelte|\\+page\\.server\\.ts|ConfigLinks\\.svelte)$"
 			],
 			"features": [
 				"features/settings.feature"
+			]
+		},
+		"settings-sender": {
+			"paths": [
+				"^src/routes/config/sender/"
+			],
+			"features": [
+				"features/settings-sender.feature"
 			]
 		}
 	}

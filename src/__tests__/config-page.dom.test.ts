@@ -5,7 +5,7 @@ vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
 // the page's first navigation is its mounting
 vi.mock('$app/navigation', async () => ({ afterNavigate: (await import('svelte')).onMount }));
 
-import SettingsPage from '../routes/config/+page.svelte';
+import SettingsPage from '../routes/config/sender/+page.svelte';
 import { show } from './helpers/dom';
 import config from '../../tests/contracts/config.json';
 import { toSettings } from '$lib/server/settings';

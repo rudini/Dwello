@@ -71,10 +71,10 @@ import {
 } from './sicherung';
 import { withLock } from '../fixtures/settings-lock';
 import { askToUpdate, confirmUpdate, holdNextUpdate, noNewVersionAfterTheLook, publishedForTheLook, waitForFailure } from './aktualisierung';
-import { updateNotice } from '../targets/aktualisierung';
+import { updateCheckBox, updateNotice } from '../targets/aktualisierung';
 import { formErrors } from '../targets/form';
 import { creditorWarning } from '../targets/statement-detail';
-import { settingField } from '../targets/settings';
+import { senderMissing, settingField, updateCheckSaved } from '../targets/settings';
 import { giveOwnHolder, saveSettings } from './settings';
 import { kiCheckButton, kiCheckResult, kiMode, kiModelOffline, kiSaveAnswer, kiSaveButton } from '../targets/ki-settings';
 import { userMenuButton } from '../targets/app-frame';
@@ -327,7 +327,18 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Wait.until(formErrors)
 		),
 	// #690: an IBAN without Firmenadresse (on the fresh installation): the settings mark it, a Nachzahlung warns
-	'creditor-missing': (example) => Wait.until(example.path === '/config' ? formErrors : creditorWarning),
+	// #1456: «Absender und Konto» marks it, the settings say it at the link to it
+	'creditor-missing': (example) =>
+		Wait.until(example.path === '/config' ? senderMissing : example.path === '/config/sender' ? formErrors : creditorWarning),
+	// #1456: the switch of #1453 saves when switched; switched off first, the look leaves it on
+	'update-check-saved': () => (actor) =>
+		actor.attemptsTo(
+			Uncheck.the(updateCheckBox),
+			Wait.until(updateCheckSaved),
+			Navigate.reload,
+			Check.the(updateCheckBox),
+			Wait.until(updateCheckSaved)
+		),
 	// #690: a refused save says that nothing was saved; refused, it writes nothing
 	'save-refused': () => (actor) => actor.attemptsTo(saveSettings({ companyPostalCode: '84' }), Wait.until(formErrors)),
 	'new-code-password': () => (actor) =>
@@ -1021,7 +1032,7 @@ export const instanceOf = ({ state, path }: Example) =>
 		? EMPTY_INSTANCE
 		: state === 'demo'
 			? DEMO_INSTANCE
-			: path === '/backup' || path.startsWith('/config/backup') || state.startsWith('update-') || ['backup-stale', 'backup-links', 'ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none', 'upload-ki-none'].includes(state)
+			: path === '/backup' || path.startsWith('/config/backup') || state.startsWith('update-') || ['backup-stale', 'backup-links', 'update-check-saved', 'ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none', 'upload-ki-none'].includes(state)
 				? FRESH_APP
 				: '';
 

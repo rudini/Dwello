@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { actions, load } from '../routes/config/+page.server';
+import { actions, load } from '../routes/config/sender/+page.server';
 import { runAction } from './helpers/action';
 import config from '../../tests/contracts/config.json';
 import fieldsRefused from '../../tests/contracts/config-fields-refused.json';

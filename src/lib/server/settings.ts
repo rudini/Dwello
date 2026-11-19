@@ -67,8 +67,6 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 		])
 	);
 	typed.account_holder_separate = holderIsSender ? '' : 'true';
-	// #1453: the search for new versions, where the page offers it
-	if (formData.has('updateCheckShown')) typed.update_check = formData.has('updateCheck') ? 'on' : 'off';
 	const saved = await fetch(API, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
@@ -79,6 +77,17 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 	const refused = (await saved.json().catch(() => ({}))) as BackendError;
 	if (!refused.causes) return fail(400, { errors: { form: m.settings_save_failed() } as Record<string, string> });
 	return fail(400, atFields(refused.causes));
+}
+
+/** #1456: the switch of the search for new versions (#1453) saves by itself; what is stored now */
+export async function saveUpdateCheck(fetch: typeof globalThis.fetch, request: Request) {
+	const updateCheck = (await request.formData()).has('updateCheck');
+	const saved = await fetch(API, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ update_check: updateCheck ? 'on' : 'off' })
+	}).catch(() => null);
+	return saved?.ok ? { updateCheck } : fail(502, { error: m.settings_save_failed() });
 }
 
 /** Each refusal at the field of its key; the Firmenadresse and the Kontoinhaber an IBAN needs (#450, #1166) marked
