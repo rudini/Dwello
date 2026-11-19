@@ -158,20 +158,15 @@ describe('Übersicht der Einstellungen', () => {
 	it('liest die Erklärung und die fehlenden Angaben mit dem Link vor', () => {
 		const body = overview({ missing: { company: true, holder: true } });
 
-		const described = body
-			.match(/<a href="\/config\/sender"[^>]*aria-describedby="([^"]+)"/)![1]
-			.split(' ');
-		const texts = described.map((id) =>
-			body
-				.match(new RegExp(`id="${id}"[^>]*>(.*?)</p>`, 's'))?.[1]
-				.replace(/<svg.*?<\/svg>|<!--.*?-->/gs, '')
-				.trim()
+		const about = body.match(/<a href="\/config\/sender"[^>]*aria-describedby="([^"]+)"/)![1];
+		const read = body
+			.match(new RegExp(`id="${about}"[^>]*>(.*?)</div>`, 's'))![1]
+			.replace(/<svg.*?<\/svg>|<[^>]+>/gs, ' ')
+			.replace(/\s+/g, ' ')
+			.trim();
+		expect(read).toBe(
+			'Absender, Konto, Fristen, Bezeichnungen und Vorschläge für Ihre Abrechnungen Es fehlen Angaben zur Firmenadresse. Es fehlen Angaben zum Kontoinhaber.'
 		);
-		expect(texts).toEqual([
-			'Absender, Konto, Fristen, Bezeichnungen und Vorschläge für Ihre Abrechnungen',
-			'Es fehlen Angaben zur Firmenadresse.',
-			'Es fehlen Angaben zum Kontoinhaber.'
-		]);
 	});
 
 	it('sagt ohne fehlende Angaben nichts beim Link zu «Absender und Konto»', () => {

@@ -49,7 +49,7 @@
 </script>
 
 <Panel {title} testid="settings-group">
-	<ul class="grid gap-4 {links.length > 1 ? 'md:grid-cols-3' : ''}" data-testid={testid}>
+	<ul class="grid gap-4" class:md:grid-cols-3={links.length > 1} data-testid={testid}>
 		{#each links as link (link.key)}
 			<!-- The whole card opens the page; its name is the link -->
 			<li
@@ -62,23 +62,22 @@
 					<a
 						href={link.href}
 						class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
-						aria-describedby={[
-							`${link.key}-text`,
-							...(link.warnings ?? []).map((_, at) => `${link.key}-missing-${at}`)
-						].join(' ')}
+						aria-describedby="{link.key}-about"
 						data-testid="settings-entry-name">{link.label}</a
 					>
-					<p id="{link.key}-text" class="text-ink-muted">{link.text}</p>
-					{#each link.warnings ?? [] as warning, at (warning)}
-						<p
-							id="{link.key}-missing-{at}"
-							class="flex items-start gap-2 font-semibold text-critical"
-							data-testid="{link.key}-missing"
-						>
-							<Icon name="warning" />
-							{warning}
-						</p>
-					{/each}
+					<!-- read with the link: its explanation and what is missing (persona Sven settings-overview P-1) -->
+					<div id="{link.key}-about" class="flex flex-col gap-1">
+						<p class="text-ink-muted">{link.text}</p>
+						{#each link.warnings ?? [] as warning (warning)}
+							<p
+								class="flex items-start gap-2 font-semibold text-critical"
+								data-testid="{link.key}-missing"
+							>
+								<Icon name="warning" />
+								{warning}
+							</p>
+						{/each}
+					</div>
 				</div>
 			</li>
 		{/each}
