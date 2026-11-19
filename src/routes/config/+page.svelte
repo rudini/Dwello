@@ -14,6 +14,7 @@
 	// #1456: the switch saves when switched; refused, it shows what is stored again
 	const stored = () => data.updateCheck ?? false;
 	let updateCheck = $state(stored());
+	let saving = false;
 	const saved = $derived(form && 'updateCheck' in form ? form.updateCheck : null);
 </script>
 
@@ -93,12 +94,17 @@
 				method="POST"
 				action="?/updateCheck"
 				class="flex flex-col gap-4"
-				onchange={(event) => event.currentTarget.requestSubmit()}
-				use:enhance={() =>
-					async ({ update, result }) => {
+				onchange={(event) => saving || event.currentTarget.requestSubmit()}
+				use:enhance={() => {
+					saving = true;
+					return async ({ update, result, formElement }) => {
 						await update({ reset: false });
+						saving = false;
 						if (result.type !== 'success') updateCheck = stored();
-					}}
+						// switched again meanwhile: the last position is what gets stored (Fallback review of #1460)
+						else if (result.data?.updateCheck !== updateCheck) formElement.requestSubmit();
+					};
+				}}
 			>
 				<!-- the privacy statement names «Einstellungen» › «Updates» (code review settings-overview-1 C-1) -->
 				<h3 class="text-lg font-semibold text-ink" data-testid="settings-entry-name">

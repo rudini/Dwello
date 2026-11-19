@@ -79,6 +79,21 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 	return fail(400, atFields(refused.causes));
 }
 
+/**
+ * #1456: what the overview «Einstellungen» says of the stored settings: what the IBAN lacks (#690), and the search for
+ * new versions where this installation may search at all (#1453, `checks` of the update state), else null
+ */
+export function toSettingsOverview(
+	config: { data: Record<string, string | null>; creditorMissing: { code: string }[] },
+	checks: boolean
+) {
+	const lacks = (code: string) => config.creditorMissing.some((missing) => missing.code === code);
+	return {
+		missing: { company: lacks('IBAN_COMPANY_ADDRESS_MISSING'), holder: lacks('ACCOUNT_HOLDER_MISSING') },
+		updateCheck: checks ? config.data.update_check !== 'off' : null
+	};
+}
+
 /** #1456: the switch of the search for new versions (#1453) saves by itself; what is stored now */
 export async function saveUpdateCheck(fetch: typeof globalThis.fetch, request: Request) {
 	const updateCheck = (await request.formData()).has('updateCheck');

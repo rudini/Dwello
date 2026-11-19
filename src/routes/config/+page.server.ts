@@ -1,5 +1,5 @@
 import { backupState } from '$lib/server/backup';
-import { saveUpdateCheck } from '$lib/server/settings';
+import { saveUpdateCheck, toSettingsOverview } from '$lib/server/settings';
 import type { Actions, PageServerLoad } from './$types';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -12,15 +12,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		backupState(fetch),
 		get('update') // #1453: whether this installation may search for new versions at all
 	]);
-	const lacks = (code: string) =>
-		(config.creditorMissing as { code: string }[]).some((missing) => missing.code === code);
-
-	return {
-		// what the stored IBAN lacks (#690), said at the link to the form
-		missing: { company: lacks('IBAN_COMPANY_ADDRESS_MISSING'), holder: lacks('ACCOUNT_HOLDER_MISSING') },
-		backup,
-		updateCheck: checks ? config.data.update_check !== 'off' : null
-	};
+	return { ...toSettingsOverview(config, checks), backup };
 };
 
 export const actions: Actions = {
