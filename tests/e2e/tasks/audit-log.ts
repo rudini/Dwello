@@ -1,10 +1,15 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Navigate } from '../screenplay/interactions';
+import { Click, Navigate, Wait } from '../screenplay/interactions';
 import { Attribute, Count } from '../screenplay/questions';
 import { auditEntriesOn, auditLogLink, deleteAuditEntryButton } from '../targets/audit-log';
 import { nextPageLink } from '../targets/statements';
 
-export const openAuditLog = Click.on(auditLogLink);
+// #1462: waits until the page is there; in WebKit a `goto` of the next step was interrupted by this click's navigation
+export const openAuditLog: Activity = (actor) =>
+	actor.attemptsTo(
+		Click.on(auditLogLink),
+		Wait.forUrl((url) => url.pathname === '/config/audit-log')
+	);
 export const goToAuditLog = Navigate.to('/config/audit-log');
 const nextPage = Attribute.named('href').of(nextPageLink);
 /** #746: `onEach` on the page shown, then «Nächste Seite» and `onEach` again, until the last page, which has none */
