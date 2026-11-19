@@ -120,6 +120,22 @@ describe('Übersicht der Einstellungen', () => {
 		expect(places).toEqual([...places].sort((a, b) => a - b));
 	});
 
+	// persona Helga settings-overview P-1: at 150 % a third of the width broke «Bezeichnungen» and let the hint leave the card
+	it('gibt dem einzigen Link von «Ihre Angaben» die ganze Breite, den Stammdaten drei Spalten', () => {
+		const body = overview({ missing: { company: true, holder: false } });
+
+		const columns = (testid: string) =>
+			/md:grid-cols-3/.test(body.match(new RegExp(`<ul[^>]*data-testid="${testid}"[^>]*>`))![0]);
+		expect([columns('own-links'), columns('quick-links')]).toEqual([false, true]);
+	});
+
+	// persona Anna settings-overview P-3: no «Stammdaten», which the page no longer has
+	it('nennt als Zweck der Seite ihre drei Gruppen', () => {
+		expect(overview()).toContain(
+			'Ihre Angaben, Vorgaben für die Abrechnung, Daten und Sicherheit.'
+		);
+	});
+
 	it('zeigt die Sicherung und den Schalter nur, wo es sie gibt, und kein Feld des Formulars', () => {
 		const body = overview();
 
@@ -127,8 +143,6 @@ describe('Übersicht der Einstellungen', () => {
 		expect(body).not.toContain('href="/config/backup"');
 		expect(body).not.toContain('name="updateCheck"');
 		expect(body).not.toContain('Updates');
-		// persona Anna settings-overview P-3: the page's purpose names what it has
-		expect(body).toContain('Ihre Angaben, Vorgaben für die Abrechnung, Daten und Sicherheit.');
 		expect(body).not.toContain('name="iban"');
 	});
 

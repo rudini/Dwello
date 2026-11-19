@@ -49,7 +49,7 @@
 </script>
 
 <Panel {title} testid="settings-group">
-	<ul class="grid gap-4 md:grid-cols-3" data-testid={testid}>
+	<ul class="grid gap-4 {links.length > 1 ? 'md:grid-cols-3' : ''}" data-testid={testid}>
 		{#each links as link (link.key)}
 			<!-- The whole card opens the page; its name is the link -->
 			<li
