@@ -1,6 +1,6 @@
 # Sprechtext (short)
 
-Generiert aus `scenes-short.mjs` (`node docs/journey-video/render.mjs short --text`). Länge 1:09.
+Generiert aus `scenes-short.mjs` (`node docs/journey-video/render.mjs short --text`). Länge 1:11.
 
 > 5’620 Commits in zehn Monaten. 4’774 davon stammen von KI-Agenten.
 >
@@ -26,9 +26,9 @@ Generiert aus `scenes-short.mjs` (`node docs/journey-video/render.mjs short --te
 >
 > *The architecture is measured. Fitness functions guard it, and the values may only get better.*
 
-> Und Hooks blockieren jeden Commit, der die Regeln bricht. Eine Regel im Text ist nur eine Bitte.
+> Und Hooks von Claude Code blockieren jeden Commit des Agenten, der die Regeln bricht. Eine Regel im Text ist nur eine Bitte.
 >
-> *And hooks block every commit that breaks the rules. A rule in a text is only a request.*
+> *And Claude Code hooks block every commit of the agent that breaks the rules. A rule in a text is only a request.*
 
 > Ich tippe kaum noch Code. Ich entscheide. Die ganze Geschichte gibt es im langen Video.
 >

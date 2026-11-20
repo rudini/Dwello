@@ -27,8 +27,8 @@ export const REGELN = [
 			d.text(1680, 420, '♪', 80, q(0.6));
 			d.text(1300, 160, 'meistens', 80, q(0.7), RED);
 		}),
-	sc('Darum arbeite ich mit Hooks. Ein Hook ist ein Skript, das vor einem Befehl des Agenten läuft und ihn blockieren kann.',
-		'That is why I work with hooks. A hook is a script that runs before an agent’s command and can block it.',
+	sc('Darum arbeite ich mit Hooks von Claude Code, nicht mit Git-Hooks. Ein Hook ist ein Skript, das vor jedem Befehl des Agenten läuft und ihn blockieren kann.',
+		'That is why I work with Claude Code hooks, not git hooks. A hook is a script that runs before every command of the agent and can block it.',
 		(d, T) => {
 			const q = (f) => f * T;
 			d.line(140, 860, 1780, 860, 0.1, 0.5, { stroke: GREY });
@@ -38,8 +38,8 @@ export const REGELN = [
 			d.gate(980, 700, 600, q(0.3), false, 'Hook');
 			d.text(1000, 300, 'Hook = Schranke', 90, q(0.6));
 		}),
-	sc('Bei jedem Commit laufen fünf Prüfungen: toter und doppelter Code, flache Module, schwache Tests, die Architektur-Fitness, die Form der Commit-Nachricht.',
-		'Every commit runs five checks: dead and duplicate code, shallow modules, weak tests, architecture fitness, the form of the commit message.',
+	sc('Will der Agent committen, laufen fünf Prüfungen: toter und doppelter Code, flache Module, schwache Tests, die Architektur-Fitness, die Form der Commit-Nachricht.',
+		'When the agent wants to commit, five checks run: dead and duplicate code, shallow modules, weak tests, architecture fitness, the form of the commit message.',
 		(d, T) => {
 			const q = (f) => f * T;
 			['toter Code', 'flache Module', 'schwache Tests', 'Fitness', 'Nachricht'].forEach((t, i) => {

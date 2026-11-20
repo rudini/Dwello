@@ -1,6 +1,6 @@
 # Sprechtext (long)
 
-Generiert aus `scenes-long.mjs` (`node docs/journey-video/render.mjs long --text`). Länge 15:30.
+Generiert aus `scenes-long.mjs` (`node docs/journey-video/render.mjs long --text`). Länge 15:33.
 
 > Ende September öffne ich nach Monaten wieder meine eigene App und klicke mich durch. Sie sieht fertig aus.
 >
@@ -358,13 +358,13 @@ Generiert aus `scenes-long.mjs` (`node docs/journey-video/render.mjs long --text
 >
 > *Agents mostly stick to it. Mostly is not enough.*
 
-> Darum arbeite ich mit Hooks. Ein Hook ist ein Skript, das vor einem Befehl des Agenten läuft und ihn blockieren kann.
+> Darum arbeite ich mit Hooks von Claude Code, nicht mit Git-Hooks. Ein Hook ist ein Skript, das vor jedem Befehl des Agenten läuft und ihn blockieren kann.
 >
-> *That is why I work with hooks. A hook is a script that runs before an agent’s command and can block it.*
+> *That is why I work with Claude Code hooks, not git hooks. A hook is a script that runs before every command of the agent and can block it.*
 
-> Bei jedem Commit laufen fünf Prüfungen: toter und doppelter Code, flache Module, schwache Tests, die Architektur-Fitness, die Form der Commit-Nachricht.
+> Will der Agent committen, laufen fünf Prüfungen: toter und doppelter Code, flache Module, schwache Tests, die Architektur-Fitness, die Form der Commit-Nachricht.
 >
-> *Every commit runs five checks: dead and duplicate code, shallow modules, weak tests, architecture fitness, the form of the commit message.*
+> *When the agent wants to commit, five checks run: dead and duplicate code, shallow modules, weak tests, architecture fitness, the form of the commit message.*
 
 > Findet eine etwas, findet der Commit nicht statt.
 >
@@ -406,7 +406,7 @@ Generiert aus `scenes-long.mjs` (`node docs/journey-video/render.mjs long --text
 >
 > *The rule file was changed 123 times. With every round the agents work more strictly by the process.*
 
-## Was bleibt (13:43)
+## Was bleibt (13:46)
 
 > Zurück zum Knopf vom Anfang. Heute hat er ein Szenario, einen Reviewer, eine Persona, die ihn bedient hat, und eine Schranke, die ihn schützt.
 >
@@ -440,4 +440,4 @@ Generiert aus `scenes-long.mjs` (`node docs/journey-video/render.mjs long --text
 >
 > *I hardly type code any more. I decide.*
 
-## Dwello (15:26)
+## Dwello (15:30)
