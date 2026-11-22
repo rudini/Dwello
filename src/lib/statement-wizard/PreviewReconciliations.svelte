@@ -26,6 +26,7 @@
 					reconciliation={row.reconciliation!}
 					caption={`${m.reconciliation_title()} ${row.name}`}
 					testid="preview-reconciliation-{row.buildingId}"
+					back="/statements/generate?schritt=3&from=invoice"
 				/>
 			</div>
 		{/each}

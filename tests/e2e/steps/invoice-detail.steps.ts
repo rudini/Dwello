@@ -25,6 +25,7 @@ import {
 	toneOfUtilityCost,
 	tonesInTenancyLawNote
 } from '../questions/invoice-detail';
+import { pagePath } from '../questions/navigation';
 import { pageAddressInApp, statementPath } from '../questions/statements';
 import { thisYear } from '../fixtures/dates';
 import {
@@ -168,8 +169,9 @@ Given(
 	}
 );
 
+// the path only: opened from the preview the address carries the way back (#1464, PO 22.11.2026, spec change)
 Then('ist der Liegenschaftsverwalter auf der Detailseite der Rechnung {string}', async ({ verwalter, seed }, invoice: string) => {
-	await verwalter.sees(pageAddressInApp).toBe(`/invoices/${seed.idOf(`Rechnung ${invoice}`)}`);
+	await verwalter.sees(pagePath).toBe(`/invoices/${seed.idOf(`Rechnung ${invoice}`)}`);
 });
 
 Then('warnt die Rechnung {string}', async ({ verwalter }, text: string) => {

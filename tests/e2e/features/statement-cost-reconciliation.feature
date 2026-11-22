@@ -172,7 +172,6 @@ Funktionalität: Kostenabstimmung in der Vorschau
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung "Hauswart 2024-12-31"
 
   # #1464 (PO 22.11.2026, Nachtrag): die Rechnung aus der Vorschau führt zurück in den Abrechnungslauf, wie die Hinweise
-  @wip
   Szenario: Von einer Rechnung aus der Kostenabstimmung der Vorschau zurück zum Abrechnungslauf
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Und der Liegenschaftsverwalter in der Kostenabstimmung der Vorschau für "Lindenhof" die Rechnungen von "Hauswart" anzeigt

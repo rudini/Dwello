@@ -7,7 +7,7 @@
 	// #1464 (PO 22.11.2026): under a position, collapsed at first, what its «Kosten des Gebäudes» is calculated from:
 	// each Rechnung with its part in the period (a link to it), around them the Anfangs- and Endbestand of a tank
 	type Row = Reconciliation['nonAllocableRows'][number];
-	let { position, rows }: { position: string; rows: Row[] } = $props();
+	let { position, rows, back }: { position: string; rows: Row[]; back?: string } = $props();
 	let open = $state(false);
 	const id = $props.id(); // names the detail and the amount a Rechnung's link is described by (persona Sven 1464 P-2)
 	const cell = 'cost-reconciliation-invoice-cell';
@@ -24,7 +24,7 @@
 			};
 		const { beyond } = row;
 		return {
-			href: `/invoices/${row.id}`,
+			href: `/invoices/${row.id}${back ? `?returnTo=${encodeURIComponent(back)}` : ''}`,
 			name: m.reconciliation_invoice_name({
 				issuer: row.billingEntityName,
 				date: formatDate(row.invoiceDate)

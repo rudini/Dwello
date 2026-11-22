@@ -14,8 +14,9 @@
 	let {
 		reconciliation,
 		caption,
-		testid
-	}: { reconciliation: Reconciliation; caption: string; testid: string } = $props();
+		testid,
+		back // the preview: each Rechnung leads back to the Abrechnungslauf (#1464 follow-up, PO 22.11.2026)
+	}: { reconciliation: Reconciliation; caption: string; testid: string; back?: string } = $props();
 
 	const rows = $derived([
 		...reconciliation.positions,
@@ -54,7 +55,9 @@
 						<dd class="text-right font-semibold text-ink">{formatCurrency(row.landlord)}</dd>
 					</dl>
 					{#if 'rows' in row}
-						<div class="mt-2"><ReconciliationRows position={row.label} rows={row.rows} /></div>
+						<div class="mt-2">
+							<ReconciliationRows position={row.label} rows={row.rows} {back} />
+						</div>
 					{/if}
 				</li>
 			{/each}
@@ -81,7 +84,8 @@
 					</tr>
 					{#if 'rows' in row}
 						<tr>
-							<td colspan="4"><ReconciliationRows position={row.label} rows={row.rows} /></td>
+							<td colspan="4"><ReconciliationRows position={row.label} rows={row.rows} {back} /></td
+							>
 						</tr>
 					{/if}
 				{/each}
@@ -89,7 +93,7 @@
 		</div>
 	{/if}
 
-	<ReconciliationExtras {reconciliation} />
+	<ReconciliationExtras {reconciliation} {back} />
 
 	{#if reconciliation.positions.length}
 		<p class="text-ink-muted" data-testid="cost-reconciliation-help">

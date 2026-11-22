@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import CostReconciliation from '$lib/statement-wizard/CostReconciliation.svelte';
+import PreviewReconciliations from '$lib/statement-wizard/PreviewReconciliations.svelte';
 import type { Reconciliation } from '$lib/cost-reconciliation';
 import { flushSync } from 'svelte';
 import { allByTestId, byTestId, show } from './helpers/dom';
@@ -149,6 +150,22 @@ describe.each(places)('Rechnungen einer Position %s', (_, place) => {
 		]);
 	});
 
+	// #1464 follow-up (PO 22.11.2026): in the preview the Rechnung leads back to the Abrechnungslauf
+	it('gibt in der Vorschau jeder Rechnung den Weg zurück zum Abrechnungslauf mit', () => {
+		const back = '/statements/generate?schritt=3&from=invoice';
+		show(CostReconciliation, {
+			reconciliation: { ...base, positions: [{ label: 'Heizung', ...amounts, rows: [...tank] }] },
+			caption: 'Kostenabstimmung',
+			testid: 'reconciliation',
+			back
+		});
+		press(toggles(place)[0]);
+		const links = [...document.querySelectorAll(`${place} [data-testid="cost-reconciliation-invoices"] a`)];
+		expect(links.map((link) => link.getAttribute('href'))).toEqual(
+			['i1', 'i2'].map((id) => `/invoices/${id}?returnTo=${encodeURIComponent(back)}`)
+		);
+	});
+
 	// persona Sven 1464 P-2: with Tab a screen reader hears the link only; its description adds detail and amount
 	it('beschreibt den Link jeder Rechnung mit ihrem Detail und ihrem Anteil', () => {
 		render({ positions: [{ label: 'Heizung', ...amounts, rows: [whole, part] }] });
@@ -191,5 +208,33 @@ describe('Rechnungen neben der Kostenabstimmung', () => {
 		render({ positions: [], nonAllocable: 500, nonAllocableRows: [{ ...whole, amount: 500, inPeriod: 500 }] });
 		press(byTestId('cost-reconciliation-extra')!.querySelector('button')!);
 		expect(allByTestId('cost-reconciliation-invoice-cell').map(text)).toEqual(['Muster AG, Rechnung vom 15.06.2024', 'ganz in dieser Periode', 'CHF 500.00']);
+	});
+
+	// #1464 follow-up (PO 22.11.2026): in the preview the non-allocable Rechnung leads back to the Abrechnungslauf too
+	it('gibt in der Vorschau den nicht umlagefähigen Rechnungen den Weg zurück zum Abrechnungslauf mit', () => {
+		const back = '/statements/generate?schritt=3&from=invoice';
+		show(CostReconciliation, {
+			reconciliation: { ...base, positions: [], nonAllocable: 1000, nonAllocableRows: [whole] },
+			caption: 'Kostenabstimmung',
+			testid: 'reconciliation',
+			back
+		});
+		press(byTestId('cost-reconciliation-extra')!.querySelector('button')!);
+		expect(byTestId('cost-reconciliation-extra')!.querySelector('a')!.getAttribute('href')).toBe(
+			`/invoices/i1?returnTo=${encodeURIComponent(back)}`
+		);
+	});
+});
+
+// #1464 follow-up (PO 22.11.2026): the preview's Kostenabstimmung leads back to step 3 of the run, as its hints do
+describe('Kostenabstimmung der Vorschau', () => {
+	it('führt von jeder Rechnung zurück in den Schritt 3 des Abrechnungslaufs', () => {
+		show(PreviewReconciliations, {
+			rows: [{ buildingId: 'b1', name: 'Lindenhof', reconciliation: { ...base, positions: [{ label: 'Heizung', ...amounts, rows: [whole] }] } }] as never
+		});
+		press(byTestId('cost-reconciliation-invoices')!.querySelector('button')!);
+		expect(byTestId('cost-reconciliation-invoices')!.querySelector('a')!.getAttribute('href')).toBe(
+			`/invoices/i1?returnTo=${encodeURIComponent('/statements/generate?schritt=3&from=invoice')}`
+		);
 	});
 });
