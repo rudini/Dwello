@@ -61,6 +61,7 @@ const identifiers: Record<string, string[]> = {
 	// query parameter; the download's file name stays German in every language (issue #101)
 	'src/routes/statements/[id]/pdf/+server.ts': ['ansehen', 'abrechnung'],
 	'src/routes/statements/[id]/SendDialog.svelte': ['ansehen'], // query parameter
+	'src/lib/statement-wizard/PreviewReconciliations.svelte': ['schritt'], // query parameter of the way back (#1464)
 	'src/routes/statements/generate/PreviewChecks.svelte': ['schritt'], // query parameter
 	'src/routes/statements/generate/InvoiceHint.svelte': ['schritt'],
 	'src/routes/statements/generate/StatementWizard.svelte': ['schritt'],
