@@ -396,6 +396,16 @@ describe('Rechnungsdetail', () => {
 		]);
 	});
 
+	// code review 1464-back-1 C-1: editing it keeps the way back to the run
+	it('gibt aus dem Abrechnungslauf geöffnet den Weg zurück auch dem Bearbeiten mit', () => {
+		const returnTo = '/statements/generate?schritt=3&from=invoice';
+		show(InvoicePage, { data: { invoice: invoice(), returnTo } });
+
+		expect(byTestId('invoice-edit-button')!.getAttribute('href')).toBe(
+			`/invoices/${invoice().id}/edit?returnTo=${encodeURIComponent(returnTo)}`
+		);
+	});
+
 	it('führt sonst über die Brotkrumen zur Rechnungsliste', () => {
 		show(InvoicePage, { data: { invoice: invoice(), returnTo: null } });
 

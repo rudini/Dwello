@@ -89,7 +89,9 @@
 	>
 		{#snippet action()}
 			<Button
-				href="/invoices/{invoice.id}/edit"
+				href="/invoices/{invoice.id}/edit{data.returnTo
+					? `?returnTo=${encodeURIComponent(data.returnTo)}`
+					: ''}"
 				variant="primary"
 				icon="edit"
 				testid="invoice-edit-button">{m.invoices_edit_title()}</Button
