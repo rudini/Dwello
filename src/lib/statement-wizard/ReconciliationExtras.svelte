@@ -6,7 +6,7 @@
 
 	// #1126: beside the comparison, each only when not 0.00, also without positions (code review 1126-2 C-1): the
 	// Verwaltungspauschale and the non-allocable invoices, which expand like a position (#1464)
-	let { reconciliation }: { reconciliation: Reconciliation } = $props();
+	let { reconciliation, back }: { reconciliation: Reconciliation; back?: string } = $props();
 
 	const extras = $derived(
 		[
@@ -34,7 +34,9 @@
 					{formatCurrency(extra.amount)}
 				</dd>
 				{#if extra.rows}
-					<dd class="w-full"><ReconciliationRows position={extra.label} rows={extra.rows} /></dd>
+					<dd class="w-full">
+						<ReconciliationRows position={extra.label} rows={extra.rows} {back} />
+					</dd>
 				{/if}
 			</div>
 		{/each}

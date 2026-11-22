@@ -4,6 +4,7 @@ import { test } from '../fixtures/test';
 import { cellsOf, draftsNamed, helpOf, invoicesShown, noInvoiceOf, noteCount, notesOf, reportPeriodName, rowOf, sentenceOf, shown, textOf, toggleCount, toggleLabelOf } from '../questions/cost-reconciliation';
 import { invoicesOfBuilding } from '../questions/statement-generate';
 import { pageAddressInApp } from '../questions/statements';
+import { chooseBreadcrumb } from '../tasks/form';
 import { openInvoiceOf, openStatementInReport, openReportOf, openReports, toggleInvoicesOf } from '../tasks/cost-reconciliation';
 
 const { Given, When, Then } = createBdd(test);
@@ -185,3 +186,8 @@ Then(
 		await verwalter.sees(toggleCount(placeOf({ seed, names }, building), row)).toBe(0);
 	}
 );
+
+// #1464 follow-up (PO 22.11.2026): the Rechnung's breadcrumb leads back to the Abrechnungslauf
+When('der Liegenschaftsverwalter von der Rechnung zum Abrechnungslauf zurückkehrt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseBreadcrumb('Abrechnungen erstellen'));
+});

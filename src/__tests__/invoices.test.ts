@@ -256,7 +256,7 @@ describe('Rechnungsdetail', () => {
 	it('zeigt Kategorie und Verteilschlüssel deutsch', async () => {
 		const { fetch } = backend({ '/invoices/i1': invoice() });
 
-		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
+		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, url: new URL('http://localhost/invoices/i1'), fetch } as never)) as {
 			invoice: { category?: { name: string }; distributionKey?: { name: string } };
 		};
 
@@ -266,7 +266,7 @@ describe('Rechnungsdetail', () => {
 
 	it('zeigt die Rechnungsnummer des Backends', async () => {
 		const { fetch } = backend({ '/invoices/i1': invoice() });
-		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
+		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, url: new URL('http://localhost/invoices/i1'), fetch } as never)) as {
 			invoice: { invoiceNumber?: string };
 		};
 		expect(shown.invoiceNumber).toBe('R-1001');
@@ -278,7 +278,7 @@ describe('Rechnungsdetail', () => {
 			[null, null]
 		] as const) {
 			const { fetch } = backend({ '/invoices/i1': invoice({ beleg }) });
-			const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
+			const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, url: new URL('http://localhost/invoices/i1'), fetch } as never)) as {
 				invoice: { beleg: unknown };
 			};
 			expect(shown.beleg).toEqual(expected);
@@ -297,7 +297,7 @@ describe('Ursprüngliche KI-Kategorisierung', () => {
 		};
 		const { fetch } = backend({ '/invoices/i1': invoice(values) });
 
-		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
+		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, url: new URL('http://localhost/invoices/i1'), fetch } as never)) as {
 			invoice: { llmCategory?: { name: string }; categorizationStatus: string };
 		};
 
@@ -472,6 +472,18 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		};
 
 		expect(await returnTo('/statements/generate?schritt=3')).toBe('/statements/generate?schritt=3');
+		expect(await returnTo('https://example.com')).toBeNull();
+	});
+
+	// #1464 follow-up (PO 22.11.2026): from the preview's Kostenabstimmung the Rechnung leads back to the run
+	it('führt von der Rechnung zurück zum Assistenten, nie zu einer fremden Adresse', async () => {
+		const returnTo = async (to: string) => {
+			const url = new URL(`http://localhost/invoices/i1?returnTo=${encodeURIComponent(to)}`);
+			const data = await detailLoad({ params: { id: 'i1' }, url, fetch: backend(answers).fetch } as never);
+			return (data as { returnTo: string | null }).returnTo;
+		};
+
+		expect(await returnTo('/statements/generate?schritt=3&from=invoice')).toBe('/statements/generate?schritt=3&from=invoice');
 		expect(await returnTo('https://example.com')).toBeNull();
 	});
 

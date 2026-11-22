@@ -26,6 +26,7 @@
 			billedIn?: { start: string; end: string }[];
 			missedIn?: { start: string; end: string }[];
 			statements?: BilledStatement[];
+			returnTo?: string | null; // opened from the preview's Kostenabstimmung (#1464 follow-up)
 		};
 	} = $props();
 
@@ -80,11 +81,17 @@
 	<PageHeader
 		title={invoice.billingEntity}
 		purpose={invoice.description}
-		trail={[{ href: '/invoices', label: m.nav_invoices() }]}
+		trail={[
+			data.returnTo
+				? { href: data.returnTo, label: m.dashboard_create_statements() }
+				: { href: '/invoices', label: m.nav_invoices() }
+		]}
 	>
 		{#snippet action()}
 			<Button
-				href="/invoices/{invoice.id}/edit"
+				href="/invoices/{invoice.id}/edit{data.returnTo
+					? `?returnTo=${encodeURIComponent(data.returnTo)}`
+					: ''}"
 				variant="primary"
 				icon="edit"
 				testid="invoice-edit-button">{m.invoices_edit_title()}</Button

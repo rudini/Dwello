@@ -386,6 +386,34 @@ describe('Rechnungsliste', () => {
 });
 
 describe('Rechnungsdetail', () => {
+	// #1464 follow-up (PO 22.11.2026): opened from the preview's Kostenabstimmung, the Rechnung leads back to the run
+	it('führt aus dem Abrechnungslauf geöffnet über die Brotkrumen zurück zum Abrechnungslauf', () => {
+		const returnTo = '/statements/generate?schritt=3&from=invoice';
+		show(InvoicePage, { data: { invoice: invoice(), returnTo } });
+
+		expect(allByTestId('breadcrumb-link').map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
+			['Abrechnungen erstellen', returnTo]
+		]);
+	});
+
+	// code review 1464-back-1 C-1: editing it keeps the way back to the run
+	it('gibt aus dem Abrechnungslauf geöffnet den Weg zurück auch dem Bearbeiten mit', () => {
+		const returnTo = '/statements/generate?schritt=3&from=invoice';
+		show(InvoicePage, { data: { invoice: invoice(), returnTo } });
+
+		expect(byTestId('invoice-edit-button')!.getAttribute('href')).toBe(
+			`/invoices/${invoice().id}/edit?returnTo=${encodeURIComponent(returnTo)}`
+		);
+	});
+
+	it('führt sonst über die Brotkrumen zur Rechnungsliste', () => {
+		show(InvoicePage, { data: { invoice: invoice(), returnTo: null } });
+
+		expect(allByTestId('breadcrumb-link').map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
+			['Rechnungen', '/invoices']
+		]);
+	});
+
 	it('zeigt die Einschätzung der KI und eine manuelle Korrektur', () => {
 		show(InvoicePage, {
 			data: {

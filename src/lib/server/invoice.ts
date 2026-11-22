@@ -1,3 +1,4 @@
+import { localPath } from '$lib/invoice';
 import { localName } from '$lib/names';
 import { ValidationError } from './error-handler';
 import type { BilledStatement, InvoiceWithDetails, Json } from '$lib/types';
@@ -116,6 +117,9 @@ export function toInvoice(r: InvoiceRow, names: Named[] = []): InvoiceWithDetail
 }
 
 type Period = { start: string; end: string };
+
+// #1464 follow-up: where a page opened from the statement run leads back to, a path of the app only
+export const returnToOf = (url: URL) => localPath(url.searchParams.get('returnTo'));
 
 /**
  * The periods with statements that bill this invoice (billedIn) and that lack it as it is now (missedIn: recorded or
