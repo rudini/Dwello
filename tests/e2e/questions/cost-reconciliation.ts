@@ -3,6 +3,9 @@ import { Count, Text, Visibility } from '../screenplay/questions';
 import {
 	previewReconciliation,
 	draftsNoteLinks,
+	invoiceCells,
+	invoicesToggleLabel,
+	noInvoiceNote,
 	reconciliationCells,
 	reconciliationHelp,
 	reconciliationNotes,
@@ -30,3 +33,7 @@ export const notesOf = (building: Place) =>
 export const noteCount = (building: Place) => Count.of(reconciliationNotes(scopeOf(building)));
 export const reportPeriodName = (buildingId: string, periodStart: string) => Text.of(reportPeriod(buildingId, periodStart));
 export const draftsNamed = Text.ofAll(draftsNoteLinks(reportReconciliation));
+// #1464: the Rechnungen of an expanded position
+export const toggleLabelOf = (building: Place, position: string) => Text.of(invoicesToggleLabel(scopeOf(building), position));
+export const invoicesShown = (building: Place, position: string) => Text.ofAll(invoiceCells(scopeOf(building), position));
+export const noInvoiceOf = (building: Place, position: string) => Text.of(noInvoiceNote(scopeOf(building), position));

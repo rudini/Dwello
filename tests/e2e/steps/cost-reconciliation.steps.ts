@@ -1,10 +1,10 @@
 import type { DataTable } from 'playwright-bdd';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { cellsOf, draftsNamed, helpOf, noteCount, notesOf, reportPeriodName, rowOf, sentenceOf, shown, textOf } from '../questions/cost-reconciliation';
+import { cellsOf, draftsNamed, helpOf, invoicesShown, noInvoiceOf, noteCount, notesOf, reportPeriodName, rowOf, sentenceOf, shown, textOf, toggleLabelOf } from '../questions/cost-reconciliation';
 import { invoicesOfBuilding } from '../questions/statement-generate';
 import { pageAddressInApp } from '../questions/statements';
-import { openStatementInReport, openReportOf, openReports } from '../tasks/cost-reconciliation';
+import { openInvoiceOf, openStatementInReport, openReportOf, openReports, toggleInvoicesOf } from '../tasks/cost-reconciliation';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -132,4 +132,48 @@ When(
 
 Then('nennt der Hinweis zu den Entwürfen die Abrechnung von {string}', async ({ verwalter, names }, tenant: string) => {
 	await verwalter.sees(draftsNamed).toEqual([names.get(tenant) ?? tenant]);
+});
+
+// #1464: the Rechnungen of a position, on «Berichte» or in the preview of a building
+const PLACE = 'der (?:Berichte|Vorschau für "([^"]*)")';
+type Fixtures = { seed: { idOf(title: string): string | undefined }; names: Map<string, string> };
+const placeOf = ({ seed, names }: Fixtures, building?: string) => (building ? inPreview(seed, names, building) : inReport);
+
+When(
+	new RegExp(`^der Liegenschaftsverwalter in der Kostenabstimmung ${PLACE} die Rechnungen von "([^"]*)" (?:anzeigt|ausblendet)$`),
+	async ({ verwalter, seed, names }, building: string | undefined, position: string) => {
+		await verwalter.attemptsTo(toggleInvoicesOf(placeOf({ seed, names }, building), position));
+	}
+);
+
+Then(
+	new RegExp(`^bietet die Kostenabstimmung ${PLACE} bei "([^"]*)" "([^"]*)" an$`),
+	async ({ verwalter, seed, names }, building: string | undefined, position: string, label: string) => {
+		await verwalter.sees(toggleLabelOf(placeOf({ seed, names }, building), position)).toBe(label);
+	}
+);
+
+Then(
+	new RegExp(`^zeigt die Kostenabstimmung ${PLACE} bei "([^"]*)":$`),
+	async ({ verwalter, seed, names }, building: string | undefined, position: string, table: DataTable) => {
+		await verwalter.sees(invoicesShown(placeOf({ seed, names }, building), position)).toEqual(table.raw().flat());
+	}
+);
+
+Then(
+	new RegExp(`^sagt die Kostenabstimmung ${PLACE} bei "([^"]*)" "([^"]*)"$`),
+	async ({ verwalter, seed, names }, building: string | undefined, position: string, text: string) => {
+		await verwalter.sees(noInvoiceOf(placeOf({ seed, names }, building), position)).toBe(text);
+	}
+);
+
+When(
+	new RegExp(`^der Liegenschaftsverwalter in der Kostenabstimmung ${PLACE} die Rechnung vom "([^"]*)" öffnet$`),
+	async ({ verwalter, seed, names }, building: string | undefined, date: string) => {
+		await verwalter.attemptsTo(openInvoiceOf(placeOf({ seed, names }, building), date));
+	}
+);
+
+Then('nennt die Kostenabstimmung der Berichte nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(textOf(inReport)).not.toContain(text);
 });
