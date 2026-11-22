@@ -1,3 +1,4 @@
+import { localPath } from '$lib/invoice';
 import { localName } from '$lib/names';
 import { ValidationError } from './error-handler';
 import type { BilledStatement, InvoiceWithDetails, Json } from '$lib/types';
@@ -122,6 +123,9 @@ type Period = { start: string; end: string };
  * changed after them), from the invoices the statements keep (#96), and each statement it is in; none if they cannot
  * be loaded
  */
+// #1464 follow-up: where a page opened from the statement run leads back to, a path of the app only
+export const returnToOf = (url: URL) => localPath(url.searchParams.get('returnTo'));
+
 export async function statementPeriods(fetch: typeof globalThis.fetch, backendUrl: string, invoiceId: string) {
 	const response = await fetch(`${backendUrl}/api/v1/invoices/${invoiceId}/statements`).catch(() => null);
 	const periods: { billedIn?: Period[]; missedIn?: Period[]; statements?: BilledStatement[] } = response?.ok
