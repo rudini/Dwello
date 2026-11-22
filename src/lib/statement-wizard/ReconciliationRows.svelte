@@ -9,6 +9,7 @@
 	type Row = Reconciliation['nonAllocableRows'][number];
 	let { position, rows }: { position: string; rows: Row[] } = $props();
 	let open = $state(false);
+	const id = $props.id(); // names the detail and the amount a Rechnung's link is described by (persona Sven 1464 P-2)
 	const cell = 'cost-reconciliation-invoice-cell';
 
 	function line(row: Row) {
@@ -67,15 +68,17 @@
 						{#if line.href}
 							<a
 								href={line.href}
+								aria-describedby="{id}-detail-{i} {id}-amount-{i}"
 								class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
 								data-testid={cell}>{line.name}</a
 							>
 						{:else}
 							<span class="font-semibold text-ink" data-testid={cell}>{line.name}</span>
 						{/if}
-						<span class="text-ink-muted" data-testid={cell}>{line.detail}</span>
+						<span id="{id}-detail-{i}" class="text-ink-muted" data-testid={cell}>{line.detail}</span
+						>
 					</span>
-					<span class="ml-auto whitespace-nowrap text-ink" data-testid={cell}
+					<span id="{id}-amount-{i}" class="ml-auto whitespace-nowrap text-ink" data-testid={cell}
 						>{formatCurrency(line.amount)}</span
 					>
 				</li>

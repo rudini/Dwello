@@ -149,6 +149,20 @@ describe.each(places)('Rechnungen einer Position %s', (_, place) => {
 		]);
 	});
 
+	// persona Sven 1464 P-2: with Tab a screen reader hears the link only; its description adds detail and amount
+	it('beschreibt den Link jeder Rechnung mit ihrem Detail und ihrem Anteil', () => {
+		render({ positions: [{ label: 'Heizung', ...amounts, rows: [whole, part] }] });
+		press(toggles(place)[0]);
+		const links = [...document.querySelectorAll(`${place} [data-testid="cost-reconciliation-invoices"] a`)];
+		const described = links.map((link) =>
+			(link.getAttribute('aria-describedby') ?? '').split(' ').map((id) => text(document.getElementById(id)))
+		);
+		expect(described).toEqual([
+			['ganz in dieser Periode', 'CHF 1’000.00'],
+			['Rechnungsbetrag CHF 800.00, Leistungszeitraum 01.01.2024 – 31.12.2027, 366 von 1461 Tagen in dieser Periode', 'CHF 200.41']
+		]);
+	});
+
 	it('sagt bei einer Position ohne Zeile, dass es keine Rechnung mehr gibt', () => {
 		render();
 		press(toggles(place)[0]);
