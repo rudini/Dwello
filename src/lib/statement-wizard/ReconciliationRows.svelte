@@ -75,7 +75,7 @@
 						{/if}
 						<span class="text-ink-muted" data-testid={cell}>{line.detail}</span>
 					</span>
-					<span class="whitespace-nowrap text-ink" data-testid={cell}
+					<span class="ml-auto whitespace-nowrap text-ink" data-testid={cell}
 						>{formatCurrency(line.amount)}</span
 					>
 				</li>

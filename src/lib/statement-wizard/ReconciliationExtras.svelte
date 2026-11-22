@@ -27,7 +27,9 @@
 				class="flex flex-wrap justify-between gap-x-4 gap-y-2"
 				data-testid="cost-reconciliation-extra"
 			>
-				<dt class="text-ink-muted" data-testid="cost-reconciliation-label">{extra.label}</dt>
+				<dt class="min-w-0 flex-1 text-ink-muted" data-testid="cost-reconciliation-label">
+					{extra.label}
+				</dt>
 				<dd class="whitespace-nowrap text-ink" data-testid="cost-reconciliation-amount">
 					{formatCurrency(extra.amount)}
 				</dd>
