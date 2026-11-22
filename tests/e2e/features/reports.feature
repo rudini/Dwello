@@ -136,7 +136,6 @@ Funktionalität: Berichte
 
   # #1464 (PO 22.11.2026): jede Position lässt sich aufklappen und zeigt die heutigen Rechnungen, aus denen ihre
   # «Kosten des Gebäudes» gerechnet sind; zu Beginn sind alle Positionen zugeklappt
-  @wip
   Szenario: Die Kostenabstimmung der Berichte zeigt die Rechnungen einer Position
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
@@ -145,8 +144,8 @@ Funktionalität: Berichte
     Dann zeigt die Kostenabstimmung der Berichte bei "Hauswart":
       | Muster AG, Rechnung vom 31.12.2024 | ganz in dieser Periode | CHF 1’200.00 |
     Und bietet die Kostenabstimmung der Berichte bei "Hauswart" "Rechnungen ausblenden" an
+    Aber bietet die Kostenabstimmung der Berichte bei "Total" keine Rechnungen an
 
-  @wip
   Szenario: Die Kostenabstimmung der Berichte blendet die Rechnungen einer Position wieder aus
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
@@ -156,7 +155,6 @@ Funktionalität: Berichte
     Aber nennt die Kostenabstimmung der Berichte nicht "Muster AG"
 
   # Lift 800.00 für 01.01.2024 – 31.12.2027 (1461 Tage): 2024 zählen 366 Tage, 800.00 × 366 / 1461 = 200.41
-  @wip
   Szenario: Die Kostenabstimmung der Berichte zeigt bei einer Rechnung über mehrere Jahre die Tage und den Anteil der Periode
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "800" Franken vom "2024-03-15" für die Zeit vom "2024-01-01" bis "2027-12-31"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
@@ -166,7 +164,6 @@ Funktionalität: Berichte
       | Muster AG, Rechnung vom 15.03.2024 | Rechnungsbetrag CHF 800.00, Leistungszeitraum 01.01.2024 – 31.12.2027, 366 von 1461 Tagen in dieser Periode | CHF 200.41 |
 
   # Heizung: Anfangsbestand 600.00 + Lieferung 1'000.00 − Endbestand 100.00 = 1'500.00 «Kosten des Gebäudes»
-  @wip
   Szenario: Die Kostenabstimmung der Berichte zeigt bei einer Position mit Tankbestand Anfangsbestand, Lieferungen und Endbestand
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15"
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
@@ -179,7 +176,6 @@ Funktionalität: Berichte
       | Muster AG, Rechnung vom 15.06.2024 | ganz in dieser Periode | CHF 1’000.00 |
       | minus Endbestand                   | Stichtag 31.12.2024    | CHF 100.00   |
 
-  @wip
   Szenario: Die Kostenabstimmung der Berichte zeigt die nicht umlagefähigen Rechnungen
     Angenommen im Gebäude "Lindenhof" gibt es eine nicht umlagefähige Rechnung der Kategorie "Reparaturen" über "500" Franken vom "2024-08-20"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
@@ -189,7 +185,6 @@ Funktionalität: Berichte
       | Muster AG, Rechnung vom 20.08.2024 | ganz in dieser Periode | CHF 500.00 |
 
   # Die Rechnung «Lift» ist seit dem Erstellen der Abrechnung gelöscht: die Position bleibt, mit CHF 0.00 Kosten
-  @wip
   Szenario: Die Kostenabstimmung der Berichte sagt bei einer Position ohne Rechnung, dass es keine mehr gibt
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "300" Franken vom "2024-11-30"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
@@ -198,7 +193,6 @@ Funktionalität: Berichte
     Und der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnungen von "Lift" anzeigt
     Dann sagt die Kostenabstimmung der Berichte bei "Lift" "Für diese Position gibt es keine Rechnung mehr. Die Abrechnungen verrechnen sie noch."
 
-  @wip
   Szenario: Rechnung aus der Kostenabstimmung der Berichte öffnen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet

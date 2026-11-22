@@ -119,7 +119,6 @@ Funktionalität: Kostenabstimmung in der Vorschau
     Aber nennt die Kostenabstimmung der Vorschau für "Birkenhof" nicht "Leerstand in dieser"
 
   # #1464 (PO 22.11.2026): auch in der Vorschau lässt sich jede Position aufklappen und zeigt ihre heutigen Rechnungen
-  @wip
   Szenario: Die Kostenabstimmung der Vorschau zeigt die Rechnungen einer Position
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann bietet die Kostenabstimmung der Vorschau für "Lindenhof" bei "Hauswart" "Rechnungen anzeigen" an
@@ -127,9 +126,9 @@ Funktionalität: Kostenabstimmung in der Vorschau
     Dann zeigt die Kostenabstimmung der Vorschau für "Lindenhof" bei "Hauswart":
       | Muster AG, Rechnung vom 31.12.2024 | ganz in dieser Periode | CHF 1’200.00 |
     Und bietet die Kostenabstimmung der Vorschau für "Lindenhof" bei "Hauswart" "Rechnungen ausblenden" an
+    Aber bietet die Kostenabstimmung der Vorschau für "Lindenhof" bei "Total" keine Rechnungen an
 
   # Lift 800.00 für 01.01.2024 – 31.12.2027 (1461 Tage): 2024 zählen 366 Tage, 800.00 × 366 / 1461 = 200.41
-  @wip
   Szenario: Die Kostenabstimmung der Vorschau zeigt bei einer Rechnung über mehrere Jahre die Tage und den Anteil der Periode
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "800" Franken vom "2024-03-15" für die Zeit vom "2024-01-01" bis "2027-12-31"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
@@ -138,7 +137,6 @@ Funktionalität: Kostenabstimmung in der Vorschau
       | Muster AG, Rechnung vom 15.03.2024 | Rechnungsbetrag CHF 800.00, Leistungszeitraum 01.01.2024 – 31.12.2027, 366 von 1461 Tagen in dieser Periode | CHF 200.41 |
 
   # Heizung: Anfangsbestand 600.00 + Lieferung 1'000.00 − Endbestand 100.00 = 1'500.00 «Kosten des Gebäudes»
-  @wip
   Szenario: Die Kostenabstimmung der Vorschau zeigt bei einer Position mit Tankbestand Anfangsbestand, Lieferungen und Endbestand
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15"
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
@@ -150,7 +148,6 @@ Funktionalität: Kostenabstimmung in der Vorschau
       | Muster AG, Rechnung vom 15.06.2024 | ganz in dieser Periode | CHF 1’000.00 |
       | minus Endbestand                   | Stichtag 31.12.2024    | CHF 100.00   |
 
-  @wip
   Szenario: Die Kostenabstimmung der Vorschau zeigt die nicht umlagefähigen Rechnungen
     Angenommen im Gebäude "Lindenhof" gibt es eine nicht umlagefähige Rechnung der Kategorie "Reparaturen" über "500" Franken vom "2024-08-20"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
@@ -159,7 +156,6 @@ Funktionalität: Kostenabstimmung in der Vorschau
       | Muster AG, Rechnung vom 20.08.2024 | ganz in dieser Periode | CHF 500.00 |
 
   # Evas Abrechnung verrechnet «Lift» noch, die Rechnung ist seither gelöscht; der Lauf rechnet nur Marc Huber ab
-  @wip
   Szenario: Die Kostenabstimmung der Vorschau sagt bei einer Position ohne Rechnung, dass es keine mehr gibt
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "300" Franken vom "2024-11-30"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
@@ -169,7 +165,6 @@ Funktionalität: Kostenabstimmung in der Vorschau
     Dann sagt die Kostenabstimmung der Vorschau für "Lindenhof" bei "Lift" "Für diese Position gibt es keine Rechnung mehr. Die Abrechnungen verrechnen sie noch."
 
   # PO 22.11.2026: die Rechnung öffnet im selben Tab und verlässt den Abrechnungslauf (gewollt)
-  @wip
   Szenario: Rechnung aus der Kostenabstimmung der Vorschau öffnen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Und der Liegenschaftsverwalter in der Kostenabstimmung der Vorschau für "Lindenhof" die Rechnungen von "Hauswart" anzeigt

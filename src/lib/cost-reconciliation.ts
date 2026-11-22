@@ -1,10 +1,13 @@
 /** #1126: a Kostenabstimmung as the pages show it, its positions named in the UI language */
+import type { ReconciliationRow } from '../../backend/src/api/report';
+
 type Amounts = { buildingCosts: number; tenants: number; landlord: number };
 export type Reconciliation = {
-	positions: (Amounts & { label: string })[];
+	positions: (Amounts & { label: string; rows: ReconciliationRow[] })[]; // #1464: rows: what «Kosten des Gebäudes» is calculated from
 	total: Amounts;
 	managementFee: number;
 	nonAllocable: number;
+	nonAllocableRows: ReconciliationRow[];
 	withoutStatement: number; // «Berichte» only: contracts of the period without a statement
 	drafts: { id: string; tenantName: string }[];
 	notUpToDate: { id: string; tenantName: string }[];

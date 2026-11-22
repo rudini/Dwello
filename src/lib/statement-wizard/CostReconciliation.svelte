@@ -2,7 +2,9 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { Reconciliation } from '$lib/cost-reconciliation';
 	import Table from '$lib/ui/Table.svelte';
+	import ReconciliationExtras from './ReconciliationExtras.svelte';
 	import ReconciliationNotes from './ReconciliationNotes.svelte';
+	import ReconciliationRows from './ReconciliationRows.svelte';
 	import ReconciliationSentences from './ReconciliationSentences.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 
@@ -19,17 +21,12 @@
 		...reconciliation.positions,
 		{ ...reconciliation.total, label: m.reconciliation_total(), total: true }
 	]);
-	const extras = $derived(
-		[
-			{ label: m.reconciliation_fee_row(), amount: reconciliation.managementFee },
-			{ label: m.reconciliation_not_allocable_row(), amount: reconciliation.nonAllocable }
-		].filter((extra) => extra.amount !== 0)
-	);
 	// #1138 (PO 06.11.2026): the total card on phones stands apart from the positions above it
 	const card = (row: (typeof rows)[number]) =>
 		'total' in row
-			? { card: 'bg-sunken', label: 'font-bold' }
-			: { card: '', label: 'font-semibold' };
+			? { card: 'bg-sunken', label: 'font-bold', row: 'font-semibold', head: 'font-semibold' }
+			: // #1464: no line between a position and the row of its Rechnungen below it
+				{ card: '', label: 'font-semibold', row: 'border-b-0', head: 'font-normal' };
 	const columns = [
 		{ label: m.reconciliation_col_position() },
 		{ label: m.statements_building_costs(), numeric: true },
@@ -56,19 +53,20 @@
 						<dt class="text-ink-muted">{columns[3].label}</dt>
 						<dd class="text-right font-semibold text-ink">{formatCurrency(row.landlord)}</dd>
 					</dl>
+					{#if 'rows' in row}
+						<div class="mt-2"><ReconciliationRows position={row.label} rows={row.rows} /></div>
+					{/if}
 				</li>
 			{/each}
 		</ul>
 		<div class="hidden md:block">
 			<Table {caption} captionHidden {columns} testid="cost-reconciliation-table">
 				{#each rows as row, i (i)}
-					<tr data-testid="cost-reconciliation-row" class={'total' in row ? 'font-semibold' : ''}>
+					<tr data-testid="cost-reconciliation-row" class={card(row).row}>
 						<!-- the position names its row, so a screen reader names it with each amount (persona Sven 1126 P-4) -->
 						<th
 							scope="row"
-							class="px-4 py-4 text-left text-ink {'total' in row
-								? 'font-semibold'
-								: 'font-normal'}"
+							class="px-4 py-4 text-left text-ink {card(row).head}"
 							data-testid="cost-reconciliation-cell">{row.label}</th
 						>
 						<td class="text-right text-ink" data-testid="cost-reconciliation-cell"
@@ -81,23 +79,17 @@
 							>{formatCurrency(row.landlord)}</td
 						>
 					</tr>
+					{#if 'rows' in row}
+						<tr>
+							<td colspan="4"><ReconciliationRows position={row.label} rows={row.rows} /></td>
+						</tr>
+					{/if}
 				{/each}
 			</Table>
 		</div>
 	{/if}
 
-	{#if extras.length}
-		<dl class="flex flex-col gap-2 tabular-nums">
-			{#each extras as extra (extra.label)}
-				<div class="flex justify-between gap-4" data-testid="cost-reconciliation-extra">
-					<dt class="text-ink-muted" data-testid="cost-reconciliation-label">{extra.label}</dt>
-					<dd class="whitespace-nowrap text-ink" data-testid="cost-reconciliation-amount">
-						{formatCurrency(extra.amount)}
-					</dd>
-				</div>
-			{/each}
-		</dl>
-	{/if}
+	<ReconciliationExtras {reconciliation} />
 
 	{#if reconciliation.positions.length}
 		<p class="text-ink-muted" data-testid="cost-reconciliation-help">

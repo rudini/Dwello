@@ -11,14 +11,15 @@ import { calculateStatementForContract, groupInvoicesByCategory } from './calcul
 import { counting } from './counting-statements';
 import { fuelStockChange } from './fuel-stock.service';
 import { getInvoicesForStatement } from './invoice.service';
-import { inPeriod, inPeriodOf } from './invoice-period';
+import { daysFrom, inPeriod, inPeriodOf } from './invoice-period';
 import { roundToRappen } from './pdf-format';
 import { countingOn } from './prorating.service';
 import { notUpToDate } from './statement-invoices.service';
 import { runPlan } from './statement-run.service';
 import { listStatements } from './statement-query.service';
 import { daysAfter } from './today';
-import type { ReconciliationBody, ReportPeriod } from '../api/report';
+import type { InPeriod } from '../api/invoice';
+import type { ReconciliationBody, ReconciliationRow, ReportPeriod } from '../api/report';
 
 type Range = { start: string; end: string };
 // what a statement bills: its positions with the tenant's share, and its Verwaltungspauschale
@@ -35,12 +36,25 @@ const keyOf = (line: { categoryId: string | null; distributionKeyId: string | nu
 	`${line.categoryId} ${line.distributionKeyId}`;
 const cents = (amount: number) => roundToRappen(amount);
 
+// #1464: a Rechnung as a row under its position
+const rowOf = (invoice: Pick<typeof invoices.$inferSelect, 'id' | 'billingEntityName' | 'invoiceDate' | 'amount'> & { inPeriod: InPeriod }): Extract<ReconciliationRow, { kind: 'invoice' }> => {
+	const { start, end, whole } = invoice.inPeriod;
+	return {
+		kind: 'invoice',
+		id: invoice.id,
+		billingEntityName: invoice.billingEntityName,
+		invoiceDate: invoice.invoiceDate,
+		amount: Number(invoice.amount),
+		inPeriod: invoice.inPeriod.amount,
+		// from the calculated part, not the Leistungszeitraum: a Lieferung into a tank counts in full (Fachreview 1464-1)
+		beyond: whole ? { start: whole.start, end: whole.end, days: daysFrom(start, end), ofDays: daysFrom(whole.start, whole.end) } : null
+	};
+};
+
 async function reconcile(buildingId: string, period: Range, billed: Billed[]) {
 	const stocks = await fuelStockChange(buildingId, period.start, period.end);
-	const groups = groupInvoicesByCategory([
-		...(await getInvoicesForStatement(buildingId, period.start, period.end)),
-		...stocks
-	]);
+	const allocable = await getInvoicesForStatement(buildingId, period.start, period.end);
+	const groups = groupInvoicesByCategory([...allocable, ...stocks]);
 	// #1138: the Anfangs- and Endbestand of the position the change of the Tankbestand is in; none of a tank at 0 and 0
 	// (Fachreview 1138-1 V-1)
 	const tanks = new Map(
@@ -48,6 +62,17 @@ async function reconcile(buildingId: string, period: Range, billed: Billed[]) {
 			.map((s) => [keyOf(s), { opening: Number(s.stock.opening), closing: Number(s.stock.closing) }] as const)
 			.filter(([, { opening, closing }]) => opening || closing)
 	);
+	// #1464: the Rechnungen of a position, between the Anfangs- and the Endbestand of its tank (also at 0 and 0)
+	const rowsOf = (key: string): ReconciliationRow[] => {
+		const bills = allocable.filter((invoice) => keyOf(invoice) === key).map(rowOf);
+		const stock = stocks.find((s) => keyOf(s) === key)?.stock;
+		if (!stock) return bills;
+		return [
+			{ kind: 'opening', date: stock.openingDate, amount: Number(stock.opening) },
+			...bills,
+			{ kind: 'closing', date: stock.closingDate, amount: Number(stock.closing) }
+		];
+	};
 	const positions = new Map(
 		groups.map((group) => [
 			keyOf(group),
@@ -76,19 +101,22 @@ async function reconcile(buildingId: string, period: Range, billed: Billed[]) {
 			buildingCosts,
 			tenants,
 			landlord: cents(buildingCosts - tenants),
-			fuelStock: tanks.get(keyOf({ categoryId, distributionKeyId })) ?? null
+			fuelStock: tanks.get(keyOf({ categoryId, distributionKeyId })) ?? null,
+			rows: rowsOf(keyOf({ categoryId, distributionKeyId }))
 		})
 	);
 	const sum = (field: 'buildingCosts' | 'tenants') =>
 		cents(rows.reduce((total, row) => total + row[field], 0));
 	const total = { buildingCosts: sum('buildingCosts'), tenants: sum('tenants') };
+	const nonAllocableRows = await nonAllocableInPeriod(buildingId, period);
 	return {
 		positions: rows,
 		total: { ...total, landlord: cents(total.buildingCosts - total.tenants) },
 		managementFee: cents(
 			billed.reduce((total, statement) => total + Number(statement.managementFee ?? 0), 0)
 		),
-		nonAllocable: await nonAllocableInPeriod(buildingId, period),
+		nonAllocable: cents(nonAllocableRows.reduce((total, row) => total + row.inPeriod, 0)),
+		nonAllocableRows,
 		vacancies: await vacanciesInPeriod(buildingId, period)
 	};
 }
@@ -124,9 +152,9 @@ async function vacanciesInPeriod(buildingId: string, period: Range) {
 		.filter((vacancy) => vacancy.days > 0);
 }
 
-/** What the non-allocable invoices of a building cost in a period, counted like the allocable ones (Rule 1) */
+/** The non-allocable invoices of a building in a period, each counted like an allocable one (Rule 1), by Rechnungsdatum */
 async function nonAllocableInPeriod(buildingId: string, period: Range) {
-	const rows = await db
+	const found = await db
 		.select()
 		.from(invoices)
 		.where(
@@ -135,10 +163,9 @@ async function nonAllocableInPeriod(buildingId: string, period: Range) {
 				eq(invoices.isValidUtilityCost, false),
 				inPeriodOf(period.start, period.end)
 			)
-		);
-	return cents(
-		rows.reduce((sum, invoice) => sum + inPeriod(invoice, period.start, period.end).amount, 0)
-	);
+		)
+		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id);
+	return found.map((invoice) => rowOf({ ...invoice, inPeriod: inPeriod(invoice, period.start, period.end) }));
 }
 
 // the statements of the building that count in exactly this period: drafts included, a replaced one not

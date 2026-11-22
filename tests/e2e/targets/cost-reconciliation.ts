@@ -73,3 +73,7 @@ export const noInvoiceNote = (scope: Target, position: string) =>
 	);
 export const invoiceLink = (scope: Target, date: string) =>
 	target(`Rechnung vom ${date} in der ${scope}`, (page) => scope.locate(page).getByRole('link', { name: date }));
+// the first position's control at the width shown (axe and language looks of the expanded state)
+export const firstInvoicesToggle = target('Schaltfläche der Rechnungen der ersten Position', (page) =>
+	page.getByTestId('cost-reconciliation-invoices').getByRole('button').first()
+);

@@ -1,3 +1,4 @@
+import { firstInvoicesToggle } from '../targets/cost-reconciliation';
 import { writeDraft } from '../../../src/lib/wizard-draft';
 import { inDays } from '../fixtures/dates';
 import { type Example, type Viewport, variants, viewports, withSeedHint } from '../fixtures/screens';
@@ -894,6 +895,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
 	// #1088: a whole period; the Hauswart invoice of 31.01.2026 is dated shortly after its end
 	'invoice-hints': (example) => previewOf('2025', 'late-invoices')(example),
+	// #1464: the Rechnungen of the first position of the Kostenabstimmung open, in the preview and on «Berichte»
+	'preview-invoices-expanded': (example) => (actor) =>
+		actor.attemptsTo(previewOf('2025', 'late-invoices')(example), Click.on(firstInvoicesToggle)),
+	'invoices-expanded': () => Click.on(firstInvoicesToggle),
 	// 2015: an allocable invoice without Kategorie holds the preview (#382)
 	'uncategorized-invoices': (example) => previewOf('2015', 'uncategorized-invoices')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),

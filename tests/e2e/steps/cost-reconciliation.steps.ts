@@ -1,7 +1,7 @@
 import type { DataTable } from 'playwright-bdd';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { cellsOf, draftsNamed, helpOf, invoicesShown, noInvoiceOf, noteCount, notesOf, reportPeriodName, rowOf, sentenceOf, shown, textOf, toggleLabelOf } from '../questions/cost-reconciliation';
+import { cellsOf, draftsNamed, helpOf, invoicesShown, noInvoiceOf, noteCount, notesOf, reportPeriodName, rowOf, sentenceOf, shown, textOf, toggleCount, toggleLabelOf } from '../questions/cost-reconciliation';
 import { invoicesOfBuilding } from '../questions/statement-generate';
 import { pageAddressInApp } from '../questions/statements';
 import { openInvoiceOf, openStatementInReport, openReportOf, openReports, toggleInvoicesOf } from '../tasks/cost-reconciliation';
@@ -177,3 +177,11 @@ When(
 Then('nennt die Kostenabstimmung der Berichte nicht {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(textOf(inReport)).not.toContain(text);
 });
+
+// the row «Total» is not expandable (Fachreview 1464-1 F-1); the anchor is the control of a position, checked before
+Then(
+	new RegExp(`^bietet die Kostenabstimmung ${PLACE} bei "([^"]*)" keine Rechnungen an$`),
+	async ({ verwalter, seed, names }, building: string | undefined, row: string) => {
+		await verwalter.sees(toggleCount(placeOf({ seed, names }, building), row)).toBe(0);
+	}
+);

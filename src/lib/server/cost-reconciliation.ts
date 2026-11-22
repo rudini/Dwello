@@ -42,6 +42,7 @@ async function toReconciliation(fetch: Fetch, body: Body): Promise<Reconciliatio
 		total: body.total,
 		managementFee: body.managementFee,
 		nonAllocable: body.nonAllocable,
+		nonAllocableRows: body.nonAllocableRows,
 		withoutStatement: body.withoutStatement ?? 0,
 		drafts: body.drafts ?? [],
 		notUpToDate: body.notUpToDate ?? [],

@@ -4,6 +4,7 @@ import {
 	previewReconciliation,
 	draftsNoteLinks,
 	invoiceCells,
+	invoicesToggle,
 	invoicesToggleLabel,
 	noInvoiceNote,
 	reconciliationCells,
@@ -37,3 +38,4 @@ export const draftsNamed = Text.ofAll(draftsNoteLinks(reportReconciliation));
 export const toggleLabelOf = (building: Place, position: string) => Text.of(invoicesToggleLabel(scopeOf(building), position));
 export const invoicesShown = (building: Place, position: string) => Text.ofAll(invoiceCells(scopeOf(building), position));
 export const noInvoiceOf = (building: Place, position: string) => Text.of(noInvoiceNote(scopeOf(building), position));
+export const toggleCount = (building: Place, position: string) => Count.of(invoicesToggle(scopeOf(building), position));

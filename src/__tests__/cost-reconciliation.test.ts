@@ -47,7 +47,7 @@ describe('Kostenabstimmung im BFF', () => {
 		const { fetch } = backend({ 'reports/reconciliation': report });
 		const result = await reportReconciliation(fetch, period);
 		expect(result.positions).toEqual([
-			{ label: 'Hauswart', buildingCosts: 1200, tenants: 1101.64, landlord: 98.36 }
+			{ label: 'Hauswart', buildingCosts: 1200, tenants: 1101.64, landlord: 98.36, rows: report.positions[0].rows }
 		]);
 		expect(result).toMatchObject({
 			withoutStatement: 1,
@@ -95,6 +95,17 @@ describe('Kostenabstimmung im BFF', () => {
 		const { fetch } = backend({ 'reports/reconciliation': none });
 		const result = await reportReconciliation(fetch, period);
 		expect(result.positions[0].label).toBe('Ohne Kategorie');
+	});
+
+	// #1464: the rows a position and the non-allocable invoices expand to
+	it('gibt die Rechnungen jeder Position und die nicht umlagefähigen Rechnungen weiter, in den Berichten und in der Vorschau', async () => {
+		const { fetch } = backend({ 'reports/reconciliation': report, 'statements/run-reconciliation': run });
+		const ofReport = await reportReconciliation(fetch, period);
+		const [ofRun] = await runReconciliations(fetch, { ...period, buildingIds: ['b1'], heatingProfileId: '', managementFeePercent: 0 });
+		expect([ofReport, ofRun.reconciliation].map((r) => [r.positions[0].rows, r.nonAllocableRows])).toEqual([
+			[report.positions[0].rows, report.nonAllocableRows],
+			[run.positions[0].rows, run.nonAllocableRows]
+		]);
 	});
 
 	it('fragt die Kostenabstimmung der Vorschau je Gebäude mit dem Lauf ab; ohne Hinweise', async () => {

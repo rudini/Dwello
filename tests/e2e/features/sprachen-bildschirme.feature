@@ -231,6 +231,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | uncalculable-keys   |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | preview-outdated    |
+      | statement-generate     | preview-invoices-expanded |
       | statement-generate     | draft-restored      |
       | statement-generate     | draft-discard-dialog |
       | statement-generate     | draft-dropped       |
@@ -393,6 +394,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | reports                | default             |
       | reports                | empty               |
       | report-reconciliation  | default             |
+      | report-reconciliation  | invoices-expanded   |
       | help-public            | default             |
       | privacy-public         | default             |
       | terms-public           | default             |

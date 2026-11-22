@@ -7,7 +7,7 @@ import { roundToRappen } from './pdf-format';
 import type { InPeriod } from '../api/invoice';
 
 const DAY = 86_400_000;
-const daysFrom = (start: string, end: string) => (Date.parse(end) - Date.parse(start)) / DAY + 1;
+export const daysFrom = (start: string, end: string) => (Date.parse(end) - Date.parse(start)) / DAY + 1;
 
 /**
  * An invoice's part in a period: the days of its Leistungszeitraum within the period (without one, the whole period
