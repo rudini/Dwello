@@ -45,3 +45,35 @@ export const draftsNoteLinks = (scope: Target) =>
 	target(`Abrechnungen im Hinweis zu den Entwürfen der ${scope}`, (page) =>
 		scope.locate(page).getByTestId('cost-reconciliation-drafts').getByRole('link')
 	);
+
+// #1464: the Rechnungen under a position (or under the row of the non-allocable ones), found by the control that names
+// the position; the copy for the other screen width is hidden and has no role
+const invoicesOf = (scope: Target, position: string) =>
+	target(`Rechnungen von «${position}» der ${scope}`, (page) =>
+		scope
+			.locate(page)
+			.getByTestId('cost-reconciliation-invoices')
+			.filter({ has: page.getByRole('button', { name: position }) })
+	);
+export const invoicesToggle = (scope: Target, position: string) =>
+	target(`Schaltfläche der Rechnungen von «${position}» der ${scope}`, (page) =>
+		invoicesOf(scope, position).locate(page).getByRole('button')
+	);
+export const invoicesToggleLabel = (scope: Target, position: string) =>
+	target(`Beschriftung der Rechnungen von «${position}» der ${scope}`, (page) =>
+		invoicesOf(scope, position).locate(page).getByTestId('cost-reconciliation-toggle-label')
+	);
+export const invoiceCells = (scope: Target, position: string) =>
+	target(`Zeilen der Rechnungen von «${position}» der ${scope}`, (page) =>
+		invoicesOf(scope, position).locate(page).getByTestId('cost-reconciliation-invoice-cell')
+	);
+export const noInvoiceNote = (scope: Target, position: string) =>
+	target(`Hinweis ohne Rechnung bei «${position}» der ${scope}`, (page) =>
+		invoicesOf(scope, position).locate(page).getByTestId('cost-reconciliation-no-invoice')
+	);
+export const invoiceLink = (scope: Target, date: string) =>
+	target(`Rechnung vom ${date} in der ${scope}`, (page) => scope.locate(page).getByRole('link', { name: date }));
+// the first position's control at the width shown (axe and language looks of the expanded state)
+export const firstInvoicesToggle = target('Schaltfläche der Rechnungen der ersten Position', (page) =>
+	page.getByTestId('cost-reconciliation-invoices').getByRole('button').first()
+);

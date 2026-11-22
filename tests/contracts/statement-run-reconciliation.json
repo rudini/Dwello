@@ -7,11 +7,35 @@
 			"buildingCosts": 1200,
 			"tenants": 1101.64,
 			"landlord": 98.36,
-			"fuelStock": { "opening": 1792, "closing": 1494 }
+			"fuelStock": { "opening": 1792, "closing": 1494 },
+			"rows": [
+				{ "kind": "opening", "date": "2023-12-31", "amount": 1792 },
+				{
+					"kind": "invoice",
+					"id": "f0000000-0000-4000-8000-000000000001",
+					"billingEntityName": "Muster AG",
+					"invoiceDate": "2024-03-15",
+					"amount": 800,
+					"inPeriod": 200.41,
+					"beyond": { "start": "2024-01-01", "end": "2027-12-31", "days": 366, "ofDays": 1461 }
+				},
+				{ "kind": "closing", "date": "2024-12-31", "amount": 1494 }
+			]
 		}
 	],
 	"total": { "buildingCosts": 1200, "tenants": 1101.64, "landlord": 98.36 },
 	"managementFee": 33.05,
 	"nonAllocable": 500,
+	"nonAllocableRows": [
+		{
+			"kind": "invoice",
+			"id": "f0000000-0000-4000-8000-000000000002",
+			"billingEntityName": "Muster AG",
+			"invoiceDate": "2024-08-20",
+			"amount": 500,
+			"inPeriod": 500,
+			"beyond": null
+		}
+	],
 	"vacancies": [{ "apartmentNumber": "OG2", "days": 30 }]
 }

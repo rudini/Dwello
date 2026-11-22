@@ -1,0 +1,6 @@
+# Workflow notes: issue #1464
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `.claude/agents/persona.md`, operating the app through `persona-kit.mjs` | Persona Marco reported that a tap on the amount of an invoice row does nothing (1464 P-3). The row is one link stretched over its area (`after:absolute after:inset-0`, as in the invoice list), and Playwright's `tap()` on the covered text waits for it to receive the event and times out; a tap at the same coordinates opens the Rechnung. The finding had to be disproved with two scripts. | One line in `persona.md`: tap or click a place by its coordinates (`page.touchscreen.tap`, `page.mouse.click`) before reporting that it does not react, since a row whose whole area is one link covers its texts. |
+| Skill `pull-request`, «Only the session that holds the product owner's task runs this skill, never a subagent or a session it started» | The coordinator's brief told this worker session to open, drive and merge the pull request, which the same skill describes under «After the merge» (a coordinator gives each worker one issue). The two sentences disagree; the brief was followed. | Reword the first sentence: never a subagent; a worker session of a coordinator runs it when its brief says so. |

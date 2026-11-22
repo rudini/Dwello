@@ -40,8 +40,70 @@ const texts = {
 	}
 };
 
+// #1464: the texts of the Rechnungen under a position, word for word as Fachreview 1464-1 wrote them
+const rowTexts = {
+	de: {
+		reconciliation_invoices_show: 'Rechnungen anzeigen',
+		reconciliation_invoices_hide: 'Rechnungen ausblenden',
+		reconciliation_invoices_show_of: 'Rechnungen anzeigen: {position}',
+		reconciliation_invoices_hide_of: 'Rechnungen ausblenden: {position}',
+		reconciliation_invoice_name: '{issuer}, Rechnung vom {date}',
+		reconciliation_invoice_whole: 'ganz in dieser Periode',
+		reconciliation_invoice_part: 'Rechnungsbetrag {amount}, Leistungszeitraum {start} – {end}, {days} von {total} Tagen in dieser Periode',
+		reconciliation_stock_opening: 'Anfangsbestand',
+		reconciliation_stock_closing: 'minus Endbestand',
+		reconciliation_stock_date: 'Stichtag {date}',
+		reconciliation_no_invoice: 'Für diese Position gibt es keine Rechnung mehr. Die Abrechnungen verrechnen sie noch.'
+	},
+	fr: {
+		reconciliation_invoices_show: 'Afficher les factures',
+		reconciliation_invoices_hide: 'Masquer les factures',
+		reconciliation_invoices_show_of: `Afficher les factures${nbsp}: {position}`,
+		reconciliation_invoices_hide_of: `Masquer les factures${nbsp}: {position}`,
+		reconciliation_invoice_name: '{issuer}, facture du {date}',
+		reconciliation_invoice_whole: 'entièrement dans cette période',
+		reconciliation_invoice_part: 'Montant de la facture {amount}, période de prestation {start} – {end}, {days} sur {total} jours dans cette période',
+		reconciliation_stock_opening: 'Stock initial',
+		reconciliation_stock_closing: 'moins stock final',
+		reconciliation_stock_date: 'Date de référence {date}',
+		reconciliation_no_invoice: 'Il n’y a plus de facture pour ce poste. Les décomptes l’incluent encore.'
+	},
+	it: {
+		reconciliation_invoices_show: 'Mostrare le fatture',
+		reconciliation_invoices_hide: 'Nascondere le fatture',
+		reconciliation_invoices_show_of: 'Mostrare le fatture: {position}',
+		reconciliation_invoices_hide_of: 'Nascondere le fatture: {position}',
+		reconciliation_invoice_name: '{issuer}, fattura del {date}',
+		reconciliation_invoice_whole: 'interamente in questo periodo',
+		reconciliation_invoice_part: 'Importo della fattura {amount}, periodo di prestazione {start} – {end}, {days} su {total} giorni in questo periodo',
+		reconciliation_stock_opening: 'Scorta iniziale',
+		reconciliation_stock_closing: 'meno scorta finale',
+		reconciliation_stock_date: 'Data di riferimento {date}',
+		reconciliation_no_invoice: 'Per questa voce non c’è più nessuna fattura. I conteggi la includono ancora.'
+	},
+	en: {
+		reconciliation_invoices_show: 'Show invoices',
+		reconciliation_invoices_hide: 'Hide invoices',
+		reconciliation_invoices_show_of: 'Show invoices: {position}',
+		reconciliation_invoices_hide_of: 'Hide invoices: {position}',
+		reconciliation_invoice_name: '{issuer}, invoice dated {date}',
+		reconciliation_invoice_whole: 'entirely in this period',
+		reconciliation_invoice_part: 'Invoice amount {amount}, service period {start} – {end}, {days} of {total} days in this period',
+		reconciliation_stock_opening: 'Opening stock',
+		reconciliation_stock_closing: 'less closing stock',
+		reconciliation_stock_date: 'Reading date {date}',
+		reconciliation_no_invoice: 'There is no longer an invoice for this statement line. The statements still include it.'
+	}
+};
+
 describe('Texte der Kostenabstimmung', () => {
 	it.each(Object.entries(texts))('stehen auf %s wie im Fachreview 1138-1', (language, expected) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		const actual = Object.fromEntries(Object.keys(expected).map((key) => [key, messages[key]]));
+		expect(actual).toEqual(expected);
+	});
+
+	it.each(Object.entries(rowTexts))('der Rechnungen einer Position stehen auf %s wie im Fachreview 1464-1', (language, expected) => {
 		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
 		const actual = Object.fromEntries(Object.keys(expected).map((key) => [key, messages[key]]));
 		expect(actual).toEqual(expected);

@@ -133,3 +133,69 @@ Funktionalität: Berichte
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
     Dann erklärt die Kostenabstimmung der Berichte den Leerstand mit "Leerstand in dieser Abrechnungsperiode: Wohnung 3.01 (30 Tage)."
+
+  # #1464 (PO 22.11.2026): jede Position lässt sich aufklappen und zeigt die heutigen Rechnungen, aus denen ihre
+  # «Kosten des Gebäudes» gerechnet sind; zu Beginn sind alle Positionen zugeklappt
+  Szenario: Die Kostenabstimmung der Berichte zeigt die Rechnungen einer Position
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
+    Dann bietet die Kostenabstimmung der Berichte bei "Hauswart" "Rechnungen anzeigen" an
+    Wenn der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnungen von "Hauswart" anzeigt
+    Dann zeigt die Kostenabstimmung der Berichte bei "Hauswart":
+      | Muster AG, Rechnung vom 31.12.2024 | ganz in dieser Periode | CHF 1’200.00 |
+    Und bietet die Kostenabstimmung der Berichte bei "Hauswart" "Rechnungen ausblenden" an
+    Aber bietet die Kostenabstimmung der Berichte bei "Total" keine Rechnungen an
+
+  Szenario: Die Kostenabstimmung der Berichte blendet die Rechnungen einer Position wieder aus
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnungen von "Hauswart" anzeigt
+    Und der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnungen von "Hauswart" ausblendet
+    Dann bietet die Kostenabstimmung der Berichte bei "Hauswart" "Rechnungen anzeigen" an
+    Aber nennt die Kostenabstimmung der Berichte nicht "Muster AG"
+
+  # Lift 800.00 für 01.01.2024 – 31.12.2027 (1461 Tage): 2024 zählen 366 Tage, 800.00 × 366 / 1461 = 200.41
+  Szenario: Die Kostenabstimmung der Berichte zeigt bei einer Rechnung über mehrere Jahre die Tage und den Anteil der Periode
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "800" Franken vom "2024-03-15" für die Zeit vom "2024-01-01" bis "2027-12-31"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnungen von "Lift" anzeigt
+    Dann zeigt die Kostenabstimmung der Berichte bei "Lift":
+      | Muster AG, Rechnung vom 15.03.2024 | Rechnungsbetrag CHF 800.00, Leistungszeitraum 01.01.2024 – 31.12.2027, 366 von 1461 Tagen in dieser Periode | CHF 200.41 |
+
+  # Heizung: Anfangsbestand 600.00 + Lieferung 1'000.00 − Endbestand 100.00 = 1'500.00 «Kosten des Gebäudes»
+  Szenario: Die Kostenabstimmung der Berichte zeigt bei einer Position mit Tankbestand Anfangsbestand, Lieferungen und Endbestand
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15"
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnungen von "Heizung" anzeigt
+    Dann zeigt die Kostenabstimmung der Berichte bei "Heizung":
+      | Anfangsbestand                     | Stichtag 31.12.2023    | CHF 600.00   |
+      | Muster AG, Rechnung vom 15.06.2024 | ganz in dieser Periode | CHF 1’000.00 |
+      | minus Endbestand                   | Stichtag 31.12.2024    | CHF 100.00   |
+
+  Szenario: Die Kostenabstimmung der Berichte zeigt die nicht umlagefähigen Rechnungen
+    Angenommen im Gebäude "Lindenhof" gibt es eine nicht umlagefähige Rechnung der Kategorie "Reparaturen" über "500" Franken vom "2024-08-20"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnungen von "Nicht umlagefähige Rechnungen (tragen Sie ganz)" anzeigt
+    Dann zeigt die Kostenabstimmung der Berichte bei "Nicht umlagefähige Rechnungen (tragen Sie ganz)":
+      | Muster AG, Rechnung vom 20.08.2024 | ganz in dieser Periode | CHF 500.00 |
+
+  # Die Rechnung «Lift» ist seit dem Erstellen der Abrechnung gelöscht: die Position bleibt, mit CHF 0.00 Kosten
+  Szenario: Die Kostenabstimmung der Berichte sagt bei einer Position ohne Rechnung, dass es keine mehr gibt
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "300" Franken vom "2024-11-30"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Rechnung "Lift 2024-11-30" ist danach gelöscht
+    Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnungen von "Lift" anzeigt
+    Dann sagt die Kostenabstimmung der Berichte bei "Lift" "Für diese Position gibt es keine Rechnung mehr. Die Abrechnungen verrechnen sie noch."
+
+  Szenario: Rechnung aus der Kostenabstimmung der Berichte öffnen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnungen von "Hauswart" anzeigt
+    Und der Liegenschaftsverwalter in der Kostenabstimmung der Berichte die Rechnung vom "31.12.2024" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung "Hauswart 2024-12-31"

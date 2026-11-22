@@ -11,7 +11,7 @@ import { join } from 'path';
 import { generateCode, recipientOf } from '../services/backup-crypto';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { apartments, auditLog, backupCodes, buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatementLineItems, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
+import { apartments, auditLog, backupCodes, buildings, categories, configuration, documents, fuelStocks, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatementLineItems, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createContract, deleteContract } from '../services/contract.service';
@@ -427,6 +427,10 @@ describe('API-Verträge des Frontends', () => {
 		const query = `buildingId=${rental.building}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`;
 		await insertInvoice(rental.building, { description: `Spät ${token}`, amount: '120.00', invoiceDate: '2024-11-30' });
 		// #1138: an apartment without a contract has Leerstand
+		// #1464: the rows of a position begin with the Anfangsbestand of its tank; a non-allocable invoice is a row too
+		const { categoryId } = (await db.select().from(invoices).where(eq(invoices.description, `Spät ${token}`)))[0];
+		await db.insert(fuelStocks).values(['2023-12-31', '2024-12-31'].map((readingDate) => ({ buildingId: rental.building, readingDate, amount: '100.00', categoryId: categoryId! })));
+		await insertInvoice(rental.building, { description: `Spät ${token}`, invoiceDate: '2024-08-20', isValidUtilityCost: false });
 		const empty = await createApartment({ buildingId: rental.building, number: '2.04', floor: 2, area: '40', rooms: '1.5' });
 		try {
 			expect(drift(await sample('report-reconciliation'), await (await callApi(`/api/v1/reports/reconciliation?${query}`)).json())).toEqual([]);
@@ -435,6 +439,7 @@ describe('API-Verträge des Frontends', () => {
 			expect(drift(await sample('statement-run-reconciliation'), run)).toEqual([]);
 		} finally {
 			await db.delete(invoices).where(eq(invoices.description, `Spät ${token}`));
+			await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, rental.building));
 			await deleteApartment(empty.id);
 		}
 	});
