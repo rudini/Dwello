@@ -550,7 +550,7 @@ describe('API-Verträge des Frontends', () => {
 		await db.insert(fuelStocks).values(['2024-12-31', '2025-12-31'].map((readingDate) => ({ buildingId: tank.building, readingDate, amount: '100.00', categoryId: heating.id })));
 		await insertInvoice(tank.building, { categoryId: heating.id, amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
 		try {
-			const { tankNotDelivery } = await (await callApi(`/api/v1/invoices/completeness/${tank.building}?periodStart=2025-01-01&periodEnd=2025-12-31`)).json();
+			const { tankNotDelivery } = (await (await callApi(`/api/v1/invoices/completeness/${tank.building}?periodStart=2025-01-01&periodEnd=2025-12-31`)).json()) as { tankNotDelivery: unknown };
 			expect(drift((await sample('invoice-completeness')).tankNotDelivery, tankNotDelivery)).toEqual([]);
 		} finally {
 			await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, tank.building));
