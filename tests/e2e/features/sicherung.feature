@@ -100,7 +100,7 @@ Funktionalität: Sicherung einrichten
     Angenommen Dwello ist eingerichtet, die Sicherung aber noch nicht
     Wenn der Liegenschaftsverwalter die Sicherung einrichtet
     # Fachreview 718b V-1: die Kopie ist eine Pflicht, kein Versprechen; wer Dwello selbst betreut, findet das Vorgehen
-    Dann erklärt die Sicherung "Die Sicherungen liegen auf dem Server dieser Dwello-Installation im Ordner «backups». Dwello behält die letzten 7 täglichen und je eine pro Monat während 12 Monaten. Damit sie einen Defekt des Servers überstehen, muss die Person, die Dwello betreut, den Ordner regelmässig auf ein anderes Gerät kopieren. Fragen Sie sie, ob sie das tut."
+    Dann erklärt die Sicherung "Die Sicherungen liegen auf dem Server dieser Dwello-Installation im Ordner «backups». Dwello behält die jüngste jedes Tages der letzten 7 Tage und je eine pro Monat während 12 Monaten. Damit sie einen Defekt des Servers überstehen, muss die Person, die Dwello betreut, den Ordner regelmässig auf ein anderes Gerät kopieren. Fragen Sie sie, ob sie das tut."
     Und erklärt die Sicherung "Betreuen Sie Dwello selbst, finden Sie das Vorgehen in der Installationsanleitung."
     Und verweist die Sicherung auf die Installationsanleitung "https://github.com/rudini/Dwello/blob/main/docs/installation.md"
 
