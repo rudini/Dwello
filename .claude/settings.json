@@ -54,6 +54,7 @@
       "Bash(bun run test:coverage*)",
       "Bash(bun run test:e2e*)",
       "Bash(bun run deepcheck:audit*)",
+      "Bash(bun run structure:report*)",
       "Bash(bun run testcheck:audit*)",
       "Bash(bun run type-check*)",
       "Bash(bun run test)",
