@@ -549,6 +549,35 @@ describe('Rechnungsdetail', () => {
 		expect(text()).not.toContain('Bestimmt, in welche Abrechnungsperiode');
 	});
 
+	// #1469 (PO 23.11.2026, Fachreview 1469-1 V-3, V-4): in der Kategorie des Tanks im Gebäude sagt die Rechnung, ob sie
+	// als Lieferung in den Tank zählt; eine nicht umlagefähige zählt in keiner Abrechnung und sagt nichts
+	describe('Lieferung in den Tank', () => {
+		const delivery =
+			'Zählt als Lieferung in den Tank. Gilt die Rechnung für eine längere Zeit, zum Beispiel für eine Tankrevision, tragen Sie diese Zeit als Leistungszeitraum ein.';
+		const notDelivery = 'Zählt mit den Tagen ihres Leistungszeitraums, nicht als Lieferung in den Tank.';
+		const hint = () => byTestId('invoice-tank-hint')?.textContent?.trim();
+		const shown = (overrides: object, tank: string | undefined = 'c1') => {
+			show(InvoicePage, { data: { invoice: invoice(overrides), tank } });
+			return hint();
+		};
+
+		it.each([
+			['ohne Leistungszeitraum', {}, delivery],
+			['mit eintägigem Leistungszeitraum', { servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }, delivery],
+			['mit Leistungszeitraum über mehrere Tage', { servicePeriodStart: '2018-02-09', servicePeriodEnd: '2028-02-09' }, notDelivery]
+		])('sagt in der Kategorie des Tanks bei einer Rechnung %s, wie sie zählt', (_, overrides, expected) => {
+			expect(shown(overrides)).toBe(expected);
+		});
+
+		it('sagt in einer anderen Kategorie als der des Tanks nichts zur Lieferung', () => {
+			expect(shown({}, 'c2')).toBeUndefined();
+		});
+
+		it('sagt bei einer nicht umlagefähigen Rechnung in der Kategorie des Tanks nichts zur Lieferung', () => {
+			expect(shown({ isValidUtilityCost: false })).toBeUndefined();
+		});
+	});
+
 	// Nachzügler oder danach geändert: die Abrechnungen der Periode rechnen sie nicht so ab, wie sie jetzt ist (#96)
 	// #378, Personas Anna und Marco: die Warnung führt zu den Abrechnungen, die zu berichtigen sind
 	it('verlinkt die Abrechnungen des Gebäudes in der Periode, die diese Rechnung vermissen', () => {

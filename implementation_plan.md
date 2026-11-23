@@ -15,9 +15,10 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 - [x] @wip scenarios: invoice detail hint (`invoice-detail.feature`), Tankrevision by its days in the PDF (`statement-detail.feature`), key of the Veränderung Tankbestand (`statement-generate.feature`); seen red
 - [x] Spec change of `statement-detail.feature` «Heizöl aus dem Tank … auch mit Leistungszeitraum der Lieferung» and glossary row «Anteil nach Heizprofil»: approved by the PO on #1469 (second round), applied
-- [ ] fach-reviewer round on the @wip scenarios, the PDF texts and the hint (all four languages)
-- [ ] Backend: delivery rule in `getInvoicesForStatement`, `heatingInvoices`, `keyFor`, `keysFinding`; PDF fuel section without non-deliveries
-- [ ] Frontend: hint on the invoice detail page
-- [ ] Glossary rows «Brennstoff (Kategorie)», «Verbrauch (Heizmaterial)»
+- [x] fach-reviewer round 1 on the @wip scenarios, the PDF texts and the hint: `docs/reviews/1469-fachreview-1.md` (M-1, M-3 to the PO)
+- [x] Backend: delivery rule in `getInvoicesForStatement`, `heatingInvoices`, `keyFor`, `keysFinding`, `stockFinding`, consumption comparison; PDF fuel section without non-deliveries; Kostenabstimmung order
+- [x] Frontend: hint on the invoice detail page; help texts `invoices_service_period_fuel`, `categories_fuel_help`; screen row `invoice-tank-detail`
+- [x] Glossary rows «Brennstoff (Kategorie)», «Verbrauch (Heizmaterial)»
+- [ ] PO decisions on M-1 (preview hint) and M-3 (glossary sentence)
 - [ ] Slice reviews (code-reviewer), daten-pruefer, personas
 - [ ] PR (`Fixes #1469`, `Spec change approved: #1469`)

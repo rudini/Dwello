@@ -3,7 +3,7 @@
  * the end, not the purchases of the period
  */
 
-import { and, asc, desc, eq, isNotNull, lte } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, isNull, lte, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, fuelStocks, invoices } from '../db/schema';
 import { getTypedConfig } from './config.service';
@@ -58,8 +58,12 @@ export async function periodReadings(buildingId: string, periodStart: string, pe
 	return { opening, closing, categoryId, missing, covered };
 }
 
-// The distribution key of the category's latest allocable invoice up to the period end (else any later one), else
-// the configured default
+/** In the tank's category a delivery has no Leistungszeitraum or a one-day one, its delivery day (#451, #1469) */
+export const isDelivery = (invoice: { servicePeriodStart: string | null; servicePeriodEnd: string | null }) =>
+	invoice.servicePeriodStart === invoice.servicePeriodEnd;
+
+// The distribution key of the category's latest allocable delivery up to the period end (else any later one), else
+// the configured default; a Revision with its own days is no delivery (#1469)
 async function keyFor(buildingId: string, categoryId: string, periodEnd: string) {
 	const latest = (upTo?: string) =>
 		db
@@ -71,6 +75,7 @@ async function keyFor(buildingId: string, categoryId: string, periodEnd: string)
 					eq(invoices.categoryId, categoryId),
 					eq(invoices.isValidUtilityCost, true),
 					isNotNull(invoices.distributionKeyId), // one recorded before the key was required (#379) has none
+					or(isNull(invoices.servicePeriodStart), eq(invoices.servicePeriodStart, invoices.servicePeriodEnd)), // isDelivery
 					upTo ? lte(invoices.invoiceDate, upTo) : undefined
 				)
 			)

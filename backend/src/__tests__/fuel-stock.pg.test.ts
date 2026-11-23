@@ -364,9 +364,23 @@ describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
 		const values = { amount: '100.00', invoiceDate: '2025-11-01', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-12-31' };
 		await withInvoice({ ...values, distributionKeyId: await perUnitKey() }, async () => {
 			expect(await heatingLines(2025)).toMatchObject([
-				{ distributionKeyName: 'Per Area (m²)', totalBuildingAmount: 400 },
-				{ distributionKeyName: 'Per Unit', totalBuildingAmount: 100 }
+				{ distributionKeyName: 'Per Unit', totalBuildingAmount: 100 },
+				{ distributionKeyName: 'Per Area (m²)', totalBuildingAmount: 400 }
 			]);
+		});
+	});
+
+	// Fachreview 1469-1 M-2: 100'000.00 × 365 / 3'653 = 9'991.79 would hide the consumption −4'900.00 (#73)
+	it('meldet einen negativen Verbrauch auch neben einer Tankrevision', async () => {
+		await withInvoice({ amount: '100000.00', invoiceDate: '2018-02-09', servicePeriodStart: '2018-02-09', servicePeriodEnd: '2028-02-09' }, async () => {
+			expect((await findings(rental.building, 2026)).filter((f) => f.kind === 'consumption')).toMatchObject([{ current: { total: -4900 } }]);
+		});
+	});
+
+	// Fachreview 1469-1 M-2: the comparison with the year before names the consumption 400.00, not 400.00 + 69.94
+	it('vergleicht den Verbrauch ohne die Tankrevision', async () => {
+		await withInvoice({ amount: '700.00', invoiceDate: '2018-02-09', servicePeriodStart: '2018-02-09', servicePeriodEnd: '2028-02-09' }, async () => {
+			expect((await findings(rental.building, 2025)).filter((f) => f.kind === 'consumption')).toMatchObject([{ current: { total: 400 } }]);
 		});
 	});
 

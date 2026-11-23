@@ -200,6 +200,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | invoice-new            | submit-empty        |
       | invoice-detail         | default             |
       | invoice-detail         | delete-dialog       |
+      | invoice-tank-detail    | default             |
       | invoice-edit           | default             |
       | invoice-edit           | submit-cleared      |
       | invoice-edit-keyless   | default             |

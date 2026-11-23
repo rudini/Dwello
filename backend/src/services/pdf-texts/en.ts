@@ -127,12 +127,15 @@ export const en: Record<string, string> = {
 	sharesNoteHeating: ' For heating costs, the time share is the share under the heating profile (see ‘Heating and hot water costs’).',
 	sharesNoteHeatingParts: ' For heating costs, the time share is the share under the heating profile (see ‘Heating and hot water costs’); for an invoice with a service period, the months of the heating profile within it count. Where these months total 0\u00a0% in the heating profile, your days rented within it count instead.',
 	sharesNoteFuel: 'Building costs for fuel from a tank: the consumption (see ‘Heating and hot water costs’). It counts for the whole billing period, even if a delivery has a service period.',
+	sharesNoteFuelOther: ' Other invoices of the same category, for example for a tank inspection, are not deliveries: they count by the days of their service period that fall within the period.', // #1469, Fachreview 1469-1 V-1
 	heatingSection: 'Heating and hot water costs',
 	fuelIntro: 'The fuel consumed is billed, not the fuel purchased.',
 	fuelOpening: 'Opening stock on {date}',
-	fuelInvoices: '+ Invoices for ‘{category}’ in the billing period',
+	fuelInvoices: '+ Deliveries for ‘{category}’ in the billing period',
 	fuelClosing: '– Closing stock on {date}',
-	fuelTotal: '= Heating costs based on consumption',
+	fuelTotal: '= Consumption',
+	fuelOther: '+ Other invoices for ‘{category}’ by the days of their service period', // #1469: the category's invoices with their own days
+	fuelPosition: '= Building costs for ‘{category}’',
 	notes: 'Notes',
 	agreedCosts: 'Only the utility costs agreed in the rental contract are billed: {categories}.',
 	managementFeeAgreed: 'The management fee is agreed in the rental contract. It covers the work of preparing this statement (Art. 4 para. 3 VMWG).',

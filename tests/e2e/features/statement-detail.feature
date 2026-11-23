@@ -776,8 +776,8 @@ Funktionalität: Abrechnungsdetail
 
   # #1469 (PO 23.11.2026): eine Rechnung der Kategorie des Tanks mit einem Leistungszeitraum über mehr als einen Tag
   # (Tankrevision) ist keine Lieferung: sie zählt wie jede Rechnung mit den Tagen ihres Leistungszeitraums in der
-  # Periode, auch mit Anfangs- und Endbestand; 700.00 × 365 / 3'653 Tage = 69.94 (#241)
-  @wip
+  # Periode, auch mit Anfangs- und Endbestand; 700.00 × 365 / 3'653 Tage = 69.94 (#241); der Abschnitt zeigt sie
+  # nach dem Verbrauch 600 − 100 = 500.00 (Fachreview 1469-1 V-1)
   Szenario: Eine Tankrevision steht im PDF mit den Tagen ihres Leistungszeitraums in der Periode, nicht als Lieferung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -790,8 +790,9 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "Leistungszeitraum 09.02.2018 – 09.02.2028"
-    Und steht im PDF "davon 01.01.2025 – 31.12.2025 (365 Tage): CHF 69.94"
+    Dann steht im PDF "= Verbrauch CHF 500.00"
+    Und steht im PDF "+ weitere Rechnungen «Heizung» nach den Tagen ihres Leistungszeitraums CHF 69.94"
+    Und steht im PDF "= Kosten des Gebäudes «Heizung» CHF 569.94"
 
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

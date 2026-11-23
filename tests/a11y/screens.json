@@ -675,6 +675,13 @@
 			]
 		},
 		{
+			"name": "invoice-tank-detail",
+			"path": "/invoices/{tankInvoice}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "invoice-edit",
 			"path": "/invoices/{invoice}/edit",
 			"states": [

@@ -236,14 +236,12 @@ Funktionalität: Rechnungsdetail
 
   # #1469 (PO 23.11.2026): in der Kategorie des Tanks im Gebäude sagt die Rechnung, ob sie als Lieferung in den Tank
   # zählt: ohne Leistungszeitraum oder mit einem eintägigen ja, mit einem längeren (Tankrevision) nicht
-  @wip
   Szenario: Eine Rechnung ohne Leistungszeitraum in der Kategorie des Tanks zählt als Lieferung in den Tank
     Angenommen im Gebäude "Seeblick" war am "2024-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-03-10"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung "Heizung 2025-03-10"
-    Dann sagt die Rechnung zum Tank "Zählt als Lieferung in den Tank."
+    Dann sagt die Rechnung zum Tank "Zählt als Lieferung in den Tank. Gilt die Rechnung für eine längere Zeit, zum Beispiel für eine Tankrevision, tragen Sie diese Zeit als Leistungszeitraum ein."
 
-  @wip
   Szenariogrundriss: Eine Rechnung mit Leistungszeitraum in der Kategorie des Tanks sagt, ob sie als Lieferung zählt
     Angenommen im Gebäude "Seeblick" war am "2024-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Heizung" über "700" Franken vom "2025-03-10" für die Zeit vom "<Beginn>" bis "<Ende>"
@@ -251,14 +249,21 @@ Funktionalität: Rechnungsdetail
     Dann sagt die Rechnung zum Tank "<Hinweis>"
 
     Beispiele:
-      | Beginn     | Ende       | Hinweis                                                                                |
-      | 2025-03-10 | 2025-03-10 | Zählt als Lieferung in den Tank.                                                       |
-      | 2018-02-09 | 2028-02-09 | Wird nach den Tagen ihres Leistungszeitraums verteilt, nicht als Lieferung in den Tank. |
+      | Beginn     | Ende       | Hinweis                                                                                                                                                        |
+      | 2025-03-10 | 2025-03-10 | Zählt als Lieferung in den Tank. Gilt die Rechnung für eine längere Zeit, zum Beispiel für eine Tankrevision, tragen Sie diese Zeit als Leistungszeitraum ein. |
+      | 2018-02-09 | 2028-02-09 | Zählt mit den Tagen ihres Leistungszeitraums, nicht als Lieferung in den Tank.                                                                                 |
 
   # #1469: ohne Tank im Gebäude ist eine Heizkostenrechnung keine Lieferung in den Tank (Fernwärme, Helga P-4 von #451)
-  @wip
   Szenario: Ohne Tank sagt eine Heizkostenrechnung nichts zur Lieferung in den Tank
     Angenommen im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-03-10"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung "Heizung 2025-03-10"
+    Dann sieht der Liegenschaftsverwalter den Betrag "CHF 900.00"
+    Aber sagt die Rechnung nichts zum Tank
+
+  # #1469 (Fachreview 1469-1 V-8): eine nicht umlagefähige Rechnung zählt in keiner Abrechnung, auch nicht als Lieferung
+  Szenario: Eine nicht umlagefähige Rechnung in der Kategorie des Tanks sagt nichts zur Lieferung in den Tank
+    Angenommen im Gebäude "Seeblick" war am "2024-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Seeblick" gibt es eine nicht umlagefähige Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-03-10"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung "Heizung 2025-03-10"
     Dann sieht der Liegenschaftsverwalter den Betrag "CHF 900.00"
     Aber sagt die Rechnung nichts zum Tank

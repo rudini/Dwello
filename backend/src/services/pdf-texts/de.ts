@@ -128,12 +128,15 @@ export const de: Record<string, string> = {
 	sharesNoteHeating: ' Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten).',
 	sharesNoteHeatingParts: ' Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten); bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin. Haben diese Monate im Heizprofil zusammen 0\u00a0%, zählen stattdessen Ihre Mietstage darin.',
 	sharesNoteFuel: 'Kosten des Gebäudes bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten). Er zählt über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.',
+	sharesNoteFuelOther: ' Weitere Rechnungen derselben Kategorie, zum Beispiel für die Tankrevision, sind keine Lieferung: Sie zählen mit den Tagen ihres Leistungszeitraums, die in die Periode fallen.', // #1469, Fachreview 1469-1 V-1
 	heatingSection: 'Heiz- und Warmwasserkosten',
 	fuelIntro: 'Abgerechnet wird das verbrauchte Heizmaterial, nicht der Einkauf.',
 	fuelOpening: 'Anfangsbestand am {date}',
-	fuelInvoices: '+ Rechnungen «{category}» in der Abrechnungsperiode',
+	fuelInvoices: '+ Lieferungen «{category}» in der Abrechnungsperiode',
 	fuelClosing: '– Endbestand am {date}',
-	fuelTotal: '= Heizkosten nach Verbrauch',
+	fuelTotal: '= Verbrauch',
+	fuelOther: '+ weitere Rechnungen «{category}» nach den Tagen ihres Leistungszeitraums', // #1469: the category's invoices with their own days
+	fuelPosition: '= Kosten des Gebäudes «{category}»',
 	notes: 'Hinweise',
 	agreedCosts: 'Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten: {categories}.',
 	managementFeeAgreed: 'Die Verwaltungspauschale ist im Mietvertrag vereinbart. Sie gilt den Aufwand für das Erstellen dieser Abrechnung ab (Art. 4 Abs. 3 VMWG).',

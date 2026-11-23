@@ -266,6 +266,25 @@ describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
 		expect(listed).toEqual(named ? [id] : []);
 	});
 
+	// #1469: in the tank's category a Revision with its own days is no delivery, so it counts by the profile's months
+	it('nennt eine Abrechnung auch, wenn danach eine Tankrevision mit Leistungszeitraum dazukam', async () => {
+		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		for (const [readingDate, amount] of [['2024-12-31', '800.00'], ['2025-12-31', '300.00']])
+			await db.insert(fuelStocks).values({ buildingId: may.building, readingDate, amount, categoryId: heating.id });
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-06-30' });
+		const id = await sentStatement(may, 'sent');
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '400.00', invoiceDate: '2025-04-10', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-03-31' });
+
+		const listed = await oldRuleOf(may.building);
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+		await db.delete(invoices).where(eq(invoices.buildingId, may.building));
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, may.building));
+		await may.remove();
+
+		expect(listed).toEqual([id]);
+	});
+
 	// H-28: which of these hints concern a run is decided here, by the contracts it bills (statement-run.service.ts)
 	it('nennt für einen Lauf, der den Vormieter derselben Wohnung abrechnet, die Abrechnung und die Heizrechnung ohne Leistungszeitraum', async () => {
 		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });

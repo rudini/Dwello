@@ -45,7 +45,13 @@ export function heatingSection(page: Page, y: number) {
 				[fill(t.fuelOpening, { date: formatDate(fuel.openingDate) }), fuel.opening],
 				[fill(t.fuelInvoices, { category: fuel.category }), fuel.invoices],
 				[fill(t.fuelClosing, { date: formatDate(fuel.closingDate) }), fuel.closing],
-				[t.fuelTotal, fuel.total]
+				[t.fuelTotal, fuel.total],
+				...(fuel.position === undefined
+					? []
+					: ([
+							[fill(t.fuelOther, { category: fuel.category }), fuel.other!],
+							[fill(t.fuelPosition, { category: fuel.category }), fuel.position]
+						] as [string, number][]))
 			]
 		: [];
 	const width = PAGE.right - PAGE.left;

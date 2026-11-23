@@ -304,7 +304,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   # #1469 (PO 23.11.2026): eine Rechnung der Kategorie des Tanks mit einem Leistungszeitraum über mehr als einen Tag
   # (Tankrevision) ist keine Lieferung; die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung,
   # hier «Pro Fläche (m²)», nicht dem der späteren Tankrevision (#890, #1323)
-  @wip
   Szenario: Die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung, nicht dem einer Tankrevision
     Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank

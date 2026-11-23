@@ -226,7 +226,7 @@ function sharesNote(data: StatementPDFData, t: Record<string, string>) {
 	});
 	// «Vereinbart ab» (#368, Fachreview 368-B M-1): those days are not the Mietstage of the header
 	const from = data.agreedCosts?.some((cost) => cost.from) ? t.sharesNoteAgreedFrom : '';
-	return data.fuel ? `${shares}${from} ${t.sharesNoteFuel}` : shares + from;
+	return data.fuel ? `${shares}${from} ${t.sharesNoteFuel}${data.fuel.position === undefined ? '' : t.sharesNoteFuelOther}` : shares + from;
 }
 
 // The rounded percentage, also of a share by the Heizprofil (#256); a credit over other days than an invoice of its

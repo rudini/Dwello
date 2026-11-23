@@ -286,7 +286,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.contract('Greta', '3.01', { startDate: '2025-08-15', baseRent: '1300.00' });
 	await seed.invoiceOn('Talblick', 'Hauswart', '600.00', '2025-07-05', ['2025-04-01', '2025-06-30']);
 	await seed.invoiceOn('Talblick', 'Hauswart', '1200.00', '2025-10-05', ['2025-07-01', '2025-09-30']);
-	await seed.invoiceOn('Talblick', 'Heizung', '900.00', '2025-10-05', ['2025-07-01', '2025-09-30']);
+	// #1469: in the tank's category over several days: no delivery, its detail page says so
+	const tankInvoice = await seed.invoiceOn('Talblick', 'Heizung', '900.00', '2025-10-05', ['2025-07-01', '2025-09-30']);
 	await seed.fuelStock('Talblick', '2024-12-31', '600.00');
 	await seed.fuelStock('Talblick', '2025-12-31', '100.00');
 	await seed.statement('Greta', 'Talblick', 2025);
@@ -440,6 +441,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		// with an allocable invoice in Waldblick: saving it as not allocable asks first (#309)
 		usedCategory: seed.idOf('Internet'),
 		keylessInvoice,
+		tankInvoice,
 		// a predefined category shows the reason of its allocability (#186)
 		predefinedCategory: await seed.predefinedCategoryId('Feuerlöscher-Wartung'),
 		distributionKey: seed.idOf('Nach Wohnungen'),

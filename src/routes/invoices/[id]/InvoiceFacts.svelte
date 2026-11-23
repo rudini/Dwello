@@ -5,13 +5,27 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import DeductedHint from '../DeductedHint.svelte';
 	import { formatCurrency, formatDate, formatDateTime } from '$lib/utils/format';
+	import { tankDelivery } from '$lib/invoice';
 
-	// What the invoice says: date, amount, building and service, and the statements it is in
-	let { invoice, statements }: { invoice: InvoiceWithDetails; statements: BilledStatement[] } =
-		$props();
+	// What the invoice says: date, amount, building and service, and the statements it is in; tank: the category of
+	// the building's tank (#1469)
+	let {
+		invoice,
+		statements,
+		tank
+	}: { invoice: InvoiceWithDetails; statements: BilledStatement[]; tank?: string } = $props();
+	const delivery = $derived(tankDelivery(tank, invoice));
 
 	const changed = (iso?: string) => (iso ? formatDateTime(iso) : '–');
 </script>
+
+{#snippet tankHint()}
+	{#if delivery !== undefined}
+		<dd class="text-ink-muted" data-testid="invoice-tank-hint">
+			{delivery ? m.invoices_tank_delivery() : m.invoices_tank_not_delivery()}
+		</dd>
+	{/if}
+{/snippet}
 
 <Panel title={m.invoices_record()}>
 	<dl class="grid gap-4 sm:grid-cols-2">
@@ -20,6 +34,7 @@
 			<dd class="text-ink">{formatDate(invoice.invoiceDate)}</dd>
 			{#if !invoice.servicePeriodStart}
 				<dd class="text-ink-muted">{m.invoices_date_decides()}</dd>
+				{@render tankHint()}
 			{/if}
 		</div>
 		{#if invoice.servicePeriodStart && invoice.servicePeriodEnd}
@@ -29,6 +44,7 @@
 					{formatDate(invoice.servicePeriodStart)} – {formatDate(invoice.servicePeriodEnd)}
 				</dd>
 				<dd class="text-ink-muted">{m.invoices_service_period_days()}</dd>
+				{@render tankHint()}
 			</div>
 		{/if}
 		{#if invoice.invoiceNumber}
