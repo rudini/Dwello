@@ -301,6 +301,20 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann meldet die Prüfung der Kategorien für "Heizung": "Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Einheit» verteilt. Prüfen Sie die Verteilschlüssel der Rechnungen."
     Und verlangt die Vorschau keine Bestätigung
 
+  # #1469 (PO 23.11.2026): eine Rechnung der Kategorie des Tanks mit einem Leistungszeitraum über mehr als einen Tag
+  # (Tankrevision) ist keine Lieferung; die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung,
+  # hier «Pro Fläche (m²)», nicht dem der späteren Tankrevision (#890, #1323)
+  @wip
+  Szenario: Die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung, nicht dem einer Tankrevision
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-03-15" nach dem Verteilschlüssel "Pro Einheit"
+    Und im Gebäude "Lindenhof" gibt es danach eine Rechnung der Kategorie "Heizung" über "500" Franken vom "2024-06-15" nach dem Verteilschlüssel "Pro Fläche (m²)"
+    Und im Gebäude "Lindenhof" gibt es danach eine Rechnung der Kategorie "Heizung" über "300" Franken vom "2024-10-15" nach dem Verteilschlüssel "Pro Einheit"
+    Und die Rechnung "Heizung 2024-10-15" gilt danach für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Fläche (m²)» verteilt."
+
   # #528 (Fachreview 528-1 V-2): schon vor dem Erstellen sagt die Vorschau, dass eine Kategorie mit verschiedenen
   # Verteilschlüsseln abgerechnet wird, und nennt die Rechnung, deren Verteilschlüssel abweicht; nur ein Hinweis
   Szenario: Die Vorschau nennt die Rechnung mit einem anderen Verteilschlüssel derselben Kategorie

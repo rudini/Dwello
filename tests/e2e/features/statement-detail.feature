@@ -774,6 +774,25 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "1'400.00 700.00 139/365 Tage 266.58"
     Und steht im PDF nicht "Leistungszeitraum 01.07.2025"
 
+  # #1469 (PO 23.11.2026): eine Rechnung der Kategorie des Tanks mit einem Leistungszeitraum über mehr als einen Tag
+  # (Tankrevision) ist keine Lieferung: sie zählt wie jede Rechnung mit den Tagen ihres Leistungszeitraums in der
+  # Periode, auch mit Anfangs- und Endbestand; 700.00 × 365 / 3'653 Tage = 69.94 (#241)
+  @wip
+  Szenario: Eine Tankrevision steht im PDF mit den Tagen ihres Leistungszeitraums in der Periode, nicht als Lieferung
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2025-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "700" Franken vom "2018-02-09" für die Zeit vom "2018-02-09" bis "2028-02-09"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Leistungszeitraum 09.02.2018 – 09.02.2028"
+    Und steht im PDF "davon 01.01.2025 – 31.12.2025 (365 Tage): CHF 69.94"
+
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und die Korrespondenz an "Eva Frei" ist auf "Französisch"

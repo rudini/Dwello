@@ -14,6 +14,7 @@ import {
 	distributionKeyOfInvoice,
 	distributionKeyRows,
 	missedWarningText,
+	tankHintOfInvoice,
 	reasonForOverride,
 	reasonOfCategory,
 	reasonsOfCategory,
@@ -272,4 +273,18 @@ Then('nennt die Bestätigung zum Löschen der Rechnung keine Aufbewahrungsfrist'
 
 When('der Liegenschaftsverwalter das Löschen der Rechnung bestätigt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(confirmDeletingInvoice);
+});
+
+// #1469: an invoice seeded by category and date («Heizung 2025-03-10»)
+Given('der Liegenschaftsverwalter ist auf der Detailseite der Rechnung {string}', async ({ verwalter, seed }, invoice: string) => {
+	await verwalter.attemptsTo(openInvoice(seed.idOf(`Rechnung ${invoice}`)!));
+});
+
+Then('sagt die Rechnung zum Tank {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(tankHintOfInvoice).toBe(text);
+});
+
+// after the amount as positive anchor (#1469)
+Then('sagt die Rechnung nichts zum Tank', async ({ verwalter }) => {
+	await verwalter.sees(tankHintOfInvoice).toBeNull();
 });

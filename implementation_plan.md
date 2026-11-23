@@ -8,3 +8,16 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and write the session to its own archive file at the end. A session that appears on `main` after this one started makes this one parallel from then on: at the merge before the push take `main`'s plan and move this checklist into the pull request.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History: `docs/archive/implementation-plan-verlauf.md` (phases 0–22 and the sessions up to 2026-11-08, closed: add nothing) and `docs/archive/sessions/` (one file per later session).
+
+## Session
+
+#1469: in the tank's category, only an invoice without or with a one-day Leistungszeitraum is a delivery (branch `ccr-153ae8d3-conoid-1469`).
+
+- [x] @wip scenarios: invoice detail hint (`invoice-detail.feature`), Tankrevision by its days in the PDF (`statement-detail.feature`), key of the Veränderung Tankbestand (`statement-generate.feature`); seen red
+- [ ] Spec change of `statement-detail.feature` «Heizöl aus dem Tank … auch mit Leistungszeitraum der Lieferung» and glossary row «Anteil nach Heizprofil»: PO approval asked on #1469
+- [ ] fach-reviewer round on the @wip scenarios, the PDF texts and the hint (all four languages)
+- [ ] Backend: delivery rule in `getInvoicesForStatement`, `heatingInvoices`, `keyFor`, `keysFinding`; PDF fuel section without non-deliveries
+- [ ] Frontend: hint on the invoice detail page
+- [ ] Glossary rows «Brennstoff (Kategorie)», «Verbrauch (Heizmaterial)»
+- [ ] Slice reviews (code-reviewer), daten-pruefer, personas
+- [ ] PR (`Fixes #1469`, `Spec change approved: #1469`)

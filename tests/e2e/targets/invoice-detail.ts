@@ -45,3 +45,5 @@ export const deleteDialogTitle = target('Titel der Bestätigung zum Löschen', (
 export const deleteDialogWarning = target('Warnung in der Bestätigung zum Löschen', (page) =>
 	page.getByRole('dialog').getByTestId('invoice-billed-warning')
 );
+// #1469: in the category of the building's tank, whether the invoice counts as a delivery into it
+export const tankHint = target('Hinweis zur Lieferung in den Tank', (page) => page.getByTestId('invoice-tank-hint'));
