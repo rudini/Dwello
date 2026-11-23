@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs';
 
 // #1456 (decided 23.11.2026): the help at «Täglich nach neuen Versionen suchen» ends by saying that the checkbox saves at once
 const sentences = {
-	de: 'Dwello speichert, sobald Sie das Kästchen ankreuzen oder das Kreuz entfernen.'
+	de: 'Dwello speichert, sobald Sie das Kästchen ankreuzen oder das Kreuz entfernen.',
+	fr: 'Dwello enregistre dès que vous cochez ou décochez la case.',
+	it: 'Dwello salva non appena Lei mette la spunta nella casella o la toglie.',
+	en: 'Dwello saves as soon as you tick or untick the box.'
 };
 
 describe('Hilfetext der Suche nach neuen Versionen', () => {
