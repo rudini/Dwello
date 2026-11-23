@@ -314,6 +314,21 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Heizung": "Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Fläche (m²)» verteilt."
 
+  # #1469 (PO 23.11.2026, dritte Runde; Fachreview 1469-1 M-1): eine Rechnung der Kategorie des Tanks mit einem
+  # Leistungszeitraum über mehrere Tage ist keine Lieferung; die Vorschau sagt es und nennt sie, ohne anzuhalten, nicht
+  # aber die Lieferung mit eintägigem Leistungszeitraum
+  @wip
+  Szenario: Die Vorschau nennt eine Rechnung der Kategorie des Tanks, die nicht als Lieferung zählt
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2024-10-05" für die Zeit vom "2024-07-01" bis "2024-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-11-20" für die Zeit vom "2024-11-15" bis "2024-11-15"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann sagt der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, "In der Kategorie Heizung zählt eine Rechnung mit einem Leistungszeitraum über mehrere Tage nicht als Lieferung in den Tank, sondern mit den Tagen ihres Leistungszeitraums. Ist eine solche Rechnung eine Lieferung, tragen Sie als Beginn und als Ende den Tag der Lieferung ein."
+    Und nennt der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, die Rechnung vom "05.10.2024" über "900.00"
+    Und nennt der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, keine Rechnung vom "20.11.2024"
+    Und verlangt die Vorschau keine Bestätigung
+
   # #528 (Fachreview 528-1 V-2): schon vor dem Erstellen sagt die Vorschau, dass eine Kategorie mit verschiedenen
   # Verteilschlüsseln abgerechnet wird, und nennt die Rechnung, deren Verteilschlüssel abweicht; nur ein Hinweis
   Szenario: Die Vorschau nennt die Rechnung mit einem anderen Verteilschlüssel derselben Kategorie

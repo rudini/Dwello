@@ -19,6 +19,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Backend: delivery rule in `getInvoicesForStatement`, `heatingInvoices`, `keyFor`, `keysFinding`, `stockFinding`, consumption comparison; PDF fuel section without non-deliveries; Kostenabstimmung order
 - [x] Frontend: hint on the invoice detail page; help texts `invoices_service_period_fuel`, `categories_fuel_help`; screen row `invoice-tank-detail`
 - [x] Glossary rows «Brennstoff (Kategorie)», «Verbrauch (Heizmaterial)»
-- [ ] PO decisions on M-1 (preview hint) and M-3 (glossary sentence)
+- [x] PO decisions on M-1 (preview hint, option A) and M-3 (glossary sentence), third round on #1469; M-3 behaviour: #1470
+- [ ] Preview hint «nicht als Lieferung» (M-1): @wip scenario seen red, title from fach-reviewer round 2, screen row
 - [ ] Slice reviews (code-reviewer), daten-pruefer, personas
 - [ ] PR (`Fixes #1469`, `Spec change approved: #1469`)
