@@ -4,5 +4,6 @@
 - [x] Fach review round 1 (fr/it/en wording): `docs/reviews/texte-fachreview-1.md`
 - [x] `settings_updates_check_help` and `backup_location` in `messages/{de,fr,it,en}.json`; scenarios, axe and language rows of `backup` and `config` green
 - [x] Code review round 1 (closing round): `docs/reviews/texte-review-1.md`
+- [x] `docs/installation.md:92`: the retention sentence of #1457 in English (parent OK)
 - [x] Workflow notes: `docs/reviews/workflow-notes-texte.md`
 - [x] Archive the session; PR `Refs #1456`, `Refs #1457`: pushed after this archive
