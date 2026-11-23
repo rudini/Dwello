@@ -332,6 +332,52 @@ describe('Tankbestand', () => {
 	});
 });
 
+// #1469 (PO 23.11.2026): in the tank's category only an invoice without or with a one-day Leistungszeitraum is a
+// delivery; one over more days (a Revision) counts with its days in the period, also with Anfangs- and Endbestand
+describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
+	const perUnitKey = async () => (await db.select().from(distributionKeys).where(eq(distributionKeys.name, 'Per Unit')))[0].id;
+	const heatingLines = async (year: number) => (await linesOf(rental.contract, year)).filter((line) => line.categoryId === heating);
+	const withInvoice = async (values: Parameters<typeof insertInvoice>[1], check: () => Promise<void>) => {
+		await insertInvoice(rental.building, { categoryId: heating, description: 'Lieferung 1469', ...values });
+		try {
+			await check();
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, 'Lieferung 1469'));
+		}
+	};
+
+	// 700.00 × 365 / 3'653 Tage = 69.94, neben dem Verbrauch 400.00
+	it('rechnet eine Tankrevision mit den Tagen ihres Leistungszeitraums in der Periode ab, nicht als Lieferung', async () => {
+		await withInvoice({ amount: '700.00', invoiceDate: '2018-02-09', servicePeriodStart: '2018-02-09', servicePeriodEnd: '2028-02-09' }, async () => {
+			expect((await heatingLine(2025))?.totalBuildingAmount).toBe(469.94);
+		});
+	});
+
+	// pins kept behaviour (#451, M-1): a one-day Leistungszeitraum is the delivery day
+	it('rechnet eine Rechnung mit eintägigem Leistungszeitraum ganz als Lieferung ab', async () => {
+		await withInvoice({ amount: '1000.00', invoiceDate: '2026-01-20', servicePeriodStart: '2025-12-20', servicePeriodEnd: '2025-12-20' }, async () => {
+			expect((await heatingLine(2025))?.totalBuildingAmount).toBe(1400);
+		});
+	});
+
+	it('verteilt den Verbrauch nach dem Schlüssel der letzten Lieferung, nicht dem einer späteren Tankrevision', async () => {
+		const values = { amount: '100.00', invoiceDate: '2025-11-01', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-12-31' };
+		await withInvoice({ ...values, distributionKeyId: await perUnitKey() }, async () => {
+			expect(await heatingLines(2025)).toMatchObject([
+				{ distributionKeyName: 'Per Area (m²)', totalBuildingAmount: 400 },
+				{ distributionKeyName: 'Per Unit', totalBuildingAmount: 100 }
+			]);
+		});
+	});
+
+	it('meldet keine verschiedenen Verteilschlüssel der Lieferungen, wenn nur eine Tankrevision einen anderen hat', async () => {
+		const values = { amount: '300.00', invoiceDate: '2024-10-15', servicePeriodStart: '2024-01-01', servicePeriodEnd: '2024-12-31' };
+		await withInvoice({ ...values, distributionKeyId: await perUnitKey() }, async () => {
+			expect((await findings(rental.building, 2024)).map((f) => f.kind)).not.toContain('keys');
+		});
+	});
+});
+
 describe('Tankbestand über die API', () => {
 	it('listet die Stichtage des Gebäudes', async () => {
 		const list = (await (await callApi(stocks())).json()) as { readingDate: string; amount: string; categoryId: string }[];
