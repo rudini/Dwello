@@ -14,7 +14,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 #1469: in the tank's category, only an invoice without or with a one-day Leistungszeitraum is a delivery (branch `ccr-153ae8d3-conoid-1469`).
 
 - [x] @wip scenarios: invoice detail hint (`invoice-detail.feature`), Tankrevision by its days in the PDF (`statement-detail.feature`), key of the Veränderung Tankbestand (`statement-generate.feature`); seen red
-- [ ] Spec change of `statement-detail.feature` «Heizöl aus dem Tank … auch mit Leistungszeitraum der Lieferung» and glossary row «Anteil nach Heizprofil»: PO approval asked on #1469
+- [x] Spec change of `statement-detail.feature` «Heizöl aus dem Tank … auch mit Leistungszeitraum der Lieferung» and glossary row «Anteil nach Heizprofil»: approved by the PO on #1469 (second round), applied
 - [ ] fach-reviewer round on the @wip scenarios, the PDF texts and the hint (all four languages)
 - [ ] Backend: delivery rule in `getInvoicesForStatement`, `heatingInvoices`, `keyFor`, `keysFinding`; PDF fuel section without non-deliveries
 - [ ] Frontend: hint on the invoice detail page

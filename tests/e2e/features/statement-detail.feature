@@ -756,14 +756,14 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "Leistungszeitraum 01.10.2025 – 31.01.2026 (Rechnung CHF 765.00 für 123 Tage), davon 01.10.2025 – 31.12.2025 (92 Tage): CHF 572.20, Ihre Mietstage 92 von 92 Tagen"
 
   # Heizkosten ohne Heizprofil nach Tagen, mit Tank: abgerechnet wird der Verbrauch der ganzen Periode, 600 + 900 - 100
-  # = 1'400; auch die Lieferung mit Leistungszeitraum Juli bis September zählt nach den Mietstagen der Periode, 139 von
-  # 365 Tagen (#451, Punkt 2; #257)
-  Szenario: Heizöl aus dem Tank steht im PDF nach den Mietstagen der Periode, auch mit Leistungszeitraum der Lieferung
+  # = 1'400; auch die Lieferung mit eintägigem Leistungszeitraum zählt nach den Mietstagen der Periode, 139 von
+  # 365 Tagen (#451, Punkt 2; #257; #1469, PO 23.11.2026: nur ein eintägiger Leistungszeitraum ist eine Lieferung)
+  Szenario: Heizöl aus dem Tank steht im PDF nach den Mietstagen der Periode, auch mit eintägigem Leistungszeitraum der Lieferung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert
     Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
-    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-07-01" bis "2025-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
     Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Lindenhof" war am "2025-12-31" Heizöl für "100" Franken im Tank
     Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
@@ -772,7 +772,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Verbrauch CHF 1'400.00"
     Und steht im PDF "1'400.00 700.00 139/365 Tage 266.58"
-    Und steht im PDF nicht "Leistungszeitraum 01.07.2025"
+    Und steht im PDF nicht "Leistungszeitraum 30.09.2025"
 
   # #1469 (PO 23.11.2026): eine Rechnung der Kategorie des Tanks mit einem Leistungszeitraum über mehr als einen Tag
   # (Tankrevision) ist keine Lieferung: sie zählt wie jede Rechnung mit den Tagen ihres Leistungszeitraums in der
