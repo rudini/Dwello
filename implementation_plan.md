@@ -22,5 +22,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] PO decisions on M-1 (preview hint, option A) and M-3 (glossary sentence), third round on #1469; M-3 behaviour: #1470
 - [x] Preview hint «nicht als Lieferung» (M-1): scenario seen red, title from fach-reviewer round 2 (`docs/reviews/1469-fachreview-2.md`), screen row `tank-not-delivery`
 - [x] code-reviewer round 1: `docs/reviews/1469-review-1.md` (C-1, C-2 done after the reviewed commit; C-3 scenarios added, seen red with the code taken out; C-4, C-5 fixed)
-- [ ] Slice reviews (code-reviewer), daten-pruefer, personas
+- [x] code-reviewer round 2: `docs/reviews/1469-review-2.md` (C-6 fixed)
+- [ ] fach-reviewer feature review, personas Dr. Weber and Marco, daten-pruefer
 - [ ] PR (`Fixes #1469`, `Spec change approved: #1469`)
