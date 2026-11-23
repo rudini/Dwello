@@ -607,16 +607,16 @@ describe('Tankbestand im PDF', () => {
 		await tank.remove();
 	});
 
-	// #257 (#451, Punkt 2): beim Tank zählt der Verbrauch der ganzen Periode, auch eine Lieferung mit Leistungszeitraum
-	// Juli bis September; Einzug am 15. August, 139 von 365 Tagen: 600 + 900 − 100 = 1'400.00 × 139/365 = 533.15, mit
+	// #257 (#451, Punkt 2): beim Tank zählt der Verbrauch der ganzen Periode, auch eine Lieferung mit eintägigem
+	// Leistungszeitraum (#1469, wie das Szenario nach Spec change #1469); Einzug am 15. August, 139 von 365 Tagen: 600 + 900 − 100 = 1'400.00 × 139/365 = 533.15, mit
 	// steigendem Bestand 100 + 900 − 400 = 600.00 × 139/365 = 228.49 (Fachreview V-1)
 	it.each([
 		['600.00', '100.00', "1'400.00 1'400.00 139/365 Tage 533.15"],
 		['100.00', '400.00', '600.00 600.00 139/365 Tage 228.49']
-	] as const)('teilt das Heizöl aus dem Tank nach den Mietstagen der Periode, auch bei einer Lieferung mit Leistungszeitraum (%s bis %s)', async (opening, closing, line) => {
+	] as const)('teilt das Heizöl aus dem Tank nach den Mietstagen der Periode, auch bei einer Lieferung mit eintägigem Leistungszeitraum (%s bis %s)', async (opening, closing, line) => {
 		const august = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
-		await insertInvoice(august.building, { categoryId: heating.id, amount: '900.00', description: 'Heizöl', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
+		await insertInvoice(august.building, { categoryId: heating.id, amount: '900.00', description: 'Heizöl', invoiceDate: '2025-10-05', servicePeriodStart: '2025-09-30', servicePeriodEnd: '2025-09-30' });
 		await createFuelStock(august.building, { readingDate: '2024-12-31', amount: opening, categoryId: heating.id });
 		await createFuelStock(august.building, { readingDate: '2025-12-31', amount: closing, categoryId: heating.id });
 		const statement = await generateStatement({ contractId: august.contract, buildingId: august.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
@@ -633,18 +633,18 @@ describe('Tankbestand im PDF', () => {
 		expect(stock).toContain('Er zählt über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.');
 	});
 
-	// #451 (Fachreview M-1): eine Lieferung zählt ganz in der Periode ihres Lieferdatums, des Endes ihres
-	// Leistungszeitraums, nie geteilt: die vom 15.12.2025 ganz in 2025, die für den
-	// Januar 2025 mit Beginn im Dezember 2024 ganz in 2025, die mit Ende im Februar 2026 nicht; 600 + 1'000 + 300 − 800 = 1'100.00,
-	// Einzug am 15. August: 1'100.00 × 139/365 = 418.90
+	// #451 (Fachreview M-1): eine Lieferung zählt ganz in der Periode ihres Lieferdatums, nie geteilt: die vom 15.12.2025
+	// und die vom 10.01.2025 (Rechnung vom Dezember 2024) ganz in 2025, die vom 10.02.2026 nicht; 600 + 1'000 + 300 − 800 =
+	// 1'100.00, Einzug am 15. August: 1'100.00 × 139/365 = 418.90; seit #1469 hat eine Lieferung einen eintägigen
+	// Leistungszeitraum
 	it('zählt eine Lieferung ganz in der Periode ihres Lieferdatums', async () => {
 		const august = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
-		const delivery = (amount: string, servicePeriodStart: string, servicePeriodEnd: string) =>
-			insertInvoice(august.building, { categoryId: heating.id, amount, description: 'Heizöl', invoiceDate: servicePeriodEnd, servicePeriodStart, servicePeriodEnd });
-		await delivery('1000.00', '2025-12-15', '2025-12-15');
-		await delivery('300.00', '2024-12-20', '2025-01-10');
-		await delivery('700.00', '2025-12-20', '2026-02-10');
+		const delivery = (amount: string, day: string, invoiceDate = day) =>
+			insertInvoice(august.building, { categoryId: heating.id, amount, description: 'Heizöl', invoiceDate, servicePeriodStart: day, servicePeriodEnd: day });
+		await delivery('1000.00', '2025-12-15');
+		await delivery('300.00', '2025-01-10', '2024-12-20'); // invoiced before the period (Fachreview 1469-3 V-10)
+		await delivery('700.00', '2026-02-10');
 		await createFuelStock(august.building, { readingDate: '2024-12-31', amount: '600.00', categoryId: heating.id });
 		await createFuelStock(august.building, { readingDate: '2025-12-31', amount: '800.00', categoryId: heating.id });
 		const statement = await generateStatement({ contractId: august.contract, buildingId: august.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
@@ -655,14 +655,37 @@ describe('Tankbestand im PDF', () => {
 		await august.remove();
 
 		expect(stock).toContain("Heizung Pro Fläche (m²) 70.00 / 70.00 m² 1'100.00 1'100.00 139/365 Tage 418.90");
-		expect(stock).toContain("Rechnungen «Heizung» in der Abrechnungsperiode CHF 1'300.00");
+		expect(stock).toContain("Lieferungen «Heizung» in der Abrechnungsperiode CHF 1'300.00");
+	});
+
+	// #1469 (Fachreview 1469-1 V-1): eine Tankrevision ist keine Lieferung; der Abschnitt zeigt den Verbrauch
+	// 600 − 100 = 500.00, dann die Tankrevision 700.00 × 365 / 3'653 = 69.94 und die Kosten des Gebäudes 569.94
+	it('zeigt neben dem Verbrauch die weiteren Rechnungen der Kategorie des Tanks', async () => {
+		const august = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(august.building, { categoryId: heating.id, amount: '700.00', description: 'Tankrevision', invoiceDate: '2018-02-09', servicePeriodStart: '2018-02-09', servicePeriodEnd: '2028-02-09' });
+		await createFuelStock(august.building, { readingDate: '2024-12-31', amount: '600.00', categoryId: heating.id });
+		await createFuelStock(august.building, { readingDate: '2025-12-31', amount: '100.00', categoryId: heating.id });
+		const statement = await generateStatement({ contractId: august.contract, buildingId: august.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const stock = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, august.building));
+		await august.remove();
+
+		expect(stock).toContain('Lieferungen «Heizung» in der Abrechnungsperiode CHF 0.00');
+		expect(stock).toContain('= Verbrauch CHF 500.00');
+		expect(stock).toContain('+ weitere Rechnungen «Heizung» nach den Tagen ihres Leistungszeitraums CHF 69.94');
+		expect(stock).toContain('= Kosten des Gebäudes «Heizung» CHF 569.94');
+		expect(stock).toContain('Weitere Rechnungen derselben Kategorie, zum Beispiel für die Tankrevision, sind keine Lieferung');
 	});
 
 	it('leitet die Heizkosten aus Anfangsbestand, Rechnungen und Endbestand her', () => {
 		expect(text).toContain('Anfangsbestand am 31.12.2024 CHF 600.00');
-		expect(text).toContain("Rechnungen «Heizung» in der Abrechnungsperiode CHF 1'000.00");
+		expect(text).toContain("Lieferungen «Heizung» in der Abrechnungsperiode CHF 1'000.00");
 		expect(text).toContain('Endbestand am 31.12.2025 CHF 100.00');
-		expect(text).toContain("Heizkosten nach Verbrauch CHF 1'500.00");
+		expect(text).toContain("= Verbrauch CHF 1'500.00");
+		expect(text).not.toContain('weitere Rechnungen');
 		expect(text).toContain('Über den Anfangs- und Endbestand des Heizmaterials erhalten Sie Auskunft');
 	});
 

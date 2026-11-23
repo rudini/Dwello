@@ -166,3 +166,7 @@ export const wizardStatus = target('Statusmeldung des Assistenten', (page) => pa
 
 // #1314: back from an invoice the preview named, why the wizard shows the step before the preview
 export const resumeNotice = target('Hinweis zur Rückkehr in den Assistenten', (page) => page.getByTestId('resume-notice'));
+// #1469: invoices of the tank's category over several days, which count by their days and not as a delivery
+export const tankNotDelivery = target('Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen', (page) =>
+	page.getByTestId('tank-not-delivery')
+);

@@ -228,6 +228,29 @@ describe('Hinweise mit eigenem Gebäude', () => {
 	});
 });
 
+// #1469 (PO 23.11.2026, third round; Fachreview 1469-1 M-1): in the tank's category an invoice over several days is no
+// delivery; the preview names it, not a delivery with a one-day Leistungszeitraum, nor one in a building without a tank
+describe('Rechnungen der Kategorie des Tanks, die nicht als Lieferung zählen', () => {
+	it.each([
+		['mit Tank', [['2023-12-31', '600.00'], ['2024-12-31', '100.00']], ['Tankrevision']],
+		['ohne Tank', [], []]
+	] as const)('nennt eine Rechnung über mehrere Tage in der Kategorie des Tanks, %s', async (_, readings, expected) => {
+		const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		for (const [readingDate, amount] of readings) await db.insert(fuelStocks).values({ buildingId: own.building, readingDate, amount, categoryId: heating.id });
+		await insertInvoice(own.building, { billingEntityName: 'Tankrevision', categoryId: heating.id, amount: '900.00', invoiceDate: '2024-10-05', servicePeriodStart: '2024-07-01', servicePeriodEnd: '2024-09-30' });
+		await insertInvoice(own.building, { billingEntityName: 'Heizöl', categoryId: heating.id, amount: '1000.00', invoiceDate: '2024-11-20', servicePeriodStart: '2024-11-15', servicePeriodEnd: '2024-11-15' });
+
+		const response = await callApi(`/api/v1/invoices/completeness/${own.building}?periodStart=2024-01-01&periodEnd=2024-12-31`);
+		const { tankNotDelivery } = (await response.json()) as { tankNotDelivery: { billingEntityName: string; categoryId: string }[] };
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, own.building));
+		await own.remove();
+
+		expect(tankNotDelivery.map((i) => i.billingEntityName)).toEqual([...expected]);
+		expect(tankNotDelivery.every((i) => i.categoryId === heating.id)).toBe(true);
+	});
+});
+
 // #335 (#451, Punkt 5): eine versendete Abrechnung, die die Heizkosten nach dem Heizprofil über die ganze Periode
 // rechnet, obwohl eine Heizrechnung der Periode jetzt einen Leistungszeitraum hat: eine neue Abrechnung derselben
 // Wohnung rechnet die Monate darin, beide zusammen tragen dann nicht genau die Heizkosten
@@ -264,6 +287,25 @@ describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
 		await may.remove();
 
 		expect(listed).toEqual(named ? [id] : []);
+	});
+
+	// #1469: in the tank's category a Revision with its own days is no delivery, so it counts by the profile's months
+	it('nennt eine Abrechnung auch, wenn danach eine Tankrevision mit Leistungszeitraum dazukam', async () => {
+		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		for (const [readingDate, amount] of [['2024-12-31', '800.00'], ['2025-12-31', '300.00']])
+			await db.insert(fuelStocks).values({ buildingId: may.building, readingDate, amount, categoryId: heating.id });
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-06-30' });
+		const id = await sentStatement(may, 'sent');
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '400.00', invoiceDate: '2025-04-10', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-03-31' });
+
+		const listed = await oldRuleOf(may.building);
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+		await db.delete(invoices).where(eq(invoices.buildingId, may.building));
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, may.building));
+		await may.remove();
+
+		expect(listed).toEqual([id]);
 	});
 
 	// H-28: which of these hints concern a run is decided here, by the contracts it bills (statement-run.service.ts)

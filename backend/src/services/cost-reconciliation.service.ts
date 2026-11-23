@@ -62,15 +62,17 @@ async function reconcile(buildingId: string, period: Range, billed: Billed[]) {
 			.map((s) => [keyOf(s), { opening: Number(s.stock.opening), closing: Number(s.stock.closing) }] as const)
 			.filter(([, { opening, closing }]) => opening || closing)
 	);
-	// #1464: the Rechnungen of a position, between the Anfangs- and the Endbestand of its tank (also at 0 and 0)
+	// #1464: the Rechnungen of a position, between the Anfangs- and the Endbestand of its tank (also at 0 and 0); one with
+	// its own days (a Revision) is no Lieferung and follows them (#1469, Fachreview 1469-1 V-6)
 	const rowsOf = (key: string): ReconciliationRow[] => {
-		const bills = allocable.filter((invoice) => keyOf(invoice) === key).map(rowOf);
+		const bills = allocable.filter((invoice) => keyOf(invoice) === key);
 		const stock = stocks.find((s) => keyOf(s) === key)?.stock;
-		if (!stock) return bills;
+		if (!stock) return bills.map(rowOf);
 		return [
 			{ kind: 'opening', date: stock.openingDate, amount: Number(stock.opening) },
-			...bills,
-			{ kind: 'closing', date: stock.closingDate, amount: Number(stock.closing) }
+			...bills.filter((invoice) => invoice.tank !== 'other').map(rowOf),
+			{ kind: 'closing', date: stock.closingDate, amount: Number(stock.closing) },
+			...bills.filter((invoice) => invoice.tank === 'other').map(rowOf)
 		];
 	};
 	const positions = new Map(

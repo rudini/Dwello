@@ -19,7 +19,7 @@ import {
 import { categorizeInvoice, extractInvoice, recategorizeInvoice } from './llm.service';
 import { validateInvoiceForUtilityStatement } from './utility-validation.service';
 import { buildingExists } from './building.service';
-import { periodReadings } from './fuel-stock.service';
+import { isDelivery, periodReadings } from './fuel-stock.service';
 import { getCategory } from './category.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { checkedFile } from './document.service';
@@ -564,7 +564,9 @@ export async function validateInvoice(id: string): Promise<{
 /**
  * Allocable invoices of a building for a period (for statement generation): those whose Leistungszeitraum overlaps it,
  * or without one, whose Rechnungsdatum lies in it; each with its part in the period. A delivery into the building's
- * tank counts in full in the period of its delivery date, the end of its Leistungszeitraum, never split (#451, M-1)
+ * tank counts in full in the period of its delivery date, the end of its Leistungszeitraum, never split (#451, M-1);
+ * in the tank's category only an invoice without or with a one-day Leistungszeitraum is one, another (a Revision)
+ * counts by its days (#1469). `tank` names both kinds
  */
 export async function getInvoicesForStatement(
 	buildingId: string,
@@ -577,16 +579,19 @@ export async function getInvoicesForStatement(
 		.where(and(eq(invoices.buildingId, buildingId), eq(invoices.isValidUtilityCost, true), inPeriodOf(periodStart, periodEnd)))
 		// invoices of one day in the order they were entered, so the statement's positions keep their order (#759)
 		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id);
-	const delivery = (invoice: (typeof results)[number]['invoice']) => !!tank?.covered && invoice.categoryId === tank.categoryId;
+	const kind = (invoice: (typeof results)[number]['invoice']) =>
+		!tank?.covered || invoice.categoryId !== tank.categoryId ? undefined : isDelivery(invoice) ? ('delivery' as const) : ('other' as const);
 
 	return results
-		.filter(({ invoice }) => !delivery(invoice) || !invoice.servicePeriodEnd || invoice.servicePeriodEnd <= periodEnd)
+		.filter(({ invoice }) => kind(invoice) !== 'delivery' || !invoice.servicePeriodEnd || invoice.servicePeriodEnd <= periodEnd)
 		.map((row) => ({
 			...row.invoice,
 			building: row.building,
 			category: row.category,
 			distributionKey: row.distributionKey,
 			llmCategory: null,
-			inPeriod: delivery(row.invoice) ? { start: periodStart, end: periodEnd, amount: parseFloat(row.invoice.amount) } : inPeriod(row.invoice, periodStart, periodEnd)
+			tank: kind(row.invoice),
+			inPeriod:
+				kind(row.invoice) === 'delivery' ? { start: periodStart, end: periodEnd, amount: parseFloat(row.invoice.amount) } : inPeriod(row.invoice, periodStart, periodEnd)
 		}));
 }

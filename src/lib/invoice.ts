@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import type { LatestKey } from './types';
+import type { InvoiceWithDetails, LatestKey } from './types';
 import { plainAmount } from './utils/format';
 
 /** The KI's category for an invoice, with its confidence (0 to 1) and reasoning */
@@ -20,6 +20,16 @@ export function suggestionProvenance(suggestion: Suggestion | null) {
  *  day (#451, M-1) */
 export const deliversToTank = (tankCategory: string | undefined, categoryId: string) =>
 	!!categoryId && tankCategory === categoryId;
+
+/** In the category of the building's tank, whether the allocable invoice counts as a delivery into it: without or with
+ *  a one-day Leistungszeitraum (#1469, as the backend's isDelivery); undefined for any other */
+export const tankDelivery = (
+	tankCategory: string | undefined,
+	invoice: Pick<InvoiceWithDetails, 'categoryId' | 'isValidUtilityCost' | 'servicePeriodStart' | 'servicePeriodEnd'>
+) =>
+	invoice.isValidUtilityCost && deliversToTank(tankCategory, invoice.categoryId ?? '')
+		? (invoice.servicePeriodStart ?? null) === (invoice.servicePeriodEnd ?? null)
+		: undefined;
 
 /** The Leistungszeitraum as the backend stores it: both dates, or null without one */
 export const servicePeriodOf = (values: { servicePeriodStart: string; servicePeriodEnd: string }) => ({

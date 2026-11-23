@@ -15,6 +15,7 @@ import {
 	legalNote,
 	retentionNote,
 	missedWarning,
+	tankHint,
 	overrideReason,
 	recategorizeError,
 	utilityCost,
@@ -46,3 +47,4 @@ export const deleteDialogDescription = Accessible.descriptionOf(deleteDialog);
 export const deleteDialogTitleShare = ShareInViewport.of(deleteDialogTitle);
 
 export const retentionOnDelete = Text.of(retentionNote);
+export const tankHintOfInvoice = Text.of(tankHint);

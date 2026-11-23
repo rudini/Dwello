@@ -535,10 +535,27 @@ describe('API-Verträge des Frontends', () => {
 			const actual = await (
 				await callApi(`/api/v1/invoices/completeness/${rental.building}?periodStart=2025-01-01&periodEnd=2025-12-31`)
 			).json();
-			expect(drift(await sample('invoice-completeness'), actual)).toEqual([]);
+			// without a tank here: the next test checks the invoices that do not count as a delivery (#1469)
+			expect(drift({ ...(await sample('invoice-completeness')), tankNotDelivery: [] }, actual)).toEqual([]);
 		} finally {
 			await db.delete(invoices).where(and(eq(invoices.buildingId, rental.building), eq(invoices.billingEntityName, 'Garten AG')));
 			await sendJson('DELETE', `/api/v1/distribution-keys/${key}`, {});
+		}
+	});
+
+	// #1469: an invoice of the tank's category over several days, in a building of its own with a Tankbestand
+	it('GET /invoices/completeness/:buildingId nennt die Rechnungen, die nicht als Lieferung zählen, wie invoice-completeness.json', async () => {
+		const tank = await createRental(crypto.randomUUID(), { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select({ id: categories.id }).from(categories).where(eq(categories.name, 'Heating'));
+		await db.insert(fuelStocks).values(['2024-12-31', '2025-12-31'].map((readingDate) => ({ buildingId: tank.building, readingDate, amount: '100.00', categoryId: heating.id })));
+		await insertInvoice(tank.building, { categoryId: heating.id, amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
+		try {
+			const { tankNotDelivery } = (await (await callApi(`/api/v1/invoices/completeness/${tank.building}?periodStart=2025-01-01&periodEnd=2025-12-31`)).json()) as { tankNotDelivery: unknown };
+			expect(drift((await sample('invoice-completeness')).tankNotDelivery, tankNotDelivery)).toEqual([]);
+		} finally {
+			await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, tank.building));
+			await db.delete(invoices).where(eq(invoices.buildingId, tank.building));
+			await tank.remove();
 		}
 	});
 

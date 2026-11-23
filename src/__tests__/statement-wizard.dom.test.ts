@@ -1126,7 +1126,7 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	const withInvoices = (
-		lists: Partial<Record<'lateInvoices' | 'splitKeys' | 'uncalculableKeys', unknown[]>>
+		lists: Partial<Record<'lateInvoices' | 'splitKeys' | 'uncalculableKeys' | 'tankNotDelivery', unknown[]>>
 	) =>
 		open({
 			preview,
@@ -1140,6 +1140,7 @@ describe('Abrechnungen erstellen', () => {
 						lateInvoices: [],
 						heatingWithoutServicePeriod: [],
 						uncalculableKeys: [],
+						tankNotDelivery: [],
 						...lists
 					}
 				}
@@ -1174,6 +1175,21 @@ describe('Abrechnungen erstellen', () => {
 		next();
 		await settle();
 		expect(heading()).toBe('Erstellen');
+	});
+
+	// #1469 (PO 23.11.2026, Fachreview 1469-2): eine Rechnung der Kategorie des Tanks über mehrere Tage zählt nicht als
+	// Lieferung; ein Hinweis mit ihrem Link, ohne Bestätigung
+	it('nennt Rechnungen der Kategorie des Tanks, die nicht als Lieferung zählen, ohne Bestätigung', () => {
+		const [revision] = completeness.tankNotDelivery;
+		withInvoices({ tankNotDelivery: [{ ...revision, categoryName: 'Heizung' }] });
+		const hint = byTestId('tank-not-delivery')!;
+
+		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain('Rechnungen, die nicht als Lieferung in den Tank zählen');
+		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain('In der Kategorie Heizung zählt eine Rechnung');
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
+			`/invoices/${revision.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3&from=invoice')}`
+		);
+		expect(byTestId('confirm-missing-invoices')).toBeNull();
 	});
 
 	// #1315 (Fachreview 1309-1): je Verteilschlüssel und Gebäude ein Satz mit dem Grund, auch ohne einzelne Wohnung

@@ -103,6 +103,8 @@ export interface InvoiceCheck {
 	lateInvoices?: HintedInvoice[];
 	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
 	heatingWithoutServicePeriod?: (HintedInvoice & { categoryId: string | null })[];
+	// #1469: invoices of the tank's category over several days, which count by their days and not as a delivery
+	tankNotDelivery?: (HintedInvoice & { categoryId: string | null })[];
 	oldHeatingRule?: string[]; // sent statements sharing the heating costs over the period although an invoice has one (#335)
 	splitKeys?: SplitKeyHint[]; // #528: invoices whose key differs from their Kategorie's, names in the UI language
 	// #1221: they hold the run; why, where (#1315) and whether the invoice is the delivery whose key the Tankbestand takes (#1323)
@@ -307,6 +309,7 @@ const categoryCheck = (check?: InvoiceCheck) => {
 		findings = [],
 		lateInvoices = [],
 		heatingWithoutServicePeriod = [],
+		tankNotDelivery = [],
 		splitKeys = [],
 		uncalculableKeys = []
 	} = check ?? {};
@@ -315,6 +318,7 @@ const categoryCheck = (check?: InvoiceCheck) => {
 		findings,
 		lateInvoices,
 		heatingWithoutServicePeriod,
+		tankNotDelivery,
 		splitKeys,
 		uncalculableKeys,
 		incomplete: lacksInvoices(check),
@@ -391,14 +395,6 @@ export const changedNotes = ({
 		oldRule && m.statements_existing_old_heating_rule({ tenant: tenantName }),
 		heatingSum && heatingSumText(heatingSum, tenantName)
 	].filter(Boolean) as string[];
-
-/** The hint on heating invoices without Leistungszeitraum beside ones with (#339): its categories, each quoted (V-15) */
-export function heatingWholeText(rows: { invoices: { categoryName?: string }[] }[]) {
-	const names = [...new Set(rows.flatMap((row) => row.invoices.map((invoice) => invoice.categoryName ?? '')))];
-	if (names.length === 1) return m.statements_heating_whole_text({ category: names[0] });
-	const categories = new Intl.ListFormat(`${getLocale()}-CH`).format(names.map((name) => m.statements_heating_category({ name })));
-	return m.statements_heating_whole_text_many({ categories });
-}
 
 /** Where the run can choose the settings of the existing statements, when it differs from them in one it chooses */
 export const sameSettingsNote = (changed: ChangedStatement[]) =>

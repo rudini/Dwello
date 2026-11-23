@@ -79,11 +79,11 @@ describe('Rechnungen einer Position der Kostenabstimmung', () => {
 	});
 
 	// Fachreview 1464-1 F-2: Anfangsbestand 600.00 + Lieferung 1'000.00 − Endbestand 100.00 = 1'500.00; the Lieferung
-	// counts in full in the period of its Lieferdatum although its Leistungszeitraum begins in 2023
+	// counts in full in the period of its Lieferdatum, its one-day Leistungszeitraum (#1469)
 	it('nennt bei einer Position mit Tankbestand den Anfangsbestand, die Lieferungen und den Endbestand, die zusammen die Kosten des Gebäudes ergeben', async () => {
 		const heating = await categoryNamed('Heating');
 		await stocks(heating, '600.00', '100.00');
-		const id = await invoice({ categoryId: heating, amount: '1000.00', invoiceDate: '2024-06-15', servicePeriodStart: '2023-07-01', servicePeriodEnd: '2024-06-15' });
+		const id = await invoice({ categoryId: heating, amount: '1000.00', invoiceDate: '2024-06-15', servicePeriodStart: '2024-06-15', servicePeriodEnd: '2024-06-15' });
 		const [position] = (await report()).positions;
 		expect(position).toMatchObject({
 			buildingCosts: 1500,
@@ -93,6 +93,14 @@ describe('Rechnungen einer Position der Kostenabstimmung', () => {
 				{ kind: 'closing', date: '2024-12-31', amount: 100 }
 			]
 		});
+	});
+
+	// #1469 (Fachreview 1469-1 V-6): a Tankrevision is no Lieferung: it follows the Endbestand, 732.00 × 366 / 1'096 = 244.45
+	it('nennt bei einer Position mit Tankbestand eine Tankrevision nach dem Endbestand', async () => {
+		const heating = await categoryNamed('Heating');
+		await stocks(heating, '600.00', '100.00');
+		const id = await invoice({ categoryId: heating, invoiceDate: '2024-02-01', servicePeriodStart: '2024-01-01', servicePeriodEnd: '2026-12-31' });
+		expect((await report()).positions.flatMap((p) => p.rows).map((row) => row.kind === 'invoice' ? row.id : row.kind)).toEqual(['opening', 'closing', id]);
 	});
 
 	// Fachreview 1464-1 F-2: a tank without a Lieferung, also one at 0 and 0, still has its two rows

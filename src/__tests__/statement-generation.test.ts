@@ -333,9 +333,11 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 			return Response.json(invoices);
 		}) as typeof globalThis.fetch;
 
+		// named in the UI language; the contract's category is none of the choices here (#1469)
+		const tankNotDelivery = invoiceCompleteness.tankNotDelivery.map((invoice) => ({ ...invoice, categoryName: '' }));
 		expect(await invoicesInPeriod(fetch, { ...period, buildingIds: ['b1', 'b2'] })).toEqual([
-			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0, check: { ...invoiceCompleteness, buildingId: 'b1', heatingWithoutServicePeriod: [] }, changed: [], uncategorized: [] },
-			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2, check: { ...invoiceCompleteness, buildingId: 'b2', heatingWithoutServicePeriod: [] }, changed: [], uncategorized: [] }
+			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0, check: { ...invoiceCompleteness, buildingId: 'b1', heatingWithoutServicePeriod: [], tankNotDelivery }, changed: [], uncategorized: [] },
+			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2, check: { ...invoiceCompleteness, buildingId: 'b2', heatingWithoutServicePeriod: [], tankNotDelivery }, changed: [], uncategorized: [] }
 		]);
 		// each category compared with the same dates one year earlier
 		expect(urls).toContain(`${API}/invoices/completeness/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);

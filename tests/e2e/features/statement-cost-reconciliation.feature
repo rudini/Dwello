@@ -148,6 +148,21 @@ Funktionalität: Kostenabstimmung in der Vorschau
       | Muster AG, Rechnung vom 15.06.2024 | ganz in dieser Periode | CHF 1’000.00 |
       | minus Endbestand                   | Stichtag 31.12.2024    | CHF 100.00   |
 
+  # #1469 (Fachreview 1469-1 V-6, Code-Review 1469-1 C-3): eine Tankrevision ist keine Lieferung, sie steht nach dem
+  # Endbestand: 732.00 × 366 / 1'096 = 244.45
+  Szenario: Die Kostenabstimmung der Vorschau zeigt eine Tankrevision nach dem Endbestand
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "732" Franken vom "2024-02-01" für die Zeit vom "2024-01-01" bis "2026-12-31"
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter in der Kostenabstimmung der Vorschau für "Lindenhof" die Rechnungen von "Heizung" anzeigt
+    Dann zeigt die Kostenabstimmung der Vorschau für "Lindenhof" bei "Heizung":
+      | Anfangsbestand                     | Stichtag 31.12.2023                                                                                         | CHF 600.00   |
+      | Muster AG, Rechnung vom 15.06.2024 | ganz in dieser Periode                                                                                      | CHF 1’000.00 |
+      | minus Endbestand                   | Stichtag 31.12.2024                                                                                         | CHF 100.00   |
+      | Muster AG, Rechnung vom 01.02.2024 | Rechnungsbetrag CHF 732.00, Leistungszeitraum 01.01.2024 – 31.12.2026, 366 von 1096 Tagen in dieser Periode | CHF 244.45   |
+
   Szenario: Die Kostenabstimmung der Vorschau zeigt die nicht umlagefähigen Rechnungen
     Angenommen im Gebäude "Lindenhof" gibt es eine nicht umlagefähige Rechnung der Kategorie "Reparaturen" über "500" Franken vom "2024-08-20"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet

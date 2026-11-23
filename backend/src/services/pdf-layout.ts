@@ -94,7 +94,7 @@ export interface StatementPDFData {
 		source?: string | null; // where the monthly shares come from (#465, DMR-10), in the tenant's language; null an own profile
 	};
 	// A tank: the heating costs of its category are opening stock + invoices – closing stock
-	fuel?: { category: string; openingDate: string; opening: number; invoices: number; closingDate: string; closing: number; total: number };
+	fuel?: { category: string; openingDate: string; opening: number; invoices: number; closingDate: string; closing: number; total: number; other?: number; position?: number }; // other, position: invoices with their own days (#1469)
 
 	// Totals
 	subtotal: number;

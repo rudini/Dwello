@@ -91,7 +91,7 @@ interface InvoiceGroup {
 		amount: number;
 		start: string;
 		end: string;
-	} & Pick<InvoicePart, 'noPeriod' | 'whole' | 'fuelStock'> & Pick<BilledInvoice, 'invoiceDate' | 'invoiceNumber'>>;
+	} & Pick<InvoicePart, 'noPeriod' | 'whole' | 'fuelStock'> & Pick<BilledInvoice, 'invoiceDate' | 'invoiceNumber' | 'notDelivery'>>;
 	isHeatingCost: boolean;
 }
 
@@ -99,7 +99,7 @@ interface InvoiceGroup {
 type PeriodCost = Pick<
 	Awaited<ReturnType<typeof getInvoicesForStatement>>[number],
 	'id' | 'description' | 'categoryId' | 'distributionKeyId' | 'inPeriod'
-> & Partial<Pick<Awaited<ReturnType<typeof getInvoicesForStatement>>[number], 'invoiceDate' | 'invoiceNumber'>> & {
+> & Partial<Pick<Awaited<ReturnType<typeof getInvoicesForStatement>>[number], 'invoiceDate' | 'invoiceNumber' | 'tank'>> & {
 	category: { name: string; isHeatingCost: boolean } | null;
 	distributionKey: { name: string } | null;
 };
@@ -122,7 +122,7 @@ export function groupInvoicesByCategory(invoices: PeriodCost[]): InvoiceGroup[] 
 		const key = `${invoice.categoryId || 'uncategorized'}-${invoice.distributionKeyId || 'none'}`;
 		const group = groups.get(key) ?? groups.set(key, emptyGroup(invoice)).get(key)!;
 		group.totalAmount += invoice.inPeriod.amount;
-		const receipt = { invoiceDate: invoice.invoiceDate, ...(invoice.invoiceNumber && { invoiceNumber: invoice.invoiceNumber }) };
+		const receipt = { invoiceDate: invoice.invoiceDate, ...(invoice.invoiceNumber && { invoiceNumber: invoice.invoiceNumber }), ...(invoice.tank === 'other' && { notDelivery: true as const }) };
 		group.invoices.push({ id: invoice.id, description: invoice.description, ...(receipt.invoiceDate && receipt), ...invoice.inPeriod });
 	}
 
@@ -394,7 +394,7 @@ export async function calculateStatementForContract(
 			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
 			...shareDays,
-			invoices: group.invoices.map(({ id, description, invoiceDate, invoiceNumber, amount, start, end, fuelStock }) => ({
+			invoices: group.invoices.map(({ id, description, invoiceDate, invoiceNumber, amount, start, end, fuelStock, notDelivery }) => ({
 				id,
 				description,
 				...(invoiceDate && { invoiceDate }),
@@ -402,7 +402,7 @@ export async function calculateStatementForContract(
 				amount,
 				start,
 				end,
-				...(fuelStock && { fuelStock })
+				...(fuelStock && { fuelStock }), ...(notDelivery && { notDelivery })
 			})),
 			isHeatingCost: group.isHeatingCost,
 			segments

@@ -200,6 +200,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | invoice-new            | submit-empty        |
       | invoice-detail         | default             |
       | invoice-detail         | delete-dialog       |
+      | invoice-tank-detail    | default             |
       | invoice-edit           | default             |
       | invoice-edit           | submit-cleared      |
       | invoice-edit-keyless   | default             |
@@ -229,6 +230,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | heating-hints       |
       | statement-generate     | split-keys          |
       | statement-generate     | uncalculable-keys   |
+      | statement-generate     | tank-not-delivery   |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | preview-outdated    |
       | statement-generate     | preview-invoices-expanded |

@@ -28,6 +28,7 @@ export interface CategoryInvoice {
 	isHeatingCost?: boolean;
 	partial?: boolean; // its Leistungszeitraum reaches beyond the period: only its days in the period count
 	distributionKeyId?: string | null;
+	notDelivery?: boolean; // in the tank's category, with its own days: no part of the consumption (#1469, M-2)
 }
 
 type Sum = { count: number; total: number };
@@ -143,7 +144,12 @@ function missingParts(current: CategoryInvoice[], previous: CategoryInvoice[], p
 	return now.filter((_, k) => billedThen.has(k) && !billedNow.has(k));
 }
 
+// The invoices of the consumption: an invoice with its own days in the tank's category is none (#1469, M-2)
+const consumption = (list: CategoryInvoice[]) => list.filter((invoice) => !invoice.notDelivery);
+
 function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], period: Period): CategoryFinding | null {
+	// with a Tankbestand the consumption is compared: the deliveries and its change (#1469, M-2)
+	if ([...current, ...previous].some((invoice) => invoice.isFuelStock)) [current, previous] = [consumption(current), consumption(previous)];
 	const sample = previous[0] ?? current[0];
 	const base = {
 		categoryId: sample.categoryId,
@@ -209,7 +215,8 @@ async function categoryInvoices(buildingId: string, { start, end }: Period): Pro
 		invoiceDate: invoice.servicePeriodEnd ? invoice.inPeriod.end : invoice.invoiceDate,
 		isHeatingCost: !!invoice.category?.isHeatingCost,
 		partial: 'whole' in invoice.inPeriod,
-		distributionKeyId: invoice.distributionKeyId
+		distributionKeyId: invoice.distributionKeyId,
+		notDelivery: invoice.tank === 'other'
 	}));
 	const stock = (await fuelStockChange(buildingId, start, end)).map((change) => ({
 		categoryId: change.categoryId,
@@ -226,9 +233,10 @@ async function categoryInvoices(buildingId: string, { start, end }: Period): Pro
 // which follows the key of the latest invoice, have more than one key: a hint, the amounts stay
 function keysFinding(current: CategoryInvoice[]): CategoryFinding | null {
 	const stock = current.find((invoice) => invoice.isFuelStock);
-	const keys = new Set(current.filter((invoice) => invoice.categoryId === stock?.categoryId).map((invoice) => invoice.distributionKeyId ?? null));
+	const tank = consumption(current.filter((invoice) => invoice.categoryId === stock?.categoryId));
+	const keys = new Set(tank.map((invoice) => invoice.distributionKeyId ?? null));
 	if (!stock?.distributionKeyId || keys.size < 2) return null;
-	const deliveries = current.filter((invoice) => invoice.categoryId === stock.categoryId && !invoice.isFuelStock);
+	const deliveries = tank.filter((invoice) => !invoice.isFuelStock);
 	return {
 		categoryId: stock.categoryId,
 		categoryName: stock.categoryName,
@@ -270,7 +278,7 @@ async function stockFinding(buildingId: string, period: Period, current: Categor
 	if (!readings) return tankQuestion(current);
 	const today = swissToday();
 	const missing = readings.missing.filter((day) => day <= today);
-	const costs = current.filter((invoice) => invoice.categoryId === readings.categoryId);
+	const costs = consumption(current.filter((invoice) => invoice.categoryId === readings.categoryId));
 	const [category] = await db.select({ name: categories.name, nameDE: categories.nameDE }).from(categories).where(eq(categories.id, readings.categoryId));
 	const finding = {
 		categoryId: readings.categoryId,
@@ -313,12 +321,11 @@ const withoutServicePeriod = (buildingId: string, from: string, to: string) =>
 		)
 		.orderBy(asc(invoices.invoiceDate), asc(invoices.createdAt), asc(invoices.id)); // of one day in the order entered (#770)
 
-// The period's heating invoices outside the category of the building's tank, whose deliveries count by consumption;
-// a tank decommissioned before the period shares its category by #71 again (#72)
+// The period's heating invoices but the deliveries into the building's tank, which count by consumption (a Revision
+// with its own days is none, #1469); a tank decommissioned before the period shares its category by #71 again (#72)
 async function heatingInvoices(buildingId: string, period: Period) {
-	const tank = await periodReadings(buildingId, period.start, period.end);
 	const bills = await getInvoicesForStatement(buildingId, period.start, period.end);
-	return bills.filter((invoice) => invoice.category?.isHeatingCost && !(tank?.covered && invoice.categoryId === tank.categoryId));
+	return bills.filter((invoice) => invoice.category?.isHeatingCost && invoice.tank !== 'delivery');
 }
 
 // #339: heating invoices without a Leistungszeitraum in a category whose other invoices have one; at a tenant change by
@@ -374,6 +381,14 @@ export async function invoiceSplitKeys(buildingId: string, { start, end }: Perio
 	return splitKeysOf(bills.map((invoice) => ({ ...invoice, amount: invoice.inPeriod.amount, invoices: [invoice] })));
 }
 
+// #1469 (PO 23.11.2026, Fachreview 1469-1 M-1): the invoices of the tank's category with a Leistungszeitraum over
+// several days, which count by their days and not as a delivery; a hint only
+async function tankNotDelivery(buildingId: string, { start, end }: Period) {
+	return (await getInvoicesForStatement(buildingId, start, end))
+		.filter((invoice) => invoice.tank === 'other')
+		.map(({ id, billingEntityName, description, invoiceDate, amount, categoryId }) => ({ id, billingEntityName, description, invoiceDate, amount, categoryId }));
+}
+
 /**
  * The check for one building and period, with the period it was compared with; also the invoices without
  * Leistungszeitraum dated shortly after the period (they may belong to it); the hints on heating invoices by the
@@ -396,6 +411,7 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 		findings: [stock, keysFinding(current), ...findings].filter((finding) => finding !== null),
 		lateInvoices,
 		...(await heatingHintsOf(buildingId, period)),
+		tankNotDelivery: await tankNotDelivery(buildingId, period),
 		splitKeys: await invoiceSplitKeys(buildingId, period),
 		uncalculableKeys: await uncalculableKeyInvoices(buildingId, period.start, period.end) // #1221: they hold the run
 	};

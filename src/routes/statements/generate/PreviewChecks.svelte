@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { heatingWholeText, tankNotDeliveryText } from '$lib/category-hints';
 	import {
-		heatingWholeText,
 		sameSettingsNote,
 		type invoiceRows,
 		type WizardSelection
@@ -48,9 +48,10 @@
 	// a statement named as outdated or other is a warning (#132, V-6)
 	const existingTone = $derived(existing.some((row) => row.changed.length) ? 'caution' : 'info');
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
-	const hinted = (list: 'lateInvoices' | 'heatingWithoutServicePeriod' | 'uncategorized') =>
+	const hinted = (list: 'lateInvoices' | 'heatingWithoutServicePeriod' | 'uncategorized' | 'tankNotDelivery') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
 	const late = $derived(hinted('lateInvoices'));
+	const tank = $derived(hinted('tankNotDelivery')); // #1469: no delivery into the tank, a hint
 	const uncategorized = $derived(hinted('uncategorized'));
 	// #1323: a delivery of another period whose key the Veränderung Tankbestand takes says so at its row
 	const uncalculable = $derived(
@@ -172,6 +173,13 @@
 	title={m.statements_heating_whole_title()}
 	text={heatingWholeText(heating)}
 	testid="heating-without-service-period"
+/>
+
+<InvoiceHint
+	buildings={tank}
+	title={m.statements_tank_not_delivery_title()}
+	text={tankNotDeliveryText(tank)}
+	testid="tank-not-delivery"
 />
 
 <SplitKeysHint

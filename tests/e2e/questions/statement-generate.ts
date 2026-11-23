@@ -20,6 +20,7 @@ import {
 	hintedInvoices,
 	heatingWithoutServicePeriod,
 	lateInvoices,
+	tankNotDelivery,
 	uncategorizedInvoices,
 	uncalculableKeys,
 	draftsOnlyNote,
@@ -213,3 +214,6 @@ export const finishedStepText = (label: string) => Text.of(finishedStep(label));
 export const wizardAnnouncement = Text.of(wizardStatus);
 
 export const resumeNoticeText = Text.of(resumeNotice); // #1314
+export const tankNotDeliveryText = Text.of(tankNotDelivery);
+export const tankNotDeliveryOn = (date: string) => Text.of(hintedInvoice(tankNotDelivery, date));
+export const countOfTankNotDeliveryOn = (date: string) => Count.of(hintedInvoice(tankNotDelivery, date));

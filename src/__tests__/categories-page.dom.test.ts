@@ -946,6 +946,10 @@ describe('Kategorie bearbeiten', () => {
 		expect(byTestId('category-fuel-checkbox-help')!.textContent).toContain(
 			'Eine Kategorie nur für Service, Wartung oder den Kaminfeger ist kein Brennstoff.'
 		);
+		// #1469 (Fachreview 1469-1 V-5): a Tankrevision over several days is no delivery
+		expect(byTestId('category-fuel-checkbox-help')!.textContent).toContain(
+			'Eine Rechnung dieser Kategorie mit einem Leistungszeitraum über mehrere Tage, zum Beispiel für die Tankrevision, zählt nicht als Lieferung, sondern mit den Tagen ihres Leistungszeitraums.'
+		);
 	});
 
 	it('fragt nach Brennstoff erst bei Heizkosten und wählt ihn bei einer neuen Kategorie nicht vor', () => {

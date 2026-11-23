@@ -301,6 +301,33 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann meldet die Prüfung der Kategorien für "Heizung": "Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Einheit» verteilt. Prüfen Sie die Verteilschlüssel der Rechnungen."
     Und verlangt die Vorschau keine Bestätigung
 
+  # #1469 (PO 23.11.2026): eine Rechnung der Kategorie des Tanks mit einem Leistungszeitraum über mehr als einen Tag
+  # (Tankrevision) ist keine Lieferung; die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung,
+  # hier «Pro Fläche (m²)», nicht dem der späteren Tankrevision (#890, #1323)
+  Szenario: Die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung, nicht dem einer Tankrevision
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-03-15" nach dem Verteilschlüssel "Pro Einheit"
+    Und im Gebäude "Lindenhof" gibt es danach eine Rechnung der Kategorie "Heizung" über "500" Franken vom "2024-06-15" nach dem Verteilschlüssel "Pro Fläche (m²)"
+    Und im Gebäude "Lindenhof" gibt es danach eine Rechnung der Kategorie "Heizung" über "300" Franken vom "2024-10-15" nach dem Verteilschlüssel "Pro Einheit"
+    Und die Rechnung "Heizung 2024-10-15" gilt danach für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Fläche (m²)» verteilt."
+
+  # #1469 (PO 23.11.2026, dritte Runde; Fachreview 1469-1 M-1): eine Rechnung der Kategorie des Tanks mit einem
+  # Leistungszeitraum über mehrere Tage ist keine Lieferung; die Vorschau sagt es und nennt sie, ohne anzuhalten, nicht
+  # aber die Lieferung mit eintägigem Leistungszeitraum
+  Szenario: Die Vorschau nennt eine Rechnung der Kategorie des Tanks, die nicht als Lieferung zählt
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2024-10-05" für die Zeit vom "2024-07-01" bis "2024-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-11-20" für die Zeit vom "2024-11-15" bis "2024-11-15"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann sagt der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, "In der Kategorie Heizung zählt eine Rechnung mit einem Leistungszeitraum über mehrere Tage nicht als Lieferung in den Tank, sondern mit den Tagen ihres Leistungszeitraums. Ist eine solche Rechnung eine Lieferung, tragen Sie als Beginn und als Ende den Tag der Lieferung ein."
+    Und nennt der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, die Rechnung vom "05.10.2024" über "900.00"
+    Und nennt der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, keine Rechnung vom "20.11.2024"
+    Und verlangt die Vorschau keine Bestätigung
+
   # #528 (Fachreview 528-1 V-2): schon vor dem Erstellen sagt die Vorschau, dass eine Kategorie mit verschiedenen
   # Verteilschlüsseln abgerechnet wird, und nennt die Rechnung, deren Verteilschlüssel abweicht; nur ein Hinweis
   Szenario: Die Vorschau nennt die Rechnung mit einem anderen Verteilschlüssel derselben Kategorie
@@ -439,6 +466,16 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Heizung": "Der Endbestand ist CHF 300.00 höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände und ob eine Lieferung fehlt oder ihre Rechnung erst nach dem Ende der Periode datiert ist."
     Und verlangt die Vorschau keine Bestätigung
+
+  # #1469 (Fachreview 1469-1 M-2, Code-Review 1469-1 C-3): eine Tankrevision zählt nicht zum Verbrauch und verdeckt den
+  # negativen nicht: 100 + 500 − 900 = −300, daneben die Tankrevision 3'000.00 × 366 / 1'096 = 1'001.82
+  Szenario: Hinweis auf einen Endbestand über Anfangsbestand und Einkauf auch neben einer Tankrevision
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "900" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "500" Franken für 2024
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "3000" Franken vom "2024-02-01" für die Zeit vom "2024-01-01" bis "2026-12-31"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Der Endbestand ist CHF 300.00 höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ."
 
   # Verbrauch 500 + 2000 − 500 = 2000 gegen 500 + 1000 − 500 = 1000 im Vorjahr: mehr als 25 % und mindestens CHF 100 (#73, #65)
   Szenario: Hinweis auf einen Verbrauch, der stark vom Vorjahr abweicht
@@ -781,6 +818,21 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
     Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "ist schon versendet. Sie verteilt die Heizkosten noch über die ganze Abrechnungsperiode, nicht nach dem Leistungszeitraum der Heizrechnungen. Die Heizkosten der Wohnung betragen"
+
+  # #1469 (Code-Review 1469-1 C-3): mit Tank im Gebäude ist die Heizrechnung für Januar bis März keine Lieferung, sie
+  # zählt mit ihren Monaten wie ohne Tank; die Vorschau weist auf Marc Hubers versendete Abrechnung hin
+  Szenario: Vorschau weist auf eine versendete Abrechnung nach der alten Regel hin, auch mit Tank im Gebäude
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Rechnung "Heizung 2024-04-10" gilt danach für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "ist schon versendet. Sie verteilt die Heizkosten noch über die ganze Abrechnungsperiode, nicht nach dem Leistungszeitraum der Heizrechnungen."
 
   # #508 (A, Persona Dr. Weber 451 P-3): die Vorschau nennt die Heizkosten der Wohnung, was die versendete und die neue
   # Abrechnung zusammen dafür verrechnen, und den Unterschied; Beträge nach Fachreview 508-1: Marc alt 900.00 + Eva neu

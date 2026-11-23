@@ -127,12 +127,15 @@ export const fr: Record<string, string> = {
 	sharesNoteHeating: ' Pour les frais de chauffage, la part temporelle est la part selon le profil de chauffage (voir «\u00a0Frais de chauffage et d’eau chaude\u00a0»).',
 	sharesNoteHeatingParts: ' Pour les frais de chauffage, la part temporelle est la part selon le profil de chauffage (voir «\u00a0Frais de chauffage et d’eau chaude\u00a0»)\u00a0; pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent. Si ces mois totalisent 0\u00a0% dans le profil de chauffage, ce sont vos jours de location dans cette période qui comptent.',
 	sharesNoteFuel: 'Coûts de l’immeuble pour le combustible en citerne\u00a0: la consommation (voir «\u00a0Frais de chauffage et d’eau chaude\u00a0»). Elle compte pour toute la période de décompte, même si une livraison a une période de prestation.',
+	sharesNoteFuelOther: ' Les autres factures de la même catégorie, par exemple pour la révision de la citerne, ne sont pas des livraisons\u00a0: elles comptent selon les jours de leur période de prestation compris dans la période.', // #1469, Fachreview 1469-1 V-1
 	heatingSection: 'Frais de chauffage et d’eau chaude',
 	fuelIntro: 'Le décompte porte sur le combustible consommé et non sur les achats.',
 	fuelOpening: 'Stock initial au {date}',
-	fuelInvoices: '+ Factures «\u00a0{category}\u00a0» de la période de décompte',
+	fuelInvoices: '+ Livraisons «\u00a0{category}\u00a0» de la période de décompte',
 	fuelClosing: '– Stock final au {date}',
-	fuelTotal: '= Frais de chauffage selon la consommation',
+	fuelTotal: '= Consommation',
+	fuelOther: '+ Autres factures «\u00a0{category}\u00a0» selon les jours de leur période de prestation', // #1469: the category's invoices with their own days
+	fuelPosition: '= Coûts de l’immeuble «\u00a0{category}\u00a0»',
 	notes: 'Remarques',
 	agreedCosts: 'Seuls les frais accessoires convenus dans le contrat de bail sont décomptés : {categories}.',
 	managementFeeAgreed: 'Les frais d’administration sont convenus dans le contrat de bail. Ils couvrent le travail lié à l’établissement de ce décompte (art. 4 al. 3 OBLF).',

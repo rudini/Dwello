@@ -125,6 +125,7 @@
 		"old-address-preview": "Statement wizard preview of 2024 with a tenant who moved out and still has the building's address: the warning at his row (A-5, #114).",
 		"uncalculable-keys": "Statement wizard preview of 2025 with Kreuzweg, whose invoice by a custom Verteilschlüssel divides by zero at its 3.5-room apartment: the hint that holds the run, with the invoice's edit link (#1221).",
 		"split-keys": "Statement wizard preview of 2024 with a Kategorie billed by two Verteilschlüssel: the invoice whose key differs, with its edit link (#528).",
+		"tank-not-delivery": "Statement wizard preview of 2025 with Tankhof, whose Tankrevision over ten years is in the category of its tank: the hint that it counts by its days and not as a delivery, with the invoice's edit link; it blocks nothing (#1469).",
 		"heating-hints": "Statement wizard preview of 2024 with tenants who moved out and a Heizprofil: the heating invoices without Leistungszeitraum beside one with, each with its edit link (#339, #451).",
 		"discontinued-figure": "Overview with an apartment that no longer exists: the figure «Aufgehoben» and its explanation beside «Vermietet ab …» and «Gesperrt» (#1311).",
 		"old-address-task": "Overview with a draft statement of a tenant who moved out and still has the building's address: the task «Neue Adresse eintragen» (A-5, #114).",
@@ -675,6 +676,13 @@
 			]
 		},
 		{
+			"name": "invoice-tank-detail",
+			"path": "/invoices/{tankInvoice}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "invoice-edit",
 			"path": "/invoices/{invoice}/edit",
 			"states": [
@@ -759,6 +767,7 @@
 				"heating-hints",
 				"split-keys",
 				"uncalculable-keys",
+				"tank-not-delivery",
 				"preview-all-billed",
 				"preview-outdated",
 				"preview-invoices-expanded",

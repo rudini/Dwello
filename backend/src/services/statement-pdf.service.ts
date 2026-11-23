@@ -228,16 +228,19 @@ function heatingOf(statement: StatementWithDetails, language: Language, hasHeati
 	return { heating: { profile: localName(stored.names, language), percent, months, periodPercent, periodMonths, source } };
 }
 
-// A tank in the period: its category's costs are opening stock + the invoices – closing stock (Art. 5 Abs. 2 lit. a VMWG),
-// with the readings the statement was created with; the invoices are its category's positions less the change
+// A tank in the period: the consumption is opening stock + the deliveries – closing stock (Art. 5 Abs. 2 lit. a VMWG),
+// with the readings the statement was created with; the deliveries are its category's positions less the change and
+// less its other invoices with their own days (a Revision, #1469), which follow the consumption with the position's sum
 function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language) {
 	const stock = statement.fuelStock;
 	const category = stock && names.get(stock.categoryId);
 	if (!stock || !category) return {};
-	const total = statement.lineItems
-		.filter((item) => item.categoryId === stock.categoryId)
-		.reduce((sum, item) => sum + parseFloat(item.totalAmount), 0);
+	const items = statement.lineItems.filter((item) => item.categoryId === stock.categoryId);
+	const position = items.reduce((sum, item) => sum + parseFloat(item.totalAmount), 0);
+	// one created before #1469 marks none: it billed every invoice of the category as a delivery
+	const other = items.flatMap((item) => item.invoices ?? []).reduce((sum, invoice) => sum + (invoice.notDelivery ? invoice.amount : 0), 0);
 	const [opening, closing] = [parseFloat(stock.opening), parseFloat(stock.closing)];
+	const total = position - other;
 	return {
 		fuel: {
 			category: localName(category, language),
@@ -246,7 +249,8 @@ function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, lang
 			invoices: roundToRappen(total - opening + closing),
 			closingDate: stock.closingDate,
 			closing,
-			total: roundToRappen(total)
+			total: roundToRappen(total),
+			...(other !== 0 && { other: roundToRappen(other), position: roundToRappen(position) })
 		}
 	};
 }

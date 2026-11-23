@@ -25,6 +25,9 @@ import {
 	heatingWithoutServicePeriodOn,
 	countOfHeatingWithoutServicePeriodOn,
 	lateInvoiceOn,
+	tankNotDeliveryText,
+	tankNotDeliveryOn,
+	countOfTankNotDeliveryOn,
 	lateInvoicesInOrder,
 	uncategorizedInvoiceOn,
 	uncategorizedInvoicesText,
@@ -814,3 +817,22 @@ Then('zeigt die Schrittanzeige beim aktuellen Schritt den Namen {string}', async
 	await verwalter.sees(currentStepNameText).toBe(name);
 	await verwalter.sees(currentStepNameWidth).toBeGreaterThan(1);
 });
+
+// #1469: invoices of the tank's category over several days count by their days, not as a delivery
+Then('sagt der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(tankNotDeliveryText).toContain(text);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(tankNotDeliveryOn(date)).toContain(amount);
+	}
+);
+
+Then(
+	'nennt der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, keine Rechnung vom {string}',
+	async ({ verwalter }, date: string) => {
+		await verwalter.sees(countOfTankNotDeliveryOn(date)).toBe(0);
+	}
+);
