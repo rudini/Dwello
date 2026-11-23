@@ -1147,6 +1147,11 @@ describe('Rechnung erfassen', () => {
 		fireEvent(byTestId<HTMLSelectElement>('invoice-building-select')!, 'change', 'b1');
 		expect(text()).toContain(delivery);
 		expect(text().indexOf(delivery)).toBeLessThan(text().indexOf(periods));
+		// #1469 (Fachreview 1469-1 V-2): a Leistungszeitraum over several days makes no delivery
+		expect(text()).toContain(
+			'Eine Rechnung mit einem Leistungszeitraum über mehrere Tage, zum Beispiel für die Tankrevision, ist keine Lieferung: Sie zählt mit den Tagen ihres Leistungszeitraums in jeder Abrechnungsperiode.'
+		);
+		expect(text()).not.toContain('dessen letzter Tag');
 	});
 
 	it('warnt ohne Abrechnungsperiode nicht', () => {

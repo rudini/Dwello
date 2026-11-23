@@ -74,6 +74,7 @@ export type Example = {
 	building: string;
 	tankBuilding: string;
 	splitBuilding: string; // #528: a Kategorie billed by two Verteilschlüssel
+	tankHintBuilding?: string; // #1469: a Tankrevision in the tank's category, which counts by its days
 	otherPeriodBuilding: string; // #1088: a building that bills November – October
 	heatingProfile: string;
 	accessKey?: string; // the name of a Zugangsschlüssel the key states create or revoke (#817)
@@ -147,7 +148,7 @@ export const UPLOADED = 'IMG_0412';
 async function seedFor(seed: TestData, path: string, state: string) {
 	// #1413: a paged list gets the records below; the audit log's would come before its old entries on its first page
 	const pagedList = state === 'paged' && !path.startsWith('/config/audit-log');
-	if (!path.includes('{') && !pagedList && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-invoices-expanded', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-other-period', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'discontinued-figure', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'uncalculable-keys', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', otherPeriodBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !pagedList && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-invoices-expanded', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-other-period', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'discontinued-figure', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'uncalculable-keys', 'tank-not-delivery', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', otherPeriodBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -304,6 +305,14 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	// #1221: in 2025 a custom key divides by zero at K1's 3.5 rooms; the wizard's preview refuses
 	await seed.distributionKey('Zimmerformel', '1 / (({rooms} - 3.5) * ({rooms} - 3.5))');
 	await seed.invoiceOnByKey('Kreuzweg', 'Hauswart', '900.00', '2025-06-30', seed.names.get('Zimmerformel')!);
+	// #1469: a Tankrevision over ten years in the category of the tank: the preview of 2025 names it, no delivery
+	await seed.building('Tankhof', 'Winterthur');
+	await seed.apartment('Tankhof', 'T1', 'vacant');
+	await seed.tenant('Theo');
+	await seed.contract('Theo', 'T1', { startDate: '2025-01-01', baseRent: '1200.00' });
+	await seed.fuelStock('Tankhof', '2024-12-31', '600.00');
+	await seed.fuelStock('Tankhof', '2025-12-31', '100.00');
+	await seed.invoiceOn('Tankhof', 'Heizung', '700.00', '2025-03-11', ['2018-02-09', '2028-02-09']);
 	// #1309: a draft (2023) and a sent statement (2024) whose key divides by zero at L1's 3.5 rooms since it changed
 	await seed.building('Lärchenweg', 'Winterthur');
 	await seed.apartment('Lärchenweg', 'L1', 'vacant');
@@ -456,6 +465,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		building: ids.building!,
 		tankBuilding: seed.idOf('Bergsicht')!,
 		splitBuilding: seed.idOf('Kreuzweg')!,
+		tankHintBuilding: seed.idOf('Tankhof')!,
 		otherPeriodBuilding: seed.idOf('Ahornweg')!,
 		heatingProfile: ids.heatingProfile!
 	};

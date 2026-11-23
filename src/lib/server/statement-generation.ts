@@ -351,6 +351,10 @@ const localCheck = (
 		...invoice,
 		categoryName: (invoice.categoryId && names.get(invoice.categoryId)) || ''
 	})),
+	tankNotDelivery: check.tankNotDelivery?.map((invoice) => ({
+		...invoice,
+		categoryName: (invoice.categoryId && names.get(invoice.categoryId)) || ''
+	})),
 	findings: check.findings?.map((finding) => ({
 		...finding,
 		categoryName: finding.categoryId

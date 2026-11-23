@@ -150,7 +150,6 @@ const consumption = (list: CategoryInvoice[]) => list.filter((invoice) => !invoi
 function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], period: Period): CategoryFinding | null {
 	// with a Tankbestand the consumption is compared: the deliveries and its change (#1469, M-2)
 	if ([...current, ...previous].some((invoice) => invoice.isFuelStock)) [current, previous] = [consumption(current), consumption(previous)];
-	if (current.length + previous.length === 0) return null;
 	const sample = previous[0] ?? current[0];
 	const base = {
 		categoryId: sample.categoryId,
@@ -382,6 +381,14 @@ export async function invoiceSplitKeys(buildingId: string, { start, end }: Perio
 	return splitKeysOf(bills.map((invoice) => ({ ...invoice, amount: invoice.inPeriod.amount, invoices: [invoice] })));
 }
 
+// #1469 (PO 23.11.2026, Fachreview 1469-1 M-1): the invoices of the tank's category with a Leistungszeitraum over
+// several days, which count by their days and not as a delivery; a hint only
+async function tankNotDelivery(buildingId: string, { start, end }: Period) {
+	return (await getInvoicesForStatement(buildingId, start, end))
+		.filter((invoice) => invoice.tank === 'other')
+		.map(({ id, billingEntityName, description, invoiceDate, amount, categoryId }) => ({ id, billingEntityName, description, invoiceDate, amount, categoryId }));
+}
+
 /**
  * The check for one building and period, with the period it was compared with; also the invoices without
  * Leistungszeitraum dated shortly after the period (they may belong to it); the hints on heating invoices by the
@@ -404,6 +411,7 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 		findings: [stock, keysFinding(current), ...findings].filter((finding) => finding !== null),
 		lateInvoices,
 		...(await heatingHintsOf(buildingId, period)),
+		tankNotDelivery: await tankNotDelivery(buildingId, period),
 		splitKeys: await invoiceSplitKeys(buildingId, period),
 		uncalculableKeys: await uncalculableKeyInvoices(buildingId, period.start, period.end) // #1221: they hold the run
 	};

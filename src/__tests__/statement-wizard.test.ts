@@ -3,7 +3,6 @@ import {
 	akontoHint,
 	draftsLink,
 	findingText,
-	heatingWholeText,
 	needsConfirmation,
 	invoiceRows,
 	restoredSelection,
@@ -12,6 +11,7 @@ import {
 	statementSteps,
 	type CategoryFinding
 } from '../lib/statement-wizard';
+import { heatingWholeText, tankNotDeliveryText } from '../lib/category-hints';
 
 const selection = {
 	periodStart: '2024-01-01',
@@ -101,6 +101,7 @@ describe('Rechnungen pro Gebäude', () => {
 				allSkipped: false,
 				lateInvoices: [],
 				heatingWithoutServicePeriod: [],
+				tankNotDelivery: [],
 				splitKeys: [],
 				uncalculableKeys: [],
 				findings: [],
@@ -120,6 +121,7 @@ describe('Rechnungen pro Gebäude', () => {
 				allSkipped: false,
 				lateInvoices: [],
 				heatingWithoutServicePeriod: [],
+				tankNotDelivery: [],
 				splitKeys: [],
 				uncalculableKeys: [],
 				findings: [],
@@ -501,6 +503,24 @@ describe('Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum', () => {
 	it('nennt mehrere Kategorien je in Anführungszeichen, in der Mehrzahl', () => {
 		expect(heatingWholeText([row('Heizung'), row('Kaminfeger')])).toContain(
 			'Diese Rechnungen der Kategorien «Heizung» und «Kaminfeger» haben keinen Leistungszeitraum'
+		);
+	});
+});
+
+// #1469 (PO 23.11.2026, Fachreview 1469-2): der Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen, nennt
+// die Kategorie des Tanks, bei mehreren Gebäuden mit verschiedenen Kategorien alle in der Mehrzahl
+describe('Hinweis auf Rechnungen, die nicht als Lieferung in den Tank zählen', () => {
+	const row = (categoryName: string) => ({ invoices: [{ categoryName }] });
+
+	it('nennt eine Kategorie in der Einzahl', () => {
+		expect(tankNotDeliveryText([row('Heizung'), row('Heizung')])).toBe(
+			'In der Kategorie Heizung zählt eine Rechnung mit einem Leistungszeitraum über mehrere Tage nicht als Lieferung in den Tank, sondern mit den Tagen ihres Leistungszeitraums. Ist eine solche Rechnung eine Lieferung, tragen Sie als Beginn und als Ende den Tag der Lieferung ein.'
+		);
+	});
+
+	it('nennt mehrere Kategorien in der Mehrzahl', () => {
+		expect(tankNotDeliveryText([row('Heizung'), row('Pellets')])).toBe(
+			'In den Kategorien Heizung und Pellets zählt eine Rechnung mit einem Leistungszeitraum über mehrere Tage nicht als Lieferung in den Tank, sondern mit den Tagen ihres Leistungszeitraums. Ist eine solche Rechnung eine Lieferung, tragen Sie als Beginn und als Ende den Tag der Lieferung ein.'
 		);
 	});
 });
