@@ -569,6 +569,13 @@ describe('Rechnungsdetail', () => {
 			expect(shown(overrides)).toBe(expected);
 		});
 
+		// Fachreview 1469-3 V-9: a delivery counts over the whole period, not only its days in it
+		it('sagt bei einer Lieferung mit eintägigem Leistungszeitraum nicht, dass nur die Tage in der Periode zählen', () => {
+			shown({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' });
+			expect(text()).toContain('Leistungszeitraum 10.03.2025 – 10.03.2025');
+			expect(text()).not.toContain('Nur die Tage in der Abrechnungsperiode zählen.');
+		});
+
 		it('sagt in einer anderen Kategorie als der des Tanks nichts zur Lieferung', () => {
 			expect(shown({}, 'c2')).toBeUndefined();
 		});

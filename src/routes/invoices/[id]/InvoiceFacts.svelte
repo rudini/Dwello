@@ -43,7 +43,10 @@
 				<dd class="text-ink">
 					{formatDate(invoice.servicePeriodStart)} – {formatDate(invoice.servicePeriodEnd)}
 				</dd>
-				<dd class="text-ink-muted">{m.invoices_service_period_days()}</dd>
+				<!-- a delivery into the tank counts over the whole period (Fachreview 1469-3 V-9) -->
+				{#if delivery !== true}
+					<dd class="text-ink-muted">{m.invoices_service_period_days()}</dd>
+				{/if}
 				{@render tankHint()}
 			</div>
 		{/if}

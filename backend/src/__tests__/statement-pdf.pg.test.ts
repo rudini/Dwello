@@ -640,11 +640,11 @@ describe('Tankbestand im PDF', () => {
 	it('zählt eine Lieferung ganz in der Periode ihres Lieferdatums', async () => {
 		const august = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
-		const delivery = (amount: string, servicePeriodStart: string, servicePeriodEnd: string) =>
-			insertInvoice(august.building, { categoryId: heating.id, amount, description: 'Heizöl', invoiceDate: servicePeriodEnd, servicePeriodStart, servicePeriodEnd });
-		await delivery('1000.00', '2025-12-15', '2025-12-15');
-		await delivery('300.00', '2025-01-10', '2025-01-10');
-		await delivery('700.00', '2026-02-10', '2026-02-10');
+		const delivery = (amount: string, day: string, invoiceDate = day) =>
+			insertInvoice(august.building, { categoryId: heating.id, amount, description: 'Heizöl', invoiceDate, servicePeriodStart: day, servicePeriodEnd: day });
+		await delivery('1000.00', '2025-12-15');
+		await delivery('300.00', '2025-01-10', '2024-12-20'); // invoiced before the period (Fachreview 1469-3 V-10)
+		await delivery('700.00', '2026-02-10');
 		await createFuelStock(august.building, { readingDate: '2024-12-31', amount: '600.00', categoryId: heating.id });
 		await createFuelStock(august.building, { readingDate: '2025-12-31', amount: '800.00', categoryId: heating.id });
 		const statement = await generateStatement({ contractId: august.contract, buildingId: august.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
