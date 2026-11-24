@@ -99,7 +99,7 @@ function partLines(item: LineItem, t: Record<string, string>) {
 	const texts = parts.map((part) => partLine(part, t, t.partNameNone));
 	const lines = texts.map((line, i) => {
 		const name = nameOf(parts[i], texts.filter((text) => text === line).length, t);
-		if (parts[i].noPeriod) return name ? partLine(parts[i], t, name) : line;
+		if (parts[i].noPeriod || parts[i].delivery) return name ? partLine(parts[i], t, name) : line;
 		const lead = t.partNamedLower ? line[0].toLowerCase() + line.slice(1) : line;
 		return name ? fill(t.partNamed, { line: lead, name }) : line;
 	});
@@ -125,7 +125,7 @@ function partLine(part: InvoicePart, t: Record<string, string>, name: string) {
 	if (!part.profile) return fill(text, { ...partValues(part, t.colon), name });
 	const { percent, months, periodMonths } = part.profile;
 	const head = text.slice(0, text.indexOf('{amount}') + '{amount}'.length);
-	return fill(head + (part.noPeriod ? t.partProfileRun : t.partProfile), {
+	return fill(head + (part.noPeriod || part.delivery ? t.partProfileRun : t.partProfile), {
 		...partValues(part, t.colon),
 		name,
 		percent: percent.toFixed(2),
@@ -152,17 +152,21 @@ export const monthSum = (shares: { month: number; percentage: number }[]) =>
 export const ownProfileDays = (data: StatementPDFData) => data.lineItems.some((item) => item.byProfile && item.invoiceParts);
 // every heating position by the profile has its invoices with their own Leistungszeitraum: the run's share bills none (#509)
 export const noRunShare = (data: StatementPDFData) =>
-	data.lineItems.filter((item) => item.byProfile).every((item) => item.invoiceParts && !item.invoiceParts.some((part) => part.noPeriod));
+	data.lineItems.filter((item) => item.byProfile).every((item) => item.invoiceParts && !item.invoiceParts.some((part) => part.noPeriod || part.delivery));
+// the heating section's sentence on the run's share: with a delivery into the tank, which bills it, for an invoice over
+// the whole period (#1470)
+export const runShareNote = (data: StatementPDFData) =>
+	data.lineItems.some((item) => item.byProfile && item.invoiceParts?.some((part) => part.delivery)) ? 'heatingNoteDelivery' : 'heatingNoteParts';
 
 // An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241);
 // the change of the Tankbestand is no invoice and says so (#239)
 const partText = (part: InvoicePart) =>
-	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.whole ? 'partBeyond' : 'partLine';
+	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.delivery ? 'partDelivery' : part.whole ? 'partBeyond' : 'partLine';
 // A line names its invoice where dates and amount match no single receipt: without a Leistungszeitraum (its dates are
 // the period's) or the same as another line's (#236), by Rechnungsdatum and Rechnungsnummer as on the receipt (#451);
 // the Tankbestand, once per position, never is
 const nameOf = (part: Part, same: number, t: Record<string, string>) => {
-	if (!part.invoiceDate || !(part.noPeriod || same > 1)) return undefined;
+	if (!part.invoiceDate || !(part.noPeriod || part.delivery || same > 1)) return undefined;
 	const date = formatDate(part.invoiceDate);
 	return part.invoiceNumber ? fill(t.partNameNumber, { date, number: part.invoiceNumber }) : fill(t.partName, { date });
 };
@@ -226,7 +230,9 @@ function sharesNote(data: StatementPDFData, t: Record<string, string>) {
 	});
 	// «Vereinbart ab» (#368, Fachreview 368-B M-1): those days are not the Mietstage of the header
 	const from = data.agreedCosts?.some((cost) => cost.from) ? t.sharesNoteAgreedFrom : '';
-	return data.fuel ? `${shares}${from} ${t.sharesNoteFuel}${data.fuel.position === undefined ? '' : t.sharesNoteFuelOther}` : shares + from;
+	if (data.fuel) return `${shares}${from} ${t.sharesNoteFuel}${data.fuel.position === undefined ? '' : t.sharesNoteFuelOther}`;
+	// without both stocks a delivery bills the whole period although its receipt shows one day (#1470)
+	return shares + from + (data.lineItems.some((item) => item.tankDelivery) ? t.sharesNoteDelivery : '');
 }
 
 // The rounded percentage, also of a share by the Heizprofil (#256); a credit over other days than an invoice of its

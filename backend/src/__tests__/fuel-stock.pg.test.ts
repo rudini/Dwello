@@ -353,6 +353,14 @@ describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
 		});
 	});
 
+	// Code-Review 1470-1 C-1: with both stocks the delivery beside a Tankrevision is marked as one too, so its line
+	// names it as a delivery, not the period as its Leistungszeitraum (Fachreview 1470-1 V-3)
+	it('markiert neben einer Tankrevision die Lieferung auch mit Anfangs- und Endbestand als Lieferung', async () => {
+		await withInvoice({ amount: '700.00', invoiceDate: '2018-02-09', servicePeriodStart: '2018-02-09', servicePeriodEnd: '2028-02-09' }, async () => {
+			expect((await heatingLine(2024))?.invoices).toContainEqual(expect.objectContaining({ amount: 3000, delivery: true }));
+		});
+	});
+
 	// pins kept behaviour (#451, M-1): a one-day Leistungszeitraum is the delivery day
 	it('rechnet eine Rechnung mit eintägigem Leistungszeitraum ganz als Lieferung ab', async () => {
 		await withInvoice({ amount: '1000.00', invoiceDate: '2026-01-20', servicePeriodStart: '2025-12-20', servicePeriodEnd: '2025-12-20' }, async () => {
@@ -382,6 +390,27 @@ describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
 		await withInvoice({ amount: '700.00', invoiceDate: '2018-02-09', servicePeriodStart: '2018-02-09', servicePeriodEnd: '2028-02-09' }, async () => {
 			expect((await findings(rental.building, 2025)).filter((f) => f.kind === 'consumption')).toMatchObject([{ current: { total: 400 } }]);
 		});
+	});
+
+	// #1470: 2027 has neither Anfangs- nor Endbestand (the last reading is 31.12.2025), the delivery counts over the period
+	it('rechnet eine Lieferung ohne Anfangs- und Endbestand über die ganze Periode ab, nicht nur an ihrem Tag', async () => {
+		await withInvoice({ amount: '900.00', invoiceDate: '2027-10-05', servicePeriodStart: '2027-09-30', servicePeriodEnd: '2027-09-30' }, async () => {
+			expect((await heatingLines(2027)).find((line) => line.totalBuildingAmount === 900)).toMatchObject({ billedDays: 365, invoices: [{ start: '2027-01-01', end: '2027-12-31' }] });
+		});
+	});
+
+	// #1470, Fachreview 1470-1 V-1: after the year of decommissioning there is no tank to deliver into; a one-day
+	// invoice of the former tank's category counts on its day, like any invoice
+	it('rechnet nach der Stilllegung des Tanks eine eintägige Rechnung mit ihrem Tag ab, nicht als Lieferung', async () => {
+		const own = await createRental(`${token}-1470`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await record('2022-12-31', '800.00', own.building);
+		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, own.building));
+		await insertInvoice(own.building, { categoryId: heating, amount: '900.00', invoiceDate: '2024-10-05', servicePeriodStart: '2024-09-30', servicePeriodEnd: '2024-09-30' });
+		const lines = await linesOf(own.contract, 2024);
+		await db.delete(invoices).where(eq(invoices.buildingId, own.building));
+		await own.remove();
+
+		expect(lines.filter((line) => line.categoryId === heating)).toMatchObject([{ billedDays: 1 }]);
 	});
 
 	it('meldet keine verschiedenen Verteilschlüssel der Lieferungen, wenn nur eine Tankrevision einen anderen hat', async () => {

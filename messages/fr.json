@@ -1569,6 +1569,8 @@
 	"statements_part_no_period_profile": "Sans période de prestation : {amount}, part selon le profil de chauffage : {percent} %",
 	"statements_part_beyond_profile": "Période de prestation {wholeStart} – {wholeEnd} (facture {wholeAmount}), dont {start} – {end} : {amount}, part selon le profil de chauffage : {percent} %",
 	"statements_part_stock_profile": "Variation du stock de combustible {start} – {end} : {amount}, part selon le profil de chauffage : {percent} %",
+	"statements_part_delivery": "Livraison dans la citerne, valable pour toute la période de décompte : {amount}, {days} jours de location sur {total}",
+	"statements_part_delivery_profile": "Livraison dans la citerne, valable pour toute la période de décompte : {amount}, part selon le profil de chauffage : {percent} %",
 	"statements_fuel_stock": "Variation du stock de combustible",
 	"statements_line_invoices": "Factures pour {category}",
 	"statements_share_days": "{days}/{total} jours",

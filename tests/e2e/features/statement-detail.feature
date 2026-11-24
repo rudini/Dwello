@@ -774,6 +774,72 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "1'400.00 700.00 139/365 Tage 266.58"
     Und steht im PDF nicht "Leistungszeitraum 30.09.2025"
 
+  # #1470 (PO 24.11.2026): ohne Anfangs- und Endbestand zählt eine Lieferung in den Tank über die ganze Periode ihres
+  # Lieferdatums, wie eine Rechnung ohne Leistungszeitraum; der letzte Tankbestand liegt vor der Periode. Nach Tagen:
+  # 900.00 / 2 Wohnungen = 450.00 × 139/365 = 171.37; nach Heizprofil ab 15.08.: Aug 0 + Sep 2 + Okt 8 + Nov 14 +
+  # Dez 26 = 50 % von 100 %, 450.00 × 50 % = 225.00
+  Szenario: Eine Lieferung in den Tank ohne Anfangs- und Endbestand zählt im PDF nach den Mietstagen der ganzen Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
+    Und steht im PDF "Für den Tank fehlt der Anfangs- oder der Endbestand. Die Lieferungen von Heizmaterial in den Tank in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat."
+
+  Szenario: Eine Lieferung in den Tank ohne Anfangs- und Endbestand zählt im PDF nach dem Heizprofil der ganzen Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "900.00 450.00 50.00 % 225.00"
+
+  # #1470 (Fachreview 1470-1 V-3): unter der Position nennt die Zeile der Lieferung ihre Rechnung, keinen
+  # Leistungszeitraum, den kein Beleg zeigt; 1'084.00 / 2 = 542.00; 900.00 × 139/365 + 184.00 × 139/184 = 342.74 +
+  # 139.00, Ihr Anteil 0.5 × 481.74 = 240.87
+  Szenario: Eine Lieferung in den Tank ohne Anfangs- und Endbestand steht im PDF unter ihrer Position mit ihrer Rechnung
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "184" Franken vom "2025-12-31" für die Zeit vom "2025-07-01" bis "2025-12-31"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Rechnung vom 05.10.2025, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Ihre Mietstage 139 von 365 Tagen"
+    Und steht im PDF "= 240.87"
+
+  # #1470 (Fachreview 1470-2 V-6, Code-Review 1470-2 C-2): nach Heizprofil zählt die Lieferung mit dem Anteil der Periode,
+  # ab 15.08. 50 % von 100 %; der Abschnitt zu den Heizkosten nennt ihn für eine Rechnung über die ganze Periode
+  Szenario: Eine Lieferung in den Tank ohne Anfangs- und Endbestand steht im PDF nach dem Heizprofil mit dem Anteil der Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "184" Franken vom "2025-12-31" für die Zeit vom "2025-07-01" bis "2025-12-31"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Rechnung vom 05.10.2025, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Anteil nach Heizprofil: 50.00 % (siehe Heiz- und Warmwasserkosten)"
+    Und steht im PDF "»: 50.00 % für eine Rechnung, die für die ganze Abrechnungsperiode gilt. Bei einer anderen Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition."
+
   # #1469 (PO 23.11.2026): eine Rechnung der Kategorie des Tanks mit einem Leistungszeitraum über mehr als einen Tag
   # (Tankrevision) ist keine Lieferung: sie zählt wie jede Rechnung mit den Tagen ihres Leistungszeitraums in der
   # Periode, auch mit Anfangs- und Endbestand; 700.00 × 365 / 3'653 Tage = 69.94 (#241); der Abschnitt zeigt sie

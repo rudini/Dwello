@@ -5,7 +5,7 @@
 
 import { and, asc, desc, eq, isNotNull, isNull, lte, or } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, fuelStocks, invoices } from '../db/schema';
+import { buildings, categories, distributionKeys, fuelStocks, invoices } from '../db/schema';
 import { getTypedConfig } from './config.service';
 import type { ErrorCode } from './coded-error';
 import { isRealDate } from './real-date';
@@ -45,17 +45,25 @@ const dayBefore = (isoDate: string) => new Date(Date.parse(isoDate) - 86_400_000
 /**
  * The readings a period needs, at the end of the day before it and of its last day, with the category of the latest
  * reading; covered: the period has fuel to bill, a reading after the day before it or an opening stock above zero (the
- * closing stock 0 of the year a tank is decommissioned opens the next year); null for a building that never had one
+ * closing stock 0 of the year a tank is decommissioned opens the next year); null for a building that never had one,
+ * and for one recorded without a tank in a period no reading covers: it has no tank to deliver into (#72, #1470)
  */
 export async function periodReadings(buildingId: string, periodStart: string, periodEnd: string) {
-	const readings = await listFuelStocks(buildingId);
+	// one query with the building's noTank, so a list of statements does not pay for it per period (P2)
+	const rows = await db
+		.select({ stock: fuelStocks, noTank: buildings.noTank })
+		.from(fuelStocks)
+		.innerJoin(buildings, eq(buildings.id, fuelStocks.buildingId))
+		.where(eq(fuelStocks.buildingId, buildingId))
+		.orderBy(asc(fuelStocks.readingDate));
+	const readings = rows.map((row) => row.stock);
 	if (readings.length === 0) return null;
 	const on = (date: string) => readings.find((stock) => stock.readingDate === date);
 	const [opening, closing] = [on(dayBefore(periodStart)), on(periodEnd)];
 	const categoryId = (closing ?? readings.at(-1)!).categoryId;
 	const missing = [!opening && dayBefore(periodStart), !closing && periodEnd].filter((date): date is string => !!date);
 	const covered = readings.some((stock) => stock.readingDate > dayBefore(periodStart)) || Number(opening?.amount) > 0;
-	return { opening, closing, categoryId, missing, covered };
+	return rows[0].noTank && !covered ? null : { opening, closing, categoryId, missing, covered };
 }
 
 /** In the tank's category a delivery has no Leistungszeitraum or a one-day one, its delivery day (#451, #1469) */
