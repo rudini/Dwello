@@ -823,6 +823,23 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "Rechnung vom 05.10.2025, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Ihre Mietstage 139 von 365 Tagen"
     Und steht im PDF "= 240.87"
 
+  # #1470 (Fachreview 1470-2 V-6, Code-Review 1470-2 C-2): nach Heizprofil zählt die Lieferung mit dem Anteil der Periode,
+  # ab 15.08. 50 % von 100 %; der Abschnitt zu den Heizkosten nennt ihn für eine Rechnung über die ganze Periode
+  Szenario: Eine Lieferung in den Tank ohne Anfangs- und Endbestand steht im PDF nach dem Heizprofil mit dem Anteil der Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "184" Franken vom "2025-12-31" für die Zeit vom "2025-07-01" bis "2025-12-31"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Rechnung vom 05.10.2025, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Anteil nach Heizprofil: 50.00 % (siehe Heiz- und Warmwasserkosten)"
+    Und steht im PDF "»: 50.00 % für eine Rechnung, die für die ganze Abrechnungsperiode gilt. Bei einer anderen Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition."
+
   # #1469 (PO 23.11.2026): eine Rechnung der Kategorie des Tanks mit einem Leistungszeitraum über mehr als einen Tag
   # (Tankrevision) ist keine Lieferung: sie zählt wie jede Rechnung mit den Tagen ihres Leistungszeitraums in der
   # Periode, auch mit Anfangs- und Endbestand; 700.00 × 365 / 3'653 Tage = 69.94 (#241); der Abschnitt zeigt sie
