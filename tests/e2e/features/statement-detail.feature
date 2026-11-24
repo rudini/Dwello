@@ -774,6 +774,38 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "1'400.00 700.00 139/365 Tage 266.58"
     Und steht im PDF nicht "Leistungszeitraum 30.09.2025"
 
+  # #1470 (PO 24.11.2026): ohne Anfangs- und Endbestand zählt eine Lieferung in den Tank über die ganze Periode ihres
+  # Lieferdatums, wie eine Rechnung ohne Leistungszeitraum; der letzte Tankbestand liegt vor der Periode. Nach Tagen:
+  # 900.00 / 2 Wohnungen = 450.00 × 139/365 = 171.37; nach Heizprofil ab 15.08.: Aug 0 + Sep 2 + Okt 8 + Nov 14 +
+  # Dez 26 = 50 % von 100 %, 450.00 × 50 % = 225.00
+  @wip
+  Szenario: Eine Lieferung in den Tank ohne Anfangs- und Endbestand zählt im PDF nach den Mietstagen der ganzen Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
+
+  @wip
+  Szenario: Eine Lieferung in den Tank ohne Anfangs- und Endbestand zählt im PDF nach dem Heizprofil der ganzen Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "900.00 450.00 50.00 % 225.00"
+
   # #1469 (PO 23.11.2026): eine Rechnung der Kategorie des Tanks mit einem Leistungszeitraum über mehr als einen Tag
   # (Tankrevision) ist keine Lieferung: sie zählt wie jede Rechnung mit den Tagen ihres Leistungszeitraums in der
   # Periode, auch mit Anfangs- und Endbestand; 700.00 × 365 / 3'653 Tage = 69.94 (#241); der Abschnitt zeigt sie

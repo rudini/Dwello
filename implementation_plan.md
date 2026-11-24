@@ -8,3 +8,15 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and write the session to its own archive file at the end. A session that appears on `main` after this one started makes this one parallel from then on: at the merge before the push take `main`'s plan and move this checklist into the pull request.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History: `docs/archive/implementation-plan-verlauf.md` (phases 0–22 and the sessions up to 2026-11-08, closed: add nothing) and `docs/archive/sessions/` (one file per later session).
+
+## Session 2026-11-24: #1470 delivery into the tank without Tankbestand counts over the whole period
+
+- [x] Read #1470 and its decision (24.11.2026); no scenario on `main` pins the old uncovered behaviour (searched tank scenarios with a Leistungszeitraum)
+- [ ] `@wip` scenarios (statement-detail.feature: by days and by Heizprofil), seen red
+- [ ] fach-reviewer on scenario and glossary rows before implementing
+- [ ] Backend: a delivery counts over the whole period also without `covered` (pg test red first)
+- [ ] Glossary «Verbrauch (Heizmaterial)», «Anteil nach Heizprofil»
+- [ ] Slice review (code-reviewer)
+- [ ] Feature review: daten-pruefer, persona
+- [ ] Before marking complete: lint, check, fitness, type-check, tests, E2E
+- [ ] Archive session, PR (`Fixes #1470`)
