@@ -39,16 +39,16 @@
     "@elysiajs/cors": "^1.4.3",
     "@elysiajs/openapi": "^1.4.17",
     "drizzle-orm": "^0.45.4",
-    "elysia": "^1.4.31",
-    "jose": "^6.2.15",
-    "nodemailer": "^10.3.1",
-    "pdfkit": "^0.20.2",
+    "elysia": "^1.4.32",
+    "jose": "^6.2.18",
+    "nodemailer": "^10.6.1",
+    "pdfkit": "^0.21.0",
     "pg": "^8.23.1",
     "qrcode": "^1.5.4",
     "zod": "^4.6.6"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.4",
+    "@types/bun": "^1.4.5",
     "@types/mailparser": "^3.9.0",
     "@types/node": "^26.6.6",
     "@types/nodemailer": "^8.0.2",
@@ -57,8 +57,8 @@
     "@types/qrcode": "^1.5.6",
     "@types/smtp-server": "^3.5.13",
     "drizzle-kit": "^0.31.11",
-    "mailparser": "^3.14.2",
-    "smtp-server": "^3.21.3",
+    "mailparser": "^3.15.0",
+    "smtp-server": "^3.21.7",
     "typescript": "^7.0.2"
   },
   "engines": {
