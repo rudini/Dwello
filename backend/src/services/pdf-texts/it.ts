@@ -56,6 +56,7 @@ export const it: Record<string, string> = {
 	and: 'e',
 	heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent}\u00a0% della quota appartamento delle spese di riscaldamento nel periodo di conteggio',
 	heatingNoteParts: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % per una fattura senza periodo di prestazione. Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
+	heatingNoteDelivery: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % per una fattura che vale per l’intero periodo di conteggio. Per un’altra fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.', // #1470, Fachreview 1470-2 V-6
 	heatingNoteOwn: 'Spese di riscaldamento secondo il profilo «{profile}»: per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
 	heatingMonths: 'Quote dei mesi del suo rapporto di locazione nel profilo di riscaldamento, che ripartisce le spese di riscaldamento di un anno sui dodici mesi: {months}',
 	heatingMonthsBilled: 'Quote dei mesi conteggiati del suo rapporto di locazione nel profilo di riscaldamento, che ripartisce le spese di riscaldamento di un anno sui dodici mesi: {months}',
@@ -129,7 +130,7 @@ export const it: Record<string, string> = {
 	sharesNoteHeatingParts: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento (vedi «Spese di riscaldamento e acqua calda»); per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo. Se questi mesi totalizzano 0\u00a0% nel profilo di riscaldamento, contano invece i suoi giorni di locazione in tale periodo.',
 	sharesNoteFuel: 'Costi dell’immobile per il combustibile del serbatoio: il consumo (vedi «Spese di riscaldamento e acqua calda»). Conta per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.',
 	sharesNoteFuelOther: ' Le altre fatture della stessa categoria, per esempio per la revisione del serbatoio, non sono forniture: contano secondo i giorni del loro periodo di prestazione che rientrano nel periodo.', // #1469, Fachreview 1469-1 V-1
-	sharesNoteDelivery: ' Una fornitura di combustibile nel serbatoio conta per l’intero periodo di conteggio, anche se ha un periodo di prestazione.', // #1470, Fachreview 1470-1 V-2
+	sharesNoteDelivery: ' Per il serbatoio manca la scorta iniziale o la scorta finale. Le forniture di combustibile nel serbatoio in questo periodo di conteggio sono quindi conteggiate come consumo; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.', // #1470, Fachreview 1470-1 V-2, 1470-2 V-7
 	heatingSection: 'Spese di riscaldamento e acqua calda',
 	fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
 	fuelOpening: 'Scorta iniziale al {date}',

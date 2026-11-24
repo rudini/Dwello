@@ -56,6 +56,7 @@ export const de: Record<string, string> = {
 	and: 'und',
 	heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent}\u00a0% des Wohnungsanteils an den Heizkosten in der Abrechnungsperiode',
 	heatingNoteParts: 'Heizkosten nach Heizprofil «{profile}»: {percent} % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.',
+	heatingNoteDelivery: 'Heizkosten nach Heizprofil «{profile}»: {percent} % für eine Rechnung, die für die ganze Abrechnungsperiode gilt. Bei einer anderen Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.', // #1470, Fachreview 1470-2 V-6
 	heatingNoteOwn: 'Heizkosten nach Heizprofil «{profile}»: Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.',
 	heatingMonths: 'Anteile der Monate Ihres Mietverhältnisses im Heizprofil, das die Heizkosten eines Jahres auf die zwölf Monate verteilt: {months}',
 	heatingMonthsBilled: 'Anteile der abgerechneten Monate Ihres Mietverhältnisses im Heizprofil, das die Heizkosten eines Jahres auf die zwölf Monate verteilt: {months}',
@@ -130,7 +131,7 @@ export const de: Record<string, string> = {
 	sharesNoteHeatingParts: ' Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten); bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin. Haben diese Monate im Heizprofil zusammen 0\u00a0%, zählen stattdessen Ihre Mietstage darin.',
 	sharesNoteFuel: 'Kosten des Gebäudes bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten). Er zählt über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.',
 	sharesNoteFuelOther: ' Weitere Rechnungen derselben Kategorie, zum Beispiel für die Tankrevision, sind keine Lieferung: Sie zählen mit den Tagen ihres Leistungszeitraums, die in die Periode fallen.', // #1469, Fachreview 1469-1 V-1
-	sharesNoteDelivery: ' Eine Lieferung von Heizmaterial in den Tank zählt über die ganze Abrechnungsperiode, auch wenn sie einen Leistungszeitraum hat.', // #1470, Fachreview 1470-1 V-2
+	sharesNoteDelivery: ' Für den Tank fehlt der Anfangs- oder der Endbestand. Die Lieferungen von Heizmaterial in den Tank in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.', // #1470, Fachreview 1470-1 V-2, 1470-2 V-7
 	heatingSection: 'Heiz- und Warmwasserkosten',
 	fuelIntro: 'Abgerechnet wird das verbrauchte Heizmaterial, nicht der Einkauf.',
 	fuelOpening: 'Anfangsbestand am {date}',

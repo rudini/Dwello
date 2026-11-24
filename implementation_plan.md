@@ -21,5 +21,9 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Glossary «Verbrauch (Heizmaterial)», «Anteil nach Heizprofil» (wording of 1470-fachreview-1)
 - [x] Slice review (code-reviewer), round 1: `docs/reviews/1470-review-1.md` (no Blocker/Major)
 - [ ] Feature review: Dr. Weber (PDF texts, creates the statement; setup SQL in Musterhaus Zentrum), then Marco (phone) and daten-pruefer; no step-5 fach-reviewer (rules and texts unchanged since its round 1)
+- [x] Persona Dr. Weber: `docs/design/personas/weber-1470.md` (P-1 rejected: a unique Leistungszeitraum and amount identify the receipt, #236/#451 V-8, also on `main`; P-2, P-3, P-5, P-6 Minor on `main` too)
+- [x] fach-reviewer round (feature review): heating-section sentence with a delivery by the Heizprofil (Code-Review 1470-1 C-1b), Dr. Weber P-4: `docs/reviews/1470-fachreview-2.md` (V-6 `heatingNoteDelivery`, V-7 `sharesNoteDelivery` says why; both Minor, fixed)
+- [x] Persona Marco: `docs/design/personas/marco-1470.md` (Minors only, on `main` too)
+- [ ] daten-pruefer: `docs/reviews/1470-datenpruefung-1.md`
 - [ ] Before marking complete: lint, check, fitness, type-check, tests, E2E
 - [ ] Archive session, PR (`Fixes #1470`)

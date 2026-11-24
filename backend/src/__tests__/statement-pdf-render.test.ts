@@ -690,13 +690,13 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect((await textOf(data)).flowing).toContain('Rechnung vom 05.10.2025, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Anteil nach Heizprofil: 50.00 % (siehe Heiz- und Warmwasserkosten)');
 	});
 
-	// #1470 (Fachreview 1470-1 V-2): ohne Anfangs- und Endbestand erklärt das PDF, warum die Lieferung über die ganze
-	// Periode zählt, obwohl ihr Beleg einen Tag zeigt
+	// #1470 (Fachreview 1470-1 V-2, 1470-2 V-7): ohne Anfangs- und Endbestand erklärt das PDF, warum die Lieferung über
+	// die ganze Periode zählt, obwohl ihr Beleg einen Tag zeigt
 	it.each([
-		['de', 'Eine Lieferung von Heizmaterial in den Tank zählt über die ganze Abrechnungsperiode, auch wenn sie einen Leistungszeitraum hat.'],
-		['fr', 'Une livraison de combustible dans la citerne compte pour toute la période de décompte, même si elle a une période de prestation.'],
-		['it', 'Una fornitura di combustibile nel serbatoio conta per l’intero periodo di conteggio, anche se ha un periodo di prestazione.'],
-		['en', 'A delivery of fuel into the tank counts for the whole billing period, even if it has a service period.']
+		['de', 'Für den Tank fehlt der Anfangs- oder der Endbestand. Die Lieferungen von Heizmaterial in den Tank in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.'],
+		['fr', 'Pour la citerne, le stock initial ou le stock final manque. Les livraisons de combustible dans la citerne pendant cette période de décompte sont donc décomptées comme consommation ; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation.'],
+		['it', 'Per il serbatoio manca la scorta iniziale o la scorta finale. Le forniture di combustibile nel serbatoio in questo periodo di conteggio sono quindi conteggiate come consumo; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.'],
+		['en', 'For the tank, the opening or the closing stock is missing. The deliveries of fuel into the tank in this billing period are therefore billed as consumption; they count for the whole billing period, even if a delivery has a service period.']
 	] as const)('erklärt auf %s, dass eine Lieferung in den Tank über die ganze Periode zählt', async (language, note) => {
 		const text = async (tankDelivery: boolean) =>
 			readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, lineItems: [{ ...mixed.lineItems[0], tankDelivery }] }, config, language), 'base64')).flowing;
@@ -803,6 +803,21 @@ describe('Heizkosten mit Leistungszeitraum nach dem Heizprofil im PDF', () => {
 		expect(text).toContain('Heizkosten nach Heizprofil «Winter»: 52.00 % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.');
 		expect(text).toContain('Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten); bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin. Haben diese Monate im Heizprofil zusammen 0 %, zählen stattdessen Ihre Mietstage darin.');
 		expect((await textOf(heated)).flowing).toContain('44.20 % des Wohnungsanteils an den Heizkosten in der Abrechnungsperiode');
+	});
+
+	// #1470 (Fachreview 1470-2 V-6): zählt eine Lieferung in den Tank mit dem Anteil der Periode, nennt der Satz sie mit,
+	// nicht nur eine Rechnung ohne Leistungszeitraum, in jeder Sprache
+	it.each([
+		['de', 'Heizkosten nach Heizprofil «Winter»: 52.00 % für eine Rechnung, die für die ganze Abrechnungsperiode gilt. Bei einer anderen Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.'],
+		['fr', 'Frais de chauffage selon le profil « Winter » : 52.00 % pour une facture valable pour toute la période de décompte. Pour une autre facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent ; sa part figure sous le poste du décompte.'],
+		['it', 'Spese di riscaldamento secondo il profilo «Winter»: 52.00 % per una fattura che vale per l’intero periodo di conteggio. Per un’altra fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.'],
+		['en', 'Heating costs under the heating profile ‘Winter’: 52.00 % for an invoice that applies to the whole billing period. For any other invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.']
+	] as const)('nennt im Heizungsabschnitt auf %s den Anteil auch für eine Lieferung in den Tank', async (language, note) => {
+		const [dated, { noPeriod: _, ...whole }] = invoiceParts;
+		const delivered = { ...winter, lineItems: [{ ...winter.lineItems[0], invoiceParts: [dated, { ...whole, delivery: true as const }] }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(delivered, config, language), 'base64')).flowing;
+
+		expect(text).toContain(note);
 	});
 
 	// #509: hat keine Heizrechnung einen fehlenden Leistungszeitraum, nennt der Satz keinen Anteil für eine solche und

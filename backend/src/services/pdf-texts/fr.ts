@@ -56,6 +56,7 @@ export const fr: Record<string, string> = {
 	and: 'et',
 	heatingNote: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% de la part du logement dans les frais de chauffage pour la période de décompte',
 	heatingNoteParts: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% pour une facture sans période de prestation. Pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.',
+	heatingNoteDelivery: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% pour une facture valable pour toute la période de décompte. Pour une autre facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.', // #1470, Fachreview 1470-2 V-6
 	heatingNoteOwn: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.',
 	heatingMonths: 'Parts des mois de votre bail dans le profil de chauffage, qui répartit les frais de chauffage d’une année sur les douze mois\u00a0: {months}',
 	heatingMonthsBilled: 'Parts dans le profil de chauffage des mois de votre bail compris dans ce décompte (le profil répartit les frais de chauffage d’une année sur les douze mois)\u00a0: {months}',
@@ -129,7 +130,7 @@ export const fr: Record<string, string> = {
 	sharesNoteHeatingParts: ' Pour les frais de chauffage, la part temporelle est la part selon le profil de chauffage (voir «\u00a0Frais de chauffage et d’eau chaude\u00a0»)\u00a0; pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent. Si ces mois totalisent 0\u00a0% dans le profil de chauffage, ce sont vos jours de location dans cette période qui comptent.',
 	sharesNoteFuel: 'Coûts de l’immeuble pour le combustible en citerne\u00a0: la consommation (voir «\u00a0Frais de chauffage et d’eau chaude\u00a0»). Elle compte pour toute la période de décompte, même si une livraison a une période de prestation.',
 	sharesNoteFuelOther: ' Les autres factures de la même catégorie, par exemple pour la révision de la citerne, ne sont pas des livraisons\u00a0: elles comptent selon les jours de leur période de prestation compris dans la période.', // #1469, Fachreview 1469-1 V-1
-	sharesNoteDelivery: ' Une livraison de combustible dans la citerne compte pour toute la période de décompte, même si elle a une période de prestation.', // #1470, Fachreview 1470-1 V-2
+	sharesNoteDelivery: ' Pour la citerne, le stock initial ou le stock final manque. Les livraisons de combustible dans la citerne pendant cette période de décompte sont donc décomptées comme consommation\u00a0; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation.', // #1470, Fachreview 1470-1 V-2, 1470-2 V-7
 	heatingSection: 'Frais de chauffage et d’eau chaude',
 	fuelIntro: 'Le décompte porte sur le combustible consommé et non sur les achats.',
 	fuelOpening: 'Stock initial au {date}',
