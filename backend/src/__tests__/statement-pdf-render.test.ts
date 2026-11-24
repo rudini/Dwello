@@ -681,6 +681,15 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(text).not.toContain('Leistungszeitraum 01.01.2025');
 	});
 
+	// #1470 (Fachreview 1470-1 V-3, Code-Review 1470-1 C-1): nach Heizprofil zählt die Lieferung mit dem Anteil der Periode
+	it('nennt eine Lieferung in den Tank nach Heizprofil mit dem Anteil nach Heizprofil der Periode', async () => {
+		const profile = { percent: 50, months: [], periodMonths: [] };
+		const parts = [{ start: '2025-01-01', end: '2025-12-31', amount: 900, days: 139, total: 365, delivery: true as const, profile, invoiceDate: '2025-10-05' }, { ...special[1], profile }];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], byProfile: true, totalAmount: 1695.65, apartmentShare: 847.83, periodShare: 0.5, invoiceParts: parts, tenantShare: 423.92 }] };
+
+		expect((await textOf(data)).flowing).toContain('Rechnung vom 05.10.2025, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Anteil nach Heizprofil: 50.00 % (siehe Heiz- und Warmwasserkosten)');
+	});
+
 	// #1470 (Fachreview 1470-1 V-2): ohne Anfangs- und Endbestand erklärt das PDF, warum die Lieferung über die ganze
 	// Periode zählt, obwohl ihr Beleg einen Tag zeigt
 	it.each([

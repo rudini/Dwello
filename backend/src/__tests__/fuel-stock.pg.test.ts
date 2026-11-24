@@ -353,6 +353,14 @@ describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
 		});
 	});
 
+	// Code-Review 1470-1 C-1: with both stocks the delivery beside a Tankrevision is marked as one too, so its line
+	// names it as a delivery, not the period as its Leistungszeitraum (Fachreview 1470-1 V-3)
+	it('markiert neben einer Tankrevision die Lieferung auch mit Anfangs- und Endbestand als Lieferung', async () => {
+		await withInvoice({ amount: '700.00', invoiceDate: '2018-02-09', servicePeriodStart: '2018-02-09', servicePeriodEnd: '2028-02-09' }, async () => {
+			expect((await heatingLine(2024))?.invoices).toContainEqual(expect.objectContaining({ amount: 3000, delivery: true }));
+		});
+	});
+
 	// pins kept behaviour (#451, M-1): a one-day Leistungszeitraum is the delivery day
 	it('rechnet eine Rechnung mit eintägigem Leistungszeitraum ganz als Lieferung ab', async () => {
 		await withInvoice({ amount: '1000.00', invoiceDate: '2026-01-20', servicePeriodStart: '2025-12-20', servicePeriodEnd: '2025-12-20' }, async () => {

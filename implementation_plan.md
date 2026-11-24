@@ -19,7 +19,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] V-2/V-3: PDF note `sharesNoteDelivery` and line `partDelivery`, detail page `statements_part_delivery(_profile)`; third scenario
 - [x] V-4: a one-day delivery does not make hint #339 name an invoice without Leistungszeitraum
 - [x] Glossary «Verbrauch (Heizmaterial)», «Anteil nach Heizprofil» (wording of 1470-fachreview-1)
-- [ ] Slice review (code-reviewer)
-- [ ] Feature review: daten-pruefer, persona
+- [x] Slice review (code-reviewer), round 1: `docs/reviews/1470-review-1.md` (no Blocker/Major)
+- [ ] Feature review: Dr. Weber (PDF texts, creates the statement; setup SQL in Musterhaus Zentrum), then Marco (phone) and daten-pruefer; no step-5 fach-reviewer (rules and texts unchanged since its round 1)
 - [ ] Before marking complete: lint, check, fitness, type-check, tests, E2E
 - [ ] Archive session, PR (`Fixes #1470`)
