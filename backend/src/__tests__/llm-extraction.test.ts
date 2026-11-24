@@ -107,6 +107,17 @@ describe('Antwort der KI zu einem Beleg', () => {
 		expect(buildExtractionPrompt('Werke Akonto.pdf')).toContain('"advance_invoice" für eine Akontorechnung');
 	});
 
+	it('verlangt ein einzelnes Liefer- oder Leistungsdatum als Beginn und Ende des Leistungszeitraums', () => {
+		expect(buildExtractionPrompt('Heizöl.pdf')).toContain(
+			'nennt die Rechnung nur ein einzelnes Liefer- oder Leistungsdatum (z.B. «Lieferdatum», «geliefert am», «Leistungsdatum»), setze es als Beginn und Ende'
+		);
+	});
+
+	it('übernimmt ein einzelnes Lieferdatum als eintägigen Leistungszeitraum', () => {
+		const parsed = parseExtractionResponse(answer({ servicePeriodStart: '2026-06-28', servicePeriodEnd: '2026-06-28' }));
+		expect(parsed?.fields).toMatchObject({ servicePeriodStart: '2026-06-28', servicePeriodEnd: '2026-06-28' });
+	});
+
 	it('gibt nichts zurück, wenn die Antwort kein JSON ist', () => {
 		expect(parseExtractionResponse('Ich kann das Bild nicht lesen.')).toBeNull();
 	});
