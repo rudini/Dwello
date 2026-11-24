@@ -16,10 +16,12 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Eval cases for the extraction prompt: oil invoice with Lieferdatum ≠ Rechnungsdatum, non-fuel invoice with one Leistungsdatum, invoice with start and end, invoice with neither
 - [ ] Failing test of the prompt rule; parsing test of the one-day case (pins kept behaviour)
 - [x] `fach-reviewer` on the prompt wording before implementing: docs/reviews/1474-fachreview-1.md; V-1 waits for a product decision (sent to the parent session)
-- [x] Fachreview V-3: fuel-stock `keyFor` takes the key of the latest delivery by its delivery day (`fuel-stock.service.ts`, `fuel-stock.pg.test.ts`)
+- [x] Fachreview V-3: fuel-stock `keyFor` takes the key of the latest delivery by its delivery day (`fuel-stock.service.ts`, `fuel-stock.pg.test.ts`), scenario «Die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung nach ihrem Liefertag» in `statement-generate.feature`
+- [x] Slice review V-3 round 1: docs/reviews/1474-v3-review-1.md
 - [ ] Prompt change (`backend/src/config/llm.ts`), test green
 - [ ] `llm:eval` after, no regression
 - [ ] Slice review (`code-reviewer`), closing round
-- [ ] No scenario: the E2E KI double reads by file name, not the invoice image, so it cannot show what the KI reads
+- [ ] daten-pruefer on the V-3 key change (amounts of the Veränderung Tankbestand)
+- [ ] No scenario for the prompt: the E2E KI double reads by file name, not the invoice image, so it cannot show what the KI reads
 - [ ] Checks of "Before marking anything complete"
 - [ ] Archive session, PR `Fixes #1474`, merge on green
