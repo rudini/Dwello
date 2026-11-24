@@ -107,15 +107,29 @@ describe('Antwort der KI zu einem Beleg', () => {
 		expect(buildExtractionPrompt('Werke Akonto.pdf')).toContain('"advance_invoice" für eine Akontorechnung');
 	});
 
-	it('verlangt ein einzelnes Liefer- oder Leistungsdatum als Beginn und Ende des Leistungszeitraums', () => {
+	// #1474, variant (a) of Fachreview 1474-1 as the product owner decided (24.11.2026, second round): the KI lists
+	// the delivery days of goods, Dwello takes a single one as the Leistungszeitraum
+	it('verlangt die Liefertage gelieferter Ware, ohne Rechnungs-, Bestelldatum oder den Tag einer Arbeit', () => {
 		expect(buildExtractionPrompt('Heizöl.pdf')).toContain(
-			'nennt die Rechnung nur ein einzelnes Liefer- oder Leistungsdatum (z.B. «Lieferdatum», «geliefert am», «Leistungsdatum»), setze es als Beginn und Ende'
+			'- deliveryDates: bei einer Rechnung über gelieferte Ware (z.B. Heizöl, Pellets, Holz) jeder Tag, an dem geliefert wurde (z.B. «Lieferdatum», «geliefert am», «Lieferung vom»), als Liste (JJJJ-MM-TT); Rechnungs-, Bestell-, Auftrags-, Offert- und Fälligkeitsdatum sind kein Liefertag, der Tag einer ausgeführten Arbeit (z.B. «ausgeführt am») auch nicht; sonst []'
 		);
 	});
 
-	it('übernimmt ein einzelnes Lieferdatum als eintägigen Leistungszeitraum', () => {
-		const parsed = parseExtractionResponse(answer({ servicePeriodStart: '2026-06-28', servicePeriodEnd: '2026-06-28' }));
+	it('übernimmt einen einzelnen Liefertag als eintägigen Leistungszeitraum', () => {
+		const parsed = parseExtractionResponse(answer({ deliveryDates: ['2026-06-28'] }));
 		expect(parsed?.fields).toMatchObject({ servicePeriodStart: '2026-06-28', servicePeriodEnd: '2026-06-28' });
+	});
+
+	it('setzt bei mehreren Liefertagen keinen Leistungszeitraum', () => {
+		const parsed = parseExtractionResponse(answer({ deliveryDates: ['2026-10-14', '2026-11-18'] }));
+		expect(parsed?.fields).toMatchObject({ servicePeriodStart: null, servicePeriodEnd: null });
+	});
+
+	it('behält einen genannten Leistungszeitraum neben einem Liefertag', () => {
+		const parsed = parseExtractionResponse(
+			answer({ servicePeriodStart: '2026-01-01', servicePeriodEnd: '2026-03-31', deliveryDates: ['2026-02-10'] })
+		);
+		expect(parsed?.fields).toMatchObject({ servicePeriodStart: '2026-01-01', servicePeriodEnd: '2026-03-31' });
 	});
 
 	it('gibt nichts zurück, wenn die Antwort kein JSON ist', () => {

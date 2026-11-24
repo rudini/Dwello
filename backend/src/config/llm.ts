@@ -286,7 +286,8 @@ export function parseLLMResponse(response: string): LLMCategorizationResult | nu
 }
 
 // Prompt for reading an uploaded Beleg; the pages follow as images. The fields are proposals the property manager
-// checks before anything is saved (#217); the amount rules follow the domain review (docs/reviews/upload-fachreview-1.md)
+// checks before anything is saved (#217); the amount rules follow the domain review (docs/reviews/upload-fachreview-1.md),
+// the delivery days docs/reviews/1474-fachreview-1.md (#1474)
 const EXTRACTION_PROMPT = `Du liest eine Rechnung an den Vermieter eines Gebäudes in der Schweiz, z.B. von einem Handwerker, einem Lieferanten, der Gemeinde oder den Werken. Die Bilder sind die Seiten der Datei «{file_name}».
 
 Lies diese Angaben ab, so wie sie auf der Rechnung stehen; erfinde nichts. Fehlt eine Angabe, setze null.
@@ -298,6 +299,7 @@ Lies diese Angaben ab, so wie sie auf der Rechnung stehen; erfinde nichts. Fehlt
 - totalAmount: Total der Leistungen in CHF inkl. MWST, ohne Mahngebühren und Verzugszinsen, vor dem Abzug bereits bezahlter Beträge, als Zahl mit Punkt (z.B. 1250.00; auf der Rechnung oft 1'250.00 oder 1'250.–); steht kein CHF-Betrag auf der Rechnung, null
 - deductedAmount: Summe der abgezogenen, bereits bezahlten Beträge (Akontozahlungen, Anzahlungen, Teilrechnungen) als Zahl, sonst null
 - servicePeriodStart, servicePeriodEnd: Leistungszeitraum, nur wenn die Rechnung ihn mit Beginn und Ende nennt (JJJJ-MM-TT)
+- deliveryDates: bei einer Rechnung über gelieferte Ware (z.B. Heizöl, Pellets, Holz) jeder Tag, an dem geliefert wurde (z.B. «Lieferdatum», «geliefert am», «Lieferung vom»), als Liste (JJJJ-MM-TT); Rechnungs-, Bestell-, Auftrags-, Offert- und Fälligkeitsdatum sind kein Liefertag, der Tag einer ausgeführten Arbeit (z.B. «ausgeführt am») auch nicht; sonst []
 - dueDate: Fälligkeitsdatum, nur wenn die Rechnung ein Datum nennt (JJJJ-MM-TT); bei «zahlbar innert 30 Tagen» null
 - description: alle erbrachten Leistungen in wenigen Worten auf Deutsch, jede Position genannt
 - nonAllocableItems: true, wenn die Rechnung auch Reparaturen, Erneuerungen oder Anschaffungen enthält, sonst false
@@ -314,6 +316,7 @@ Antworte NUR im folgenden JSON-Format:
   "deductedAmount": <Zahl oder null>,
   "servicePeriodStart": <Datum oder null>,
   "servicePeriodEnd": <Datum oder null>,
+  "deliveryDates": [<Datum>, …],
   "dueDate": <Datum oder null>,
   "description": <Text oder null>,
   "nonAllocableItems": <true oder false>,
@@ -368,13 +371,16 @@ export function parseExtractionResponse(response: string): Extraction | null {
 	const start = date(parsed.servicePeriodStart);
 	const end = date(parsed.servicePeriodEnd);
 	const whole = start && end && end >= start; // a Leistungszeitraum has both dates, the end not before the start
+	// the one delivery day of goods is a one-day Leistungszeitraum; several are none (#1474)
+	const days = new Set(Array.isArray(parsed.deliveryDates) ? parsed.deliveryDates.map(date) : []);
+	const delivered = days.size === 1 ? [...days][0] : null;
 	const fields = {
 		billingEntityName: text(parsed.billingEntityName),
 		invoiceNumber: text(parsed.invoiceNumber),
 		invoiceDate: date(parsed.invoiceDate),
 		amount: francs(parsed.totalAmount),
-		servicePeriodStart: whole ? start : null,
-		servicePeriodEnd: whole ? end : null,
+		servicePeriodStart: whole ? start : delivered,
+		servicePeriodEnd: whole ? end : delivered,
 		dueDate: date(parsed.dueDate),
 		description: text(parsed.description)
 	};

@@ -14,12 +14,13 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Branch `ccr-153ae8d3-conoid-1474` from origin/main
 - [x] `llm:eval` before (allocability + new extraction cases), model and scores noted here: qwen/qwen3-vl-8b-instruct via OpenRouter, allocability 48/48, Leistungszeitraum 2/4
 - [x] Eval cases for the extraction prompt: oil invoice with Lieferdatum ≠ Rechnungsdatum, non-fuel invoice with one Leistungsdatum, invoice with start and end, invoice with neither
-- [ ] Failing test of the prompt rule; parsing test of the one-day case (pins kept behaviour)
+- [x] Failing test of the prompt rule; parsing tests of one, several and no delivery days (each seen red)
 - [x] `fach-reviewer` on the prompt wording before implementing: docs/reviews/1474-fachreview-1.md; V-1 waits for a product decision (sent to the parent session)
 - [x] Fachreview V-3: fuel-stock `keyFor` takes the key of the latest delivery by its delivery day (`fuel-stock.service.ts`, `fuel-stock.pg.test.ts`), scenario «Die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung nach ihrem Liefertag» in `statement-generate.feature`
 - [x] Slice review V-3 round 1: docs/reviews/1474-v3-review-1.md
-- [ ] Prompt change (`backend/src/config/llm.ts`), test green
-- [ ] `llm:eval` after, no regression
+- [x] PO decision 24.11.2026 second round: option (a), goods only. Fachreview wording (a) put into the period line: eval 4/6 (Kaminfeger got a one-day period, two pellet deliveries a range). Final form: period line unchanged, new field `deliveryDates`, Dwello takes exactly one as the one-day Leistungszeitraum: 6/6 twice
+- [ ] `fach-reviewer` round 2 on the `deliveryDates` form
+- [x] `llm:eval` after (qwen/qwen3-vl-8b-instruct via OpenRouter): Leistungszeitraum 6/6 (before 4/6 on the same six cases); allocability 42/48 and 44/48, every «kein Vorschlag» an HTTP 429 of OpenRouter, the one wrong answer (ZEV) is also wrong 6 of 6 times with main's prompt (allocability prompt unchanged); before 48/48 and 47/48
 - [ ] Slice review (`code-reviewer`), closing round
 - [ ] daten-pruefer on the V-3 key change (amounts of the Veränderung Tankbestand)
 - [ ] No scenario for the prompt: the E2E KI double reads by file name, not the invoice image, so it cannot show what the KI reads
