@@ -11,11 +11,12 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 ## Session: #1474 single delivery date as one-day Leistungszeitraum
 
-- [ ] Branch `ccr-153ae8d3-conoid-1474` from origin/main
-- [ ] `llm:eval` before (allocability + new extraction cases), model and scores noted here
-- [ ] Eval cases for the extraction prompt: oil invoice with Lieferdatum ≠ Rechnungsdatum, non-fuel invoice with one Leistungsdatum, invoice with start and end, invoice with neither
+- [x] Branch `ccr-153ae8d3-conoid-1474` from origin/main
+- [x] `llm:eval` before (allocability + new extraction cases), model and scores noted here: qwen/qwen3-vl-8b-instruct via OpenRouter, allocability 48/48, Leistungszeitraum 2/4
+- [x] Eval cases for the extraction prompt: oil invoice with Lieferdatum ≠ Rechnungsdatum, non-fuel invoice with one Leistungsdatum, invoice with start and end, invoice with neither
 - [ ] Failing test of the prompt rule; parsing test of the one-day case (pins kept behaviour)
-- [ ] `fach-reviewer` on the prompt wording before implementing
+- [x] `fach-reviewer` on the prompt wording before implementing: docs/reviews/1474-fachreview-1.md; V-1 waits for a product decision (sent to the parent session)
+- [x] Fachreview V-3: fuel-stock `keyFor` takes the key of the latest delivery by its delivery day (`fuel-stock.service.ts`, `fuel-stock.pg.test.ts`)
 - [ ] Prompt change (`backend/src/config/llm.ts`), test green
 - [ ] `llm:eval` after, no regression
 - [ ] Slice review (`code-reviewer`), closing round

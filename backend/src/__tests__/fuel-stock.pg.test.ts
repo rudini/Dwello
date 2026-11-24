@@ -368,6 +368,14 @@ describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
 		});
 	});
 
+	// Fachreview 1474-1 V-3: delivered 20.12.2025, invoiced 20.01.2026, the delivery and its key count in 2025
+	it('verteilt den Verbrauch nach dem Schlüssel der letzten Lieferung nach ihrem Liefertag, nicht ihrem Rechnungsdatum', async () => {
+		const values = { amount: '1000.00', invoiceDate: '2026-01-20', servicePeriodStart: '2025-12-20', servicePeriodEnd: '2025-12-20' };
+		await withInvoice({ ...values, distributionKeyId: await perUnitKey() }, async () => {
+			expect(await heatingLines(2025)).toMatchObject([{ distributionKeyName: 'Per Unit', totalBuildingAmount: 1400 }]);
+		});
+	});
+
 	it('verteilt den Verbrauch nach dem Schlüssel der letzten Lieferung, nicht dem einer späteren Tankrevision', async () => {
 		const values = { amount: '100.00', invoiceDate: '2025-11-01', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-12-31' };
 		await withInvoice({ ...values, distributionKeyId: await perUnitKey() }, async () => {
