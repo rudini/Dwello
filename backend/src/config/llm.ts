@@ -320,7 +320,7 @@ Antworte NUR im folgenden JSON-Format:
   "dueDate": <Datum oder null>,
   "description": <Text oder null>,
   "nonAllocableItems": <true oder false>,
-  "confidence": { "billingEntityName": <0 bis 1>, "invoiceNumber": <0 bis 1>, "invoiceDate": <0 bis 1>, "totalAmount": <0 bis 1>, "servicePeriodStart": <0 bis 1>, "dueDate": <0 bis 1>, "description": <0 bis 1> }
+  "confidence": { "billingEntityName": <0 bis 1>, "invoiceNumber": <0 bis 1>, "invoiceDate": <0 bis 1>, "totalAmount": <0 bis 1>, "servicePeriodStart": <0 bis 1>, "deliveryDates": <0 bis 1>, "dueDate": <0 bis 1>, "description": <0 bis 1> }
 }`;
 
 export const buildExtractionPrompt = (fileName: string) =>
@@ -385,9 +385,13 @@ export function parseExtractionResponse(response: string): Extraction | null {
 		description: text(parsed.description)
 	};
 	const confidence = (parsed.confidence ?? {}) as Record<string, unknown>;
+	// a period from the delivery day is as sure as that day (Fachreview 1474-2 V-6)
+	const answeredAs = whole
+		? ANSWERED_AS
+		: { ...ANSWERED_AS, servicePeriodStart: 'deliveryDates', servicePeriodEnd: 'deliveryDates' };
 	const unsure = Object.entries(fields)
 		.filter(([field, value]) => {
-			const sure = confidence[ANSWERED_AS[field] ?? field];
+			const sure = confidence[answeredAs[field] ?? field];
 			// a value without its confidence counts as unsure (domain review V-12)
 			return value !== null && !(typeof sure === 'number' && sure >= 0.7);
 		})

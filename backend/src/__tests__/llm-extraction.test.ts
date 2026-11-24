@@ -120,6 +120,18 @@ describe('Antwort der KI zu einem Beleg', () => {
 		expect(parsed?.fields).toMatchObject({ servicePeriodStart: '2026-06-28', servicePeriodEnd: '2026-06-28' });
 	});
 
+	// Fachreview 1474-2 V-6: a one-day Leistungszeitraum from the delivery day is as sure as the KI read that day
+	it('nennt einen Leistungszeitraum aus dem Liefertag unsicher, wenn die KI den Liefertag unsicher las', () => {
+		const sure = { billingEntityName: 0.95, invoiceNumber: 0.9, invoiceDate: 0.9, totalAmount: 0.9, description: 0.9 };
+		const unsure = (deliveryDates: number) =>
+			parseExtractionResponse(
+				answer({ deliveryDates: ['2026-06-28'], confidence: { ...sure, deliveryDates } })
+			)?.unsure;
+		expect(unsure(0.9)).toEqual([]);
+		expect(unsure(0.5)).toEqual(['servicePeriodStart', 'servicePeriodEnd']);
+		expect(buildExtractionPrompt('Heizöl.pdf')).toContain('"deliveryDates": <0 bis 1>');
+	});
+
 	it('setzt bei mehreren Liefertagen keinen Leistungszeitraum', () => {
 		const parsed = parseExtractionResponse(answer({ deliveryDates: ['2026-10-14', '2026-11-18'] }));
 		expect(parsed?.fields).toMatchObject({ servicePeriodStart: null, servicePeriodEnd: null });
@@ -127,9 +139,16 @@ describe('Antwort der KI zu einem Beleg', () => {
 
 	it('behält einen genannten Leistungszeitraum neben einem Liefertag', () => {
 		const parsed = parseExtractionResponse(
-			answer({ servicePeriodStart: '2026-01-01', servicePeriodEnd: '2026-03-31', deliveryDates: ['2026-02-10'] })
+			answer({
+				servicePeriodStart: '2026-01-01',
+				servicePeriodEnd: '2026-03-31',
+				deliveryDates: ['2026-02-10']
+			})
 		);
-		expect(parsed?.fields).toMatchObject({ servicePeriodStart: '2026-01-01', servicePeriodEnd: '2026-03-31' });
+		expect(parsed?.fields).toMatchObject({
+			servicePeriodStart: '2026-01-01',
+			servicePeriodEnd: '2026-03-31'
+		});
 	});
 
 	it('gibt nichts zurück, wenn die Antwort kein JSON ist', () => {

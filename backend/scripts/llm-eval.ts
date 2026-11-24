@@ -84,12 +84,18 @@ const invoices: [string, string | null, string | null][] = [
 ];
 let read = 0;
 for (const [file, start, end] of invoices) {
-	const image = Buffer.from(await Bun.file(`${import.meta.dir}/llm-eval/${file}`).arrayBuffer()).toString('base64');
-	const extraction = await extractInvoice(file, [`data:image/png;base64,${image}`]).catch(() => null);
+	const image = Buffer.from(
+		await Bun.file(`${import.meta.dir}/llm-eval/${file}`).arrayBuffer()
+	).toString('base64');
+	const extraction = await extractInvoice(file, [`data:image/png;base64,${image}`]).catch(
+		() => null
+	);
 	const fields = extraction && extraction !== 'unreadable' ? extraction.fields : null;
 	const ok = !!fields && fields.servicePeriodStart === start && fields.servicePeriodEnd === end;
 	if (ok) read++;
-	const answer = fields ? `${fields.servicePeriodStart} bis ${fields.servicePeriodEnd}` : 'kein Vorschlag';
+	const answer = fields
+		? `${fields.servicePeriodStart} bis ${fields.servicePeriodEnd}`
+		: 'kein Vorschlag';
 	console.log(`${ok ? 'ok    ' : 'FALSCH'} ${file}: erwartet ${start} bis ${end}, KI ${answer}`);
 }
 console.log(`Leistungszeitraum: ${read} von ${invoices.length}`);

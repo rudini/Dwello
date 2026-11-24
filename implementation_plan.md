@@ -19,7 +19,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Fachreview V-3: fuel-stock `keyFor` takes the key of the latest delivery by its delivery day (`fuel-stock.service.ts`, `fuel-stock.pg.test.ts`), scenario «Die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung nach ihrem Liefertag» in `statement-generate.feature`
 - [x] Slice review V-3 round 1: docs/reviews/1474-v3-review-1.md
 - [x] PO decision 24.11.2026 second round: option (a), goods only. Fachreview wording (a) put into the period line: eval 4/6 (Kaminfeger got a one-day period, two pellet deliveries a range). Final form: period line unchanged, new field `deliveryDates`, Dwello takes exactly one as the one-day Leistungszeitraum: 6/6 twice
-- [ ] `fach-reviewer` round 2 on the `deliveryDates` form
+- [x] `fach-reviewer` round 2 on the `deliveryDates` form: docs/reviews/1474-fachreview-2.md; V-1 to V-4 closed, V-5 waits for a product decision (sent to the parent session), V-6 fixed (confidence of `deliveryDates`)
 - [x] `llm:eval` after (qwen/qwen3-vl-8b-instruct via OpenRouter): Leistungszeitraum 6/6 (before 4/6 on the same six cases); allocability 42/48 and 44/48, every «kein Vorschlag» an HTTP 429 of OpenRouter, the one wrong answer (ZEV) is also wrong 6 of 6 times with main's prompt (allocability prompt unchanged); before 48/48 and 47/48
 - [ ] Slice review (`code-reviewer`), closing round
 - [ ] daten-pruefer on the V-3 key change (amounts of the Veränderung Tankbestand)
