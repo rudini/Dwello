@@ -412,7 +412,7 @@ export type AdvanceLine = { from: string; to: string; amount: number; total: num
 // An invoice a position billed (#96): its amount in the period and the days it bills there, its Rechnungsdatum and
 // Rechnungsnummer that name it in the PDF (#451; absent on statements created before); the change of the Tankbestand is
 // billed like one (#239) under the id fuel-stock-<period end>
-export type BilledInvoice = { id: string; description: string; invoiceDate?: string; invoiceNumber?: string; amount: number; start: string; end: string; fuelStock?: true; notDelivery?: true }; // notDelivery: of the tank's category with its own days (#1469)
+export type BilledInvoice = { id: string; description: string; invoiceDate?: string; invoiceNumber?: string; amount: number; start: string; end: string; fuelStock?: true; notDelivery?: true; delivery?: true }; // notDelivery: of the tank's category with its own days (#1469); delivery: into the tank, over the whole period (#1470)
 
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };

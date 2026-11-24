@@ -226,6 +226,23 @@ describe('Hinweise mit eigenem Gebäude', () => {
 
 		expect(heatingWithoutServicePeriod.map((i) => i.billingEntityName)).toEqual([...expected]);
 	});
+
+	// #1470 (Fachreview 1470-1 V-4): without Anfangs- and Endbestand a delivery with a one-day Leistungszeitraum counts
+	// over the whole period too, so it does not make the one without look like the only one over the whole period
+	it('nennt keine Heizrechnung ohne Leistungszeitraum neben einer eintägigen Lieferung ohne Tankbestand', async () => {
+		const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await db.insert(fuelStocks).values({ buildingId: own.building, readingDate: '2022-12-31', amount: '800.00', categoryId: heating.id });
+		await insertInvoice(own.building, { billingEntityName: 'Heizöl März', categoryId: heating.id, amount: '900.00', invoiceDate: '2024-03-31' });
+		await insertInvoice(own.building, { billingEntityName: 'Heizöl September', categoryId: heating.id, amount: '900.00', invoiceDate: '2024-10-05', servicePeriodStart: '2024-09-30', servicePeriodEnd: '2024-09-30' });
+
+		const response = await callApi(`/api/v1/invoices/completeness/${own.building}?periodStart=2024-01-01&periodEnd=2024-12-31`);
+		const { heatingWithoutServicePeriod } = (await response.json()) as { heatingWithoutServicePeriod: { billingEntityName: string }[] };
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, own.building));
+		await own.remove();
+
+		expect(heatingWithoutServicePeriod).toEqual([]);
+	});
 });
 
 // #1469 (PO 23.11.2026, third round; Fachreview 1469-1 M-1): in the tank's category an invoice over several days is no

@@ -15,7 +15,7 @@
 
 	// by the Heizprofil its share instead of the days, as the PDF (#507)
 	function partText({ part, start, end, amount, fuelStock }: StatementLineInvoice) {
-		const { days, total, noPeriod, whole, profile } = part!;
+		const { days, total, noPeriod, whole, profile, delivery } = part!;
 		const values = {
 			start: formatDate(start),
 			end: formatDate(end),
@@ -31,9 +31,11 @@
 			? [m.statements_part_stock, m.statements_part_stock_profile]
 			: noPeriod
 				? [m.statements_part_no_period, m.statements_part_no_period_profile]
-				: whole
-					? [m.statements_part_beyond, m.statements_part_beyond_profile]
-					: [m.statements_part_line, m.statements_part_line_profile];
+				: delivery // into the tank: the whole period, not its delivery day (#1470)
+					? [m.statements_part_delivery, m.statements_part_delivery_profile]
+					: whole
+						? [m.statements_part_beyond, m.statements_part_beyond_profile]
+						: [m.statements_part_line, m.statements_part_line_profile];
 		return (profile ? byProfile : byDays)(values);
 	}
 

@@ -68,6 +68,7 @@ export const it: Record<string, string> = {
 	timeShareColumn: 'Quota temporale',
 	days: '{days}/{total} giorni',
 	partNoPeriod: '{name} senza periodo di prestazione, vale per l’intero periodo di conteggio{colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total} giorni',
+	partDelivery: '{name}, fornitura nel serbatoio, vale per l’intero periodo di conteggio{colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total} giorni', // #1470, Fachreview 1470-1 V-3
 	partBeyond: 'Periodo di prestazione {wholeStart} – {wholeEnd} (fattura di CHF {wholeAmount} per {wholeDays} giorni), di cui {start} – {end} ({total} giorni){colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total}',
 	partStock: 'Variazione della scorta di combustibile {start} – {end}{colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total}',
 	partLine: 'Periodo di prestazione {start} – {end}{colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total}',
@@ -128,6 +129,7 @@ export const it: Record<string, string> = {
 	sharesNoteHeatingParts: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento (vedi «Spese di riscaldamento e acqua calda»); per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo. Se questi mesi totalizzano 0\u00a0% nel profilo di riscaldamento, contano invece i suoi giorni di locazione in tale periodo.',
 	sharesNoteFuel: 'Costi dell’immobile per il combustibile del serbatoio: il consumo (vedi «Spese di riscaldamento e acqua calda»). Conta per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.',
 	sharesNoteFuelOther: ' Le altre fatture della stessa categoria, per esempio per la revisione del serbatoio, non sono forniture: contano secondo i giorni del loro periodo di prestazione che rientrano nel periodo.', // #1469, Fachreview 1469-1 V-1
+	sharesNoteDelivery: ' Una fornitura di combustibile nel serbatoio conta per l’intero periodo di conteggio, anche se ha un periodo di prestazione.', // #1470, Fachreview 1470-1 V-2
 	heatingSection: 'Spese di riscaldamento e acqua calda',
 	fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
 	fuelOpening: 'Scorta iniziale al {date}',

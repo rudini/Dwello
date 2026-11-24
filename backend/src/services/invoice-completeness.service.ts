@@ -331,7 +331,8 @@ async function heatingInvoices(buildingId: string, period: Period) {
 // #339: heating invoices without a Leistungszeitraum in a category whose other invoices have one; at a tenant change by
 // the Heizprofil they count over the whole period, the others only in their months
 function withoutBesideWith(heating: Awaited<ReturnType<typeof heatingInvoices>>) {
-	const dated = new Set(heating.filter((invoice) => invoice.servicePeriodStart).map((invoice) => invoice.categoryId));
+	// a delivery into the tank counts over the whole period also with its delivery day as Leistungszeitraum (#1470)
+	const dated = new Set(heating.filter((invoice) => invoice.servicePeriodStart && !invoice.inPeriod.delivery).map((invoice) => invoice.categoryId));
 	return heating
 		.filter((invoice) => !invoice.servicePeriodStart && dated.has(invoice.categoryId))
 		.map(({ id, billingEntityName, description, invoiceDate, amount, categoryId }) => ({ id, billingEntityName, description, invoiceDate, amount, categoryId }));

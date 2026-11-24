@@ -91,7 +91,7 @@ interface InvoiceGroup {
 		amount: number;
 		start: string;
 		end: string;
-	} & Pick<InvoicePart, 'noPeriod' | 'whole' | 'fuelStock'> & Pick<BilledInvoice, 'invoiceDate' | 'invoiceNumber' | 'notDelivery'>>;
+	} & Pick<InvoicePart, 'noPeriod' | 'whole' | 'fuelStock' | 'delivery'> & Pick<BilledInvoice, 'invoiceDate' | 'invoiceNumber' | 'notDelivery'>>;
 	isHeatingCost: boolean;
 }
 
@@ -165,7 +165,7 @@ const partOf = (invoice: InvoiceGroup['invoices'][number], rentalStart: string, 
 	total: days(invoice.start, invoice.end),
 	...(invoice.noPeriod && { noPeriod: invoice.noPeriod }),
 	...(invoice.whole && { whole: invoice.whole }),
-	...(invoice.fuelStock && { fuelStock: invoice.fuelStock })
+	...(invoice.fuelStock && { fuelStock: invoice.fuelStock }), ...(invoice.delivery && { delivery: invoice.delivery })
 });
 
 // #71: a heating invoice counts the Heizprofil's months in its days in the period, normalised to 100 %, from the
@@ -394,7 +394,7 @@ export async function calculateStatementForContract(
 			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
 			...shareDays,
-			invoices: group.invoices.map(({ id, description, invoiceDate, invoiceNumber, amount, start, end, fuelStock, notDelivery }) => ({
+			invoices: group.invoices.map(({ id, description, invoiceDate, invoiceNumber, amount, start, end, fuelStock, notDelivery, delivery }) => ({
 				id,
 				description,
 				...(invoiceDate && { invoiceDate }),
@@ -402,7 +402,7 @@ export async function calculateStatementForContract(
 				amount,
 				start,
 				end,
-				...(fuelStock && { fuelStock }), ...(notDelivery && { notDelivery })
+				...(fuelStock && { fuelStock }), ...(notDelivery && { notDelivery }), ...(delivery && { delivery })
 			})),
 			isHeatingCost: group.isHeatingCost,
 			segments

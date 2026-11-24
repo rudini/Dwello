@@ -69,6 +69,7 @@ export const de: Record<string, string> = {
 	timeShareColumn: 'Zeitanteil',
 	days: '{days}/{total} Tage',
 	partNoPeriod: '{name} ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen',
+	partDelivery: '{name}, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen', // #1470, Fachreview 1470-1 V-3
 	partBeyond: 'Leistungszeitraum {wholeStart} – {wholeEnd} (Rechnung CHF {wholeAmount} für {wholeDays} Tage), davon {start} – {end} ({total} Tage){colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen',
 	partStock: 'Veränderung Tankbestand {start} – {end}{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen',
 	partLine: 'Leistungszeitraum {start} – {end}{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen',
@@ -129,6 +130,7 @@ export const de: Record<string, string> = {
 	sharesNoteHeatingParts: ' Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten); bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin. Haben diese Monate im Heizprofil zusammen 0\u00a0%, zählen stattdessen Ihre Mietstage darin.',
 	sharesNoteFuel: 'Kosten des Gebäudes bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten). Er zählt über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.',
 	sharesNoteFuelOther: ' Weitere Rechnungen derselben Kategorie, zum Beispiel für die Tankrevision, sind keine Lieferung: Sie zählen mit den Tagen ihres Leistungszeitraums, die in die Periode fallen.', // #1469, Fachreview 1469-1 V-1
+	sharesNoteDelivery: ' Eine Lieferung von Heizmaterial in den Tank zählt über die ganze Abrechnungsperiode, auch wenn sie einen Leistungszeitraum hat.', // #1470, Fachreview 1470-1 V-2
 	heatingSection: 'Heiz- und Warmwasserkosten',
 	fuelIntro: 'Abgerechnet wird das verbrauchte Heizmaterial, nicht der Einkauf.',
 	fuelOpening: 'Anfangsbestand am {date}',

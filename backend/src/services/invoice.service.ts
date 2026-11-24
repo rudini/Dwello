@@ -566,7 +566,8 @@ export async function validateInvoice(id: string): Promise<{
  * or without one, whose Rechnungsdatum lies in it; each with its part in the period. A delivery into the building's
  * tank counts in full in the period of its delivery date, the end of its Leistungszeitraum, never split (#451, M-1);
  * in the tank's category only an invoice without or with a one-day Leistungszeitraum is one, another (a Revision)
- * counts by its days (#1469). `tank` names both kinds
+ * counts by its days (#1469); without Anfangs- or Endbestand too, over the whole period (#1470). `tank` names both
+ * kinds where the period has a Tankbestand
  */
 export async function getInvoicesForStatement(
 	buildingId: string,
@@ -579,8 +580,9 @@ export async function getInvoicesForStatement(
 		.where(and(eq(invoices.buildingId, buildingId), eq(invoices.isValidUtilityCost, true), inPeriodOf(periodStart, periodEnd)))
 		// invoices of one day in the order they were entered, so the statement's positions keep their order (#759)
 		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id);
+	const delivery = (invoice: (typeof results)[number]['invoice']) => invoice.categoryId === tank?.categoryId && isDelivery(invoice);
 	const kind = (invoice: (typeof results)[number]['invoice']) =>
-		!tank?.covered || invoice.categoryId !== tank.categoryId ? undefined : isDelivery(invoice) ? ('delivery' as const) : ('other' as const);
+		!tank?.covered || invoice.categoryId !== tank.categoryId ? undefined : delivery(invoice) ? ('delivery' as const) : ('other' as const);
 
 	return results
 		.filter(({ invoice }) => kind(invoice) !== 'delivery' || !invoice.servicePeriodEnd || invoice.servicePeriodEnd <= periodEnd)
@@ -591,7 +593,8 @@ export async function getInvoicesForStatement(
 			distributionKey: row.distributionKey,
 			llmCategory: null,
 			tank: kind(row.invoice),
-			inPeriod:
-				kind(row.invoice) === 'delivery' ? { start: periodStart, end: periodEnd, amount: parseFloat(row.invoice.amount) } : inPeriod(row.invoice, periodStart, periodEnd)
+			inPeriod: delivery(row.invoice)
+				? { start: periodStart, end: periodEnd, amount: parseFloat(row.invoice.amount), delivery: true as const }
+				: inPeriod(row.invoice, periodStart, periodEnd)
 		}));
 }

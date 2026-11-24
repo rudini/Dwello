@@ -665,6 +665,37 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(text).not.toContain('05.02.2026');
 	});
 
+	// #1470 (Fachreview 1470-1 V-3): eine Lieferung in den Tank zählt über die ganze Periode; die Zeile nennt ihre Rechnung,
+	// keinen Leistungszeitraum, den kein Beleg zeigt, in jeder Sprache
+	it.each([
+		['de', 'Rechnung vom 05.10.2025, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Ihre Mietstage 139 von 365 Tagen'],
+		['fr', 'Facture du 05.10.2025, livraison dans la citerne, valable pour toute la période de décompte : CHF 900.00, 139 jours de location sur 365 jours'],
+		['it', 'Fattura del 05.10.2025, fornitura nel serbatoio, vale per l’intero periodo di conteggio: CHF 900.00, 139 giorni di locazione su 365 giorni'],
+		['en', 'Invoice dated 05.10.2025, delivery into the tank, applies to the whole billing period: CHF 900.00; your days rented: 139 of 365 days']
+	] as const)('nennt eine Lieferung in den Tank unter ihrer Position auf %s als solche', async (language, line) => {
+		const parts = [{ start: '2025-01-01', end: '2025-12-31', amount: 900, days: 139, total: 365, delivery: true as const, invoiceDate: '2025-10-05' }, special[1]];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1695.65, apartmentShare: 847.83, periodShare: 0.5, invoiceParts: parts, tenantShare: 420 }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+
+		expect(text).toContain(line);
+		expect(text).not.toContain('Leistungszeitraum 01.01.2025');
+	});
+
+	// #1470 (Fachreview 1470-1 V-2): ohne Anfangs- und Endbestand erklärt das PDF, warum die Lieferung über die ganze
+	// Periode zählt, obwohl ihr Beleg einen Tag zeigt
+	it.each([
+		['de', 'Eine Lieferung von Heizmaterial in den Tank zählt über die ganze Abrechnungsperiode, auch wenn sie einen Leistungszeitraum hat.'],
+		['fr', 'Une livraison de combustible dans la citerne compte pour toute la période de décompte, même si elle a une période de prestation.'],
+		['it', 'Una fornitura di combustibile nel serbatoio conta per l’intero periodo di conteggio, anche se ha un periodo di prestazione.'],
+		['en', 'A delivery of fuel into the tank counts for the whole billing period, even if it has a service period.']
+	] as const)('erklärt auf %s, dass eine Lieferung in den Tank über die ganze Periode zählt', async (language, note) => {
+		const text = async (tankDelivery: boolean) =>
+			readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, lineItems: [{ ...mixed.lineItems[0], tankDelivery }] }, config, language), 'base64')).flowing;
+
+		expect(await text(true)).toContain(note);
+		expect(await text(false)).not.toContain(note);
+	});
+
 	// #451, Punkt 3 (V-8): zwei gleiche Zeilen mit Leistungszeitraum beginnen mit ihrer Rechnung, in jeder Sprache
 	it.each([
 		['de', 'Rechnung vom 05.10.2025 (Nr. 4711), Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen', 'Rechnung vom 06.10.2025, Leistungszeitraum'],

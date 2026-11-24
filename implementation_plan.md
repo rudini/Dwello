@@ -12,10 +12,13 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ## Session 2026-11-24: #1470 delivery into the tank without Tankbestand counts over the whole period
 
 - [x] Read #1470 and its decision (24.11.2026); no scenario on `main` pins the old uncovered behaviour (searched tank scenarios with a Leistungszeitraum)
-- [ ] `@wip` scenarios (statement-detail.feature: by days and by Heizprofil), seen red
-- [ ] fach-reviewer on scenario and glossary rows before implementing
-- [ ] Backend: a delivery counts over the whole period also without `covered` (pg test red first)
-- [ ] Glossary «Verbrauch (Heizmaterial)», «Anteil nach Heizprofil»
+- [x] `@wip` scenarios (statement-detail.feature: by days and by Heizprofil), seen red
+- [x] fach-reviewer on scenario and glossary rows before implementing (`docs/reviews/1470-fachreview-1.md`)
+- [x] Backend: a delivery counts over the whole period also without `covered` (pg test red first)
+- [x] V-1: not after the tank is recorded decommissioned (`periodReadings` null; guard seen red)
+- [x] V-2/V-3: PDF note `sharesNoteDelivery` and line `partDelivery`, detail page `statements_part_delivery(_profile)`; third scenario
+- [x] V-4: a one-day delivery does not make hint #339 name an invoice without Leistungszeitraum
+- [x] Glossary «Verbrauch (Heizmaterial)», «Anteil nach Heizprofil» (wording of 1470-fachreview-1)
 - [ ] Slice review (code-reviewer)
 - [ ] Feature review: daten-pruefer, persona
 - [ ] Before marking complete: lint, check, fitness, type-check, tests, E2E

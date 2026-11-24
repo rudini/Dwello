@@ -1670,6 +1670,22 @@ describe('Abrechnungsdetail', () => {
 		);
 	});
 
+	// #1470 (Fachreview 1470-1 V-3): eine Lieferung in den Tank zählt über die ganze Periode; die Zeile nennt keinen
+	// Leistungszeitraum, den ihr Beleg nicht zeigt, nach Tagen und nach Heizprofil wie das PDF
+	const delivery = { id: 'i1', description: 'Heizöl', amount: 900, start: '2025-01-01', end: '2025-12-31', delivery: true as const };
+	const other = { id: 'i2', description: 'Service', amount: 184, start: '2025-07-01', end: '2025-12-31' };
+	it('nennt eine Lieferung in den Tank als solche, mit den Mietstagen der ganzen Periode', () => {
+		detail({ lineItems: [line({ invoices: [{ ...delivery, part: { days: 139, total: 365, delivery: true } }, { ...other, part: { days: 139, total: 184 } }] })] });
+		expect(invoicesText()).toContain('Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Ihre Mietstage 139 von 365 Tagen');
+		expect(invoicesText()).not.toContain('Leistungszeitraum 01.01.2025');
+	});
+
+	it('nennt eine Lieferung in den Tank nach Heizprofil mit dem Anteil nach Heizprofil', () => {
+		const profile = { percent: 50, months: [], periodMonths: [] };
+		detail({ lineItems: [line({ invoices: [{ ...delivery, part: { days: 139, total: 365, delivery: true, profile } }, { ...other, part: { days: 139, total: 184, profile } }] })] });
+		expect(invoicesText()).toContain('Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Anteil nach Heizprofil: 50.00 %');
+	});
+
 	// V-14: ein Betrag unter null (sinkender Tankbestand, Gutschrift) steht wie im PDF mit Minus vor der Zahl
 	it('rechnet einen Betrag unter null in der Berechnung mit Minus vor der Zahl', () => {
 		const invoices = [
