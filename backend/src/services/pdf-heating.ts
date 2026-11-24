@@ -3,15 +3,14 @@
  */
 
 import { fill } from './pdf-format';
-import { monthList, monthSum, noRunShare, ownProfileDays } from './pdf-cost-table';
+import { monthList, monthSum, noRunShare, ownProfileDays, runShareNote } from './pdf-cost-table';
 import { COLORS, FONT, PAGE, amountLine, formatCurrency, formatDate, heading, type Page, type StatementPDFData } from './pdf-layout';
 
 // the run's share; only for invoices without a Leistungszeitraum where a position has invoices with their own (#71),
 // none where every position counts its invoices' own months (#509); with a delivery into the tank for an invoice over
 // the whole period (#1470)
 const heatingNoteKey = (data: StatementPDFData) =>
-	!ownProfileDays(data) ? 'heatingNote' : noRunShare(data) ? 'heatingNoteOwn' : delivered(data) ? 'heatingNoteDelivery' : 'heatingNoteParts';
-const delivered = (data: StatementPDFData) => data.lineItems.some((item) => item.byProfile && item.invoiceParts?.some((part) => part.delivery));
+	!ownProfileDays(data) ? 'heatingNote' : noRunShare(data) ? 'heatingNoteOwn' : runShareNote(data);
 
 // The heating profile's share, with the months of a tenancy over part of the period
 function heatingLines({ t, data }: Page) {

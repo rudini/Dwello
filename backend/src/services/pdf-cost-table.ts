@@ -153,6 +153,10 @@ export const ownProfileDays = (data: StatementPDFData) => data.lineItems.some((i
 // every heating position by the profile has its invoices with their own Leistungszeitraum: the run's share bills none (#509)
 export const noRunShare = (data: StatementPDFData) =>
 	data.lineItems.filter((item) => item.byProfile).every((item) => item.invoiceParts && !item.invoiceParts.some((part) => part.noPeriod || part.delivery));
+// the heating section's sentence on the run's share: with a delivery into the tank, which bills it, for an invoice over
+// the whole period (#1470)
+export const runShareNote = (data: StatementPDFData) =>
+	data.lineItems.some((item) => item.byProfile && item.invoiceParts?.some((part) => part.delivery)) ? 'heatingNoteDelivery' : 'heatingNoteParts';
 
 // An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241);
 // the change of the Tankbestand is no invoice and says so (#239)
