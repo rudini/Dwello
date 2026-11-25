@@ -26,6 +26,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] The invoice page reads `category.isFuel` from the invoice response (contract `invoice.json`), not a `fuel` value of its load (fitness: maintainability of the load); api-contracts test seen red
 - [x] Slice review round 1 of the feature-review fixes: docs/reviews/1478-feature-review-1.md; C-1 Blocker fixed (the tank's own category gets no hint of another fuel, DOM test seen red), C-2 fixed, C-3: the load test pins kept behaviour (said in the commit); duplicate category names in `{categories}` removed (render test seen red)
 - [x] Persona re-runs: docs/design/personas/marco-1478-2.md (P-1 closed), weber-1478-2.md (P-1, P-3 closed; P-5, P-6 Minor wording stay in the report)
-- [ ] Slice review round 2 of the C-1 fix
-- [ ] Checks of "Before marking anything complete"
+- [x] Slice review round 2 of the C-1 fix: docs/reviews/1478-feature-review-2.md; C-1 to C-3 closed, no new findings
+- [x] Workflow note: docs/reviews/workflow-notes-issue-1478.md (fitness reads HEAD, ask rule on `git checkout`, persona build before the slice fixes)
+- [x] Checks of "Before marking anything complete" (lint, check, fitness, backend type-check and `bun run test`, vitest --changed 1488 passed, E2E invoice-detail + statement-detail 208 passed, statement-generate in the run before, Prettier on added files); `main` unchanged since the branch start, no merge needed
 - [ ] Archive session, PR `Fixes #1478`
