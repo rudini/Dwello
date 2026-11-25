@@ -15,6 +15,8 @@ export const load: PageServerLoad = async ({ params, url, fetch }) => {
 		invoice: toInvoice(invoice, [...categories, ...distributionKeys]),
 		// the category of the building's tank: whether the invoice counts as a delivery into it (#1469)
 		tank: (await tankCategories(fetch, [invoice.buildingId]))[invoice.buildingId] as string | undefined,
+		// beside the tank, a one-day invoice of another fuel category counts as a delivery too (#1478)
+		fuel: categories.some((category) => category.id === invoice.categoryId && category.isFuel),
 		...(await statementPeriods(fetch, BACKEND_URL, params.id)),
 		returnTo: returnToOf(url)
 	};

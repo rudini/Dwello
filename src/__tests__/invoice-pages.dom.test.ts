@@ -576,6 +576,18 @@ describe('Rechnungsdetail', () => {
 			expect(text()).not.toContain('Nur die Tage in der Abrechnungsperiode zählen.');
 		});
 
+		// #1478 (Code-Review 1478-1 C-1): a one-day invoice of another fuel category beside the tank is a delivery too
+		it('sagt bei einer eintägigen Rechnung einer anderen Brennstoff-Kategorie nicht, dass nur die Tage in der Periode zählen', () => {
+			show(InvoicePage, { data: { invoice: invoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }), tank: 'c2', fuel: true } });
+			expect(text()).toContain('Leistungszeitraum 10.03.2025 – 10.03.2025');
+			expect(text()).not.toContain('Nur die Tage in der Abrechnungsperiode zählen.');
+		});
+
+		it('sagt bei einer eintägigen Rechnung einer anderen Kategorie, die kein Brennstoff ist, dass nur die Tage zählen', () => {
+			show(InvoicePage, { data: { invoice: invoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }), tank: 'c2', fuel: false } });
+			expect(text()).toContain('Nur die Tage in der Abrechnungsperiode zählen.');
+		});
+
 		it('sagt in einer anderen Kategorie als der des Tanks nichts zur Lieferung', () => {
 			expect(shown({}, 'c2')).toBeUndefined();
 		});

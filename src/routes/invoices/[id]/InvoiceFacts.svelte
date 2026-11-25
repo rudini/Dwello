@@ -8,13 +8,19 @@
 	import { tankDelivery } from '$lib/invoice';
 
 	// What the invoice says: date, amount, building and service, and the statements it is in; tank: the category of
-	// the building's tank (#1469)
+	// the building's tank (#1469); fuel: whether the invoice's category is a fuel
 	let {
 		invoice,
 		statements,
-		tank
-	}: { invoice: InvoiceWithDetails; statements: BilledStatement[]; tank?: string } = $props();
+		tank,
+		fuel
+	}: { invoice: InvoiceWithDetails; statements: BilledStatement[]; tank?: string; fuel?: boolean } =
+		$props();
 	const delivery = $derived(tankDelivery(tank, invoice));
+	// beside the tank, a one-day invoice of another fuel counts over the whole period too (#1478, Code-Review 1478-1 C-1)
+	const fuelDelivery = $derived(
+		!!tank && !!fuel && invoice.servicePeriodStart === invoice.servicePeriodEnd
+	);
 
 	const changed = (iso?: string) => (iso ? formatDateTime(iso) : '–');
 </script>
@@ -44,7 +50,7 @@
 					{formatDate(invoice.servicePeriodStart)} – {formatDate(invoice.servicePeriodEnd)}
 				</dd>
 				<!-- a delivery into the tank counts over the whole period (Fachreview 1469-3 V-9) -->
-				{#if delivery !== true}
+				{#if delivery !== true && !fuelDelivery}
 					<dd class="text-ink-muted">{m.invoices_service_period_days()}</dd>
 				{/if}
 				{@render tankHint()}

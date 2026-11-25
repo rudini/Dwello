@@ -16,7 +16,9 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] `fach-reviewer` round 1 on the scenarios and every text and place that prints the value: docs/reviews/1478-fachreview-1.md; V-1, M-1, V-2, V-4 fixed, V-3 glossary sentences word for word; proposed issue for a building ohne Tank after a change of fuel
 - [x] Rule in `getInvoicesForStatement` (`delivery()`, part marker `delivery: 'fuel'`), V-2 included (`isFuel` without `no_tank` beside a Tankbestand); `fuel-stock.pg.test.ts` seen red, each guard taken out once; the multi-day case pins kept behaviour
 - [x] Texts `partDeliveryFuel`, `sharesNoteDeliveryFuel` (PDF), `statements_part_delivery_fuel(_profile)` (page) in de/fr/it/en as the report gives them, render and DOM tests seen red; glossary rows «Verbrauch (Heizmaterial)», «Brennstoff (Kategorie)», «Anteil nach Heizprofil»; scenarios green without `@wip`; E2E «Tank|Lieferung|Brennstoff|Heizprofil|PDF» 173 passed; backend `bun run test` 2450 pass
-- [ ] Slice review (`code-reviewer`)
+- [x] Slice review round 1: docs/reviews/1478-review-1.md; C-1 fixed (invoice page hides «Nur die Tage …» for a one-day invoice of another fuel beside the tank, DOM test seen red, guard `fuel` taken out once), C-2 Minor: that test pins kept behaviour, said in the next commit
+- [x] Issue #1480 (`needs-decision`) for a building ohne Tank after a change of fuel (Fachreview 1478-1)
+- [ ] Slice review round 2 of the C-1 fix
 - [ ] daten-pruefer; personas per `docs/design/personas/README.md`
 - [ ] Checks of "Before marking anything complete"
 - [ ] Archive session, PR `Fixes #1478`
