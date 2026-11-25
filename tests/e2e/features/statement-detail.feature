@@ -790,7 +790,7 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
-    Und steht im PDF "Für den Tank fehlt der Anfangs- oder der Endbestand. Die Lieferungen von Heizmaterial in den Tank in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat."
+    Und steht im PDF "Für den Tank sind der Anfangs- und der Endbestand nicht beide erfasst. Die Lieferungen von Heizmaterial in den Tank in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat."
 
   Szenario: Eine Lieferung in den Tank ohne Anfangs- und Endbestand zählt im PDF nach dem Heizprofil der ganzen Periode
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

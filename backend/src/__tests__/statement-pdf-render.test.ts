@@ -690,13 +690,13 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect((await textOf(data)).flowing).toContain('Rechnung vom 05.10.2025, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Anteil nach Heizprofil: 50.00 % (siehe Heiz- und Warmwasserkosten)');
 	});
 
-	// #1470 (Fachreview 1470-1 V-2, 1470-2 V-7): ohne Anfangs- und Endbestand erklärt das PDF, warum die Lieferung über
+	// #1470 (Fachreview 1470-1 V-2, 1470-2 V-7), #1477 (Fachreview 1474-3 V-8): ohne Anfangs- oder Endbestand erklärt das PDF, warum die Lieferung über
 	// die ganze Periode zählt, obwohl ihr Beleg einen Tag zeigt
 	it.each([
-		['de', 'Für den Tank fehlt der Anfangs- oder der Endbestand. Die Lieferungen von Heizmaterial in den Tank in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.'],
-		['fr', 'Pour la citerne, le stock initial ou le stock final manque. Les livraisons de combustible dans la citerne pendant cette période de décompte sont donc décomptées comme consommation ; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation.'],
-		['it', 'Per il serbatoio manca la scorta iniziale o la scorta finale. Le forniture di combustibile nel serbatoio in questo periodo di conteggio sono quindi conteggiate come consumo; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.'],
-		['en', 'For the tank, the opening or the closing stock is missing. The deliveries of fuel into the tank in this billing period are therefore billed as consumption; they count for the whole billing period, even if a delivery has a service period.']
+		['de', 'Für den Tank sind der Anfangs- und der Endbestand nicht beide erfasst. Die Lieferungen von Heizmaterial in den Tank in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.'],
+		['fr', 'Pour la citerne, le stock initial et le stock final ne sont pas saisis tous les deux. Les livraisons de combustible dans la citerne pendant cette période de décompte sont donc décomptées comme consommation ; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation.'],
+		['it', 'Per il serbatoio la scorta iniziale e la scorta finale non sono registrate entrambe. Le forniture di combustibile nel serbatoio in questo periodo di conteggio sono quindi conteggiate come consumo; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.'],
+		['en', 'For the tank, the opening and the closing stock are not both recorded. The deliveries of fuel into the tank in this billing period are therefore billed as consumption; they count for the whole billing period, even if a delivery has a service period.']
 	] as const)('erklärt auf %s, dass eine Lieferung in den Tank über die ganze Periode zählt', async (language, note) => {
 		const text = async (tankDelivery: boolean) =>
 			readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, lineItems: [{ ...mixed.lineItems[0], tankDelivery }] }, config, language), 'base64')).flowing;
