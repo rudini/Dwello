@@ -19,7 +19,7 @@ import {
 import { categorizeInvoice, extractInvoice, recategorizeInvoice } from './llm.service';
 import { validateInvoiceForUtilityStatement } from './utility-validation.service';
 import { buildingExists } from './building.service';
-import { isDelivery, periodReadings, untrackedFuelCategories } from './fuel-stock.service';
+import { isDelivery, periodReadings } from './fuel-stock.service';
 import { getCategory } from './category.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { checkedFile } from './document.service';
@@ -57,6 +57,9 @@ function selectWithDetails() {
 				address: buildings.address
 			},
 			accountingPeriod: buildings.accountingPeriod, // for the Aufbewahrungsfrist (#1410)
+			// a fuel category of a building not recorded without a tank: without any Tankbestand a one-day invoice in it
+			// is a delivery (#1474), without a query of its own (P2)
+			fuel: sql<boolean>`coalesce(${categories.isFuel} and not ${buildings.noTank}, false)`,
 			category: {
 				id: categories.id,
 				name: categories.name,
@@ -581,25 +584,22 @@ export async function getInvoicesForStatement(
 		// invoices of one day in the order they were entered, so the statement's positions keep their order (#759)
 		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id);
 	// without any Tankbestand only a one-day invoice of a fuel category is a delivery (#1474)
-	const untracked = tank ? null : await untrackedFuelCategories(buildingId);
-	const delivery = (invoice: (typeof results)[number]['invoice']) =>
+	const delivery = ({ invoice, fuel }: (typeof results)[number]) =>
 		isDelivery(invoice) &&
-		(tank
-			? invoice.categoryId === tank.categoryId
-			: !!invoice.servicePeriodStart && !!untracked?.has(invoice.categoryId ?? ''));
-	const kind = (invoice: (typeof results)[number]['invoice']) =>
-		!tank?.covered || invoice.categoryId !== tank.categoryId ? undefined : delivery(invoice) ? ('delivery' as const) : ('other' as const);
+		(tank ? invoice.categoryId === tank.categoryId : !!invoice.servicePeriodStart && fuel);
+	const kind = (row: (typeof results)[number]) =>
+		!tank?.covered || row.invoice.categoryId !== tank.categoryId ? undefined : delivery(row) ? ('delivery' as const) : ('other' as const);
 
 	return results
-		.filter(({ invoice }) => kind(invoice) !== 'delivery' || !invoice.servicePeriodEnd || invoice.servicePeriodEnd <= periodEnd)
+		.filter((row) => kind(row) !== 'delivery' || !row.invoice.servicePeriodEnd || row.invoice.servicePeriodEnd <= periodEnd)
 		.map((row) => ({
 			...row.invoice,
 			building: row.building,
 			category: row.category,
 			distributionKey: row.distributionKey,
 			llmCategory: null,
-			tank: kind(row.invoice),
-			inPeriod: delivery(row.invoice)
+			tank: kind(row),
+			inPeriod: delivery(row)
 				? { start: periodStart, end: periodEnd, amount: parseFloat(row.invoice.amount), delivery: true as const }
 				: inPeriod(row.invoice, periodStart, periodEnd)
 		}));

@@ -66,19 +66,6 @@ export async function periodReadings(buildingId: string, periodStart: string, pe
 	return rows[0].noTank && !covered ? null : { opening, closing, categoryId, missing, covered };
 }
 
-/**
- * The fuel categories of a building with no Tankbestand at all that is not recorded without a tank: a one-day invoice
- * in one is a delivery too (#1474, Fachreview 1474-3 V-7); asked only when `periodReadings` gives null
- */
-export async function untrackedFuelCategories(buildingId: string) {
-	const rows = await db
-		.select({ id: categories.id })
-		.from(categories)
-		.innerJoin(buildings, and(eq(buildings.id, buildingId), eq(buildings.noTank, false)))
-		.where(eq(categories.isFuel, true));
-	return new Set(rows.map((row) => row.id));
-}
-
 /** In the tank's category a delivery has no Leistungszeitraum or a one-day one, its delivery day (#451, #1469) */
 export const isDelivery = (invoice: { servicePeriodStart: string | null; servicePeriodEnd: string | null }) =>
 	invoice.servicePeriodStart === invoice.servicePeriodEnd;
