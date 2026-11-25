@@ -3,7 +3,7 @@
  */
 
 import { fill } from './pdf-format';
-import { monthList, monthSum, noRunShare, ownProfileDays, runShareNote } from './pdf-cost-table';
+import { fuelDeliveryText, monthList, monthSum, noRunShare, ownProfileDays, runShareNote } from './pdf-cost-table';
 import { COLORS, FONT, PAGE, amountLine, formatCurrency, formatDate, heading, type Page, type StatementPDFData } from './pdf-layout';
 
 // the run's share; only for invoices without a Leistungszeitraum where a position has invoices with their own (#71),
@@ -56,9 +56,10 @@ export function heatingSection(page: Page, y: number) {
 			]
 		: [];
 	const width = PAGE.right - PAGE.left;
+	const intro = fuelDeliveryText(data, t.fuelIntroDeliveryFuel) || t.fuelIntro; // only the tank's consumption (#1478, V-6)
 	doc.font(FONT.regular).fontSize(9);
 	const height =
-		[...lines, fuel ? t.fuelIntro : ''].reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 8, 0) +
+		[...lines, fuel ? intro : ''].reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 8, 0) +
 		amounts.reduce((sum, [label]) => sum + Math.max(15, doc.heightOfString(label, { width: 340 }) + 4), 0);
 	let top = heading(doc, t.heatingSection, y, height + 30);
 	for (const line of lines) {
@@ -66,7 +67,7 @@ export function heatingSection(page: Page, y: number) {
 		top = doc.y + 8;
 	}
 	if (!fuel) return top + 10;
-	doc.text(t.fuelIntro, PAGE.left, top, { width });
+	doc.text(intro, PAGE.left, top, { width });
 	top = doc.y + 6;
 	amounts.forEach(([label, amount], i) => (top = amountLine(doc, label, formatCurrency(amount), top, i === amounts.length - 1)));
 	return top + 12;

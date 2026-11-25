@@ -230,15 +230,18 @@ function sharesNote(data: StatementPDFData, t: Record<string, string>) {
 	});
 	// «Vereinbart ab» (#368, Fachreview 368-B M-1): those days are not the Mietstage of the header
 	const from = data.agreedCosts?.some((cost) => cost.from) ? t.sharesNoteAgreedFrom : '';
-	const fuel = fuelDeliveryNote(data, t);
+	const fuel = fuelDeliveryText(data, t.sharesNoteDeliveryFuel);
 	if (data.fuel) return `${shares}${from} ${t.sharesNoteFuel}${data.fuel.position === undefined ? '' : t.sharesNoteFuelOther}${fuel}`;
 	// without both stocks a delivery bills the whole period although its receipt shows one day (#1470)
 	return shares + from + (data.lineItems.some((item) => item.tankDelivery === true) ? t.sharesNoteDelivery : '') + fuel;
 }
 
-// a delivery of another fuel, without a Tankbestand of its own, bills its purchase (#1478, Fachreview 1478-1 M-1)
-const fuelDeliveryNote = (data: StatementPDFData, t: Record<string, string>) =>
-	data.lineItems.some((item) => item.tankDelivery === 'fuel') ? t.sharesNoteDeliveryFuel : '';
+// a delivery of another fuel, without a Tankbestand of its own, bills its purchase, named by its positions (#1478,
+// Fachreview 1478-1 M-1, 1478-2 V-6, V-7); empty without one
+export const fuelDeliveryText = (data: StatementPDFData, text: string) => {
+	const categories = data.lineItems.filter((item) => item.tankDelivery === 'fuel').map((item) => item.category);
+	return categories.length ? fill(text, { categories: categories.join(', ') }) : '';
+};
 
 // The rounded percentage, also of a share by the Heizprofil (#256); a credit over other days than an invoice of its
 // position gives a Zeitanteil above 100 % or below 0 % (#237)

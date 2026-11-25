@@ -47,3 +47,4 @@ export const deleteDialogWarning = target('Warnung in der Bestätigung zum Lösc
 );
 // #1469: in the category of the building's tank, whether the invoice counts as a delivery into it
 export const tankHint = target('Hinweis zur Lieferung in den Tank', (page) => page.getByTestId('invoice-tank-hint'));
+export const fuelHint = target('Hinweis zur Lieferung von Heizmaterial', (page) => page.getByTestId('invoice-fuel-hint'));

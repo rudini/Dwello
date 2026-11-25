@@ -28,7 +28,6 @@
 			statements?: BilledStatement[];
 			returnTo?: string | null; // opened from the preview's Kostenabstimmung (#1464 follow-up)
 			tank?: string; // the category of the building's tank (#1469)
-			fuel?: boolean; // the invoice's category is a fuel (#1478)
 		};
 	} = $props();
 
@@ -107,7 +106,7 @@
 
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex flex-col gap-8 lg:col-span-2">
-			<InvoiceFacts {invoice} statements={data.statements ?? []} tank={data.tank} fuel={data.fuel} />
+			<InvoiceFacts {invoice} statements={data.statements ?? []} tank={data.tank} />
 			<CategorizationPanel
 				{invoice}
 				busy={recategorizing}

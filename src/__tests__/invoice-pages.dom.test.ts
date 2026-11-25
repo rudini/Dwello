@@ -576,22 +576,33 @@ describe('Rechnungsdetail', () => {
 			expect(text()).not.toContain('Nur die Tage in der Abrechnungsperiode zählen.');
 		});
 
+		// an invoice whose category is a fuel, or with false one that is none
+		const fuelInvoice = (values: object, isFuel = true) => invoice({ ...values, category: { ...categories[0], isFuel } });
+
 		// #1478 (Code-Review 1478-1 C-1): a one-day invoice of another fuel category beside the tank is a delivery too
 		it('sagt bei einer eintägigen Rechnung einer anderen Brennstoff-Kategorie nicht, dass nur die Tage in der Periode zählen', () => {
-			show(InvoicePage, { data: { invoice: invoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }), tank: 'c2', fuel: true } });
+			show(InvoicePage, { data: { invoice: fuelInvoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }), tank: 'c2' } });
 			expect(text()).toContain('Leistungszeitraum 10.03.2025 – 10.03.2025');
 			expect(text()).not.toContain('Nur die Tage in der Abrechnungsperiode zählen.');
+		});
+
+		// Fachreview 1478-2 V-10 (persona Marco P-1): it says how it counts instead
+		it('sagt bei einer eintägigen Rechnung einer anderen Brennstoff-Kategorie, dass sie als Lieferung von Heizmaterial zählt', () => {
+			show(InvoicePage, { data: { invoice: fuelInvoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }), tank: 'c2' } });
+			expect(byTestId('invoice-fuel-hint')?.textContent?.trim()).toBe(
+				'Zählt als Lieferung von Heizmaterial, nicht in den Tank: Sie gilt für die ganze Abrechnungsperiode ihres Liefertags. Für diese Kategorie gibt es keinen Tankbestand; abgerechnet wird der Einkauf. Gilt die Rechnung für eine längere Zeit, zum Beispiel für die Reinigung des Ofens, tragen Sie diese Zeit als Leistungszeitraum ein.'
+			);
 		});
 
 		// Code-Review 1478-2 C-4: a non-allocable invoice counts in no statement, as in the tank's category
 		it('sagt bei einer nicht umlagefähigen eintägigen Rechnung einer anderen Brennstoff-Kategorie, dass nur die Tage zählen', () => {
 			const values = { servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10', isValidUtilityCost: false };
-			show(InvoicePage, { data: { invoice: invoice(values), tank: 'c2', fuel: true } });
+			show(InvoicePage, { data: { invoice: fuelInvoice(values), tank: 'c2' } });
 			expect(text()).toContain('Nur die Tage in der Abrechnungsperiode zählen.');
 		});
 
 		it('sagt bei einer eintägigen Rechnung einer anderen Kategorie, die kein Brennstoff ist, dass nur die Tage zählen', () => {
-			show(InvoicePage, { data: { invoice: invoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }), tank: 'c2', fuel: false } });
+			show(InvoicePage, { data: { invoice: fuelInvoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }, false), tank: 'c2' } });
 			expect(text()).toContain('Nur die Tage in der Abrechnungsperiode zählen.');
 		});
 

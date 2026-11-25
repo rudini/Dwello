@@ -132,9 +132,10 @@ export const en: Record<string, string> = {
 	sharesNoteFuel: 'Building costs for fuel from a tank: the consumption (see ‘Heating and hot water costs’). It counts for the whole billing period, even if a delivery has a service period.',
 	sharesNoteFuelOther: ' Other invoices of the same category, for example for a tank inspection, are not deliveries: they count by the days of their service period that fall within the period.', // #1469, Fachreview 1469-1 V-1
 	sharesNoteDelivery: ' For the tank, the opening and the closing stock are not both recorded. The deliveries of fuel into the tank in this billing period are therefore billed as consumption; they count for the whole billing period, even if a delivery has a service period.', // #1470, Fachreview 1470-1 V-2, 1470-2 V-7; #1477 (Fachreview 1474-3 V-8)
-	sharesNoteDeliveryFuel: ' For fuel in a category other than the tank’s, no fuel stock is recorded. Its deliveries in this billing period are therefore billed as consumption, separately from the consumption from the tank; they count for the whole billing period, even if a delivery has a service period.', // #1478, Fachreview 1478-1 M-1
+	sharesNoteDeliveryFuel: ' For ‘{categories}’ no fuel stock is recorded. The deliveries in this billing period are therefore billed as consumption, separately from the consumption from the tank; they count for the whole billing period, even if a delivery has a service period. An invoice with a service period of several days, for example for cleaning the stove, is not a delivery: it counts by the days that fall within the period.', // #1478, Fachreview 1478-1 M-1, 1478-2 V-7
 	heatingSection: 'Heating and hot water costs',
 	fuelIntro: 'The fuel consumed is billed, not the fuel purchased.',
+	fuelIntroDeliveryFuel: 'For the tank, the fuel consumed is billed, not the fuel purchased. For ‘{categories}’ no fuel stock is recorded: the deliveries in the billing period are billed there, that is, the purchases (see Cost overview).', // #1478, Fachreview 1478-2 V-6
 	fuelOpening: 'Opening stock on {date}',
 	fuelInvoices: '+ Deliveries for ‘{category}’ in the billing period',
 	fuelClosing: '– Closing stock on {date}',

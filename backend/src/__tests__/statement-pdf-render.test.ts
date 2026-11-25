@@ -719,22 +719,42 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing).toContain(line);
 	});
 
-	// #1478 (Fachreview 1478-1 M-1): a delivery of another fuel category has no Tankbestand of its own; the PDF says its
-	// purchase is billed, over the whole period, beside the tank's notes or without them, in every language
+	// #1478 (Fachreview 1478-1 M-1, 1478-2 V-7): a delivery of another fuel category has no Tankbestand of its own; the
+	// PDF names the category, says its purchase is billed over the whole period and a multi-day invoice is none, beside
+	// the tank's notes or without them, in every language
 	it.each([
-		['de', 'Für Heizmaterial einer anderen Kategorie als der des Tanks ist kein Tankbestand erfasst. Seine Lieferungen in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet, getrennt vom Verbrauch aus dem Tank; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.', 'Für den Tank sind'],
-		['fr', 'Pour le combustible d’une autre catégorie que celle de la citerne, aucun stock de combustible n’est saisi. Ses livraisons pendant cette période de décompte sont donc décomptées comme consommation, séparément de la consommation de la citerne ; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation.', 'Pour la citerne, le stock'],
-		['it', 'Per il combustibile di un’altra categoria rispetto a quella del serbatoio non è registrata alcuna scorta di combustibile. Le sue forniture in questo periodo di conteggio sono quindi conteggiate come consumo, separatamente dal consumo del serbatoio; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.', 'Per il serbatoio la scorta'],
-		['en', 'For fuel in a category other than the tank’s, no fuel stock is recorded. Its deliveries in this billing period are therefore billed as consumption, separately from the consumption from the tank; they count for the whole billing period, even if a delivery has a service period.', 'For the tank, the opening']
+		['de', 'Für «Holz» ist kein Tankbestand erfasst. Die Lieferungen in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet, getrennt vom Verbrauch aus dem Tank; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat. Eine Rechnung mit einem Leistungszeitraum über mehrere Tage, zum Beispiel für die Reinigung des Ofens, ist keine Lieferung: Sie zählt mit den Tagen, die in die Periode fallen.', 'Für den Tank sind'],
+		['fr', 'Pour « Holz », aucun stock de combustible n’est saisi. Les livraisons pendant cette période de décompte sont donc décomptées comme consommation, séparément de la consommation de la citerne ; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation. Une facture dont la période de prestation couvre plusieurs jours, par exemple pour le nettoyage du poêle, n’est pas une livraison : elle compte selon les jours compris dans la période.', 'Pour la citerne, le stock'],
+		['it', 'Per «Holz» non è registrata alcuna scorta di combustibile. Le forniture in questo periodo di conteggio sono quindi conteggiate come consumo, separatamente dal consumo del serbatoio; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione. Una fattura con un periodo di prestazione di più giorni, per esempio per la pulizia della stufa, non è una fornitura: conta secondo i giorni che rientrano nel periodo.', 'Per il serbatoio la scorta'],
+		['en', 'For ‘Holz’ no fuel stock is recorded. The deliveries in this billing period are therefore billed as consumption, separately from the consumption from the tank; they count for the whole billing period, even if a delivery has a service period. An invoice with a service period of several days, for example for cleaning the stove, is not a delivery: it counts by the days that fall within the period.', 'For the tank, the opening']
 	] as const)('erklärt auf %s, dass eine Lieferung einer anderen Brennstoff-Kategorie ohne Tankbestand über die ganze Periode zählt', async (language, note, tankNote) => {
 		const text = async (tankDelivery: boolean | 'fuel', fuel?: StatementPDFData['fuel']) =>
-			readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, fuel, lineItems: [{ ...mixed.lineItems[0], tankDelivery }] }, config, language), 'base64')).flowing;
+			readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, fuel, lineItems: [{ ...mixed.lineItems[0], category: 'Holz', tankDelivery }] }, config, language), 'base64')).flowing;
 		const tank = await text('fuel');
 
 		expect(tank).toContain(note);
 		expect(tank).not.toContain(tankNote);
 		expect(await text('fuel', heated.fuel)).toContain(note);
 		expect(await text(true)).not.toContain(note);
+	});
+
+	// #1478 (Fachreview 1478-2 V-6): beside a delivery of another fuel category the heating section says that only the
+	// tank bills the consumption, in every language
+	it.each([
+		['de', 'Aus dem Tank wird das verbrauchte Heizmaterial abgerechnet, nicht der Einkauf. Für «Holz» ist kein Tankbestand erfasst: Dort sind die Lieferungen der Abrechnungsperiode abgerechnet, also der Einkauf (siehe Kostenübersicht).', 'Abgerechnet wird das verbrauchte Heizmaterial, nicht der Einkauf.'],
+		['fr', 'Pour la citerne, le décompte porte sur le combustible consommé et non sur les achats. Pour « Holz », aucun stock de combustible n’est saisi : ce sont les livraisons de la période de décompte qui sont décomptées, donc les achats (voir Aperçu des coûts).', 'Le décompte porte sur le combustible consommé et non sur les achats.'],
+		['it', 'Per il serbatoio si conteggia il combustibile consumato, non quello acquistato. Per «Holz» non è registrata alcuna scorta di combustibile: sono conteggiate le forniture del periodo di conteggio, quindi gli acquisti (vedi Riepilogo costi).', 'Si conteggia il combustibile consumato, non quello acquistato.'],
+		['en', 'For the tank, the fuel consumed is billed, not the fuel purchased. For ‘Holz’ no fuel stock is recorded: the deliveries in the billing period are billed there, that is, the purchases (see Cost overview).', 'The fuel consumed is billed, not the fuel purchased.']
+	] as const)('sagt im Heizungsabschnitt auf %s, dass nur aus dem Tank der Verbrauch abgerechnet ist', async (language, intro, tankIntro) => {
+		const text = async (tankDelivery?: 'fuel') =>
+			readPdf(Buffer.from(await generateStatementPDFBase64({ ...heated, lineItems: [...heated.lineItems, { ...heated.lineItems[0], category: 'Holz', tankDelivery }] }, config, language), 'base64')).flowing;
+
+		const [fuel, tank] = [await text('fuel'), await text()];
+
+		expect(fuel).toContain(intro);
+		expect(fuel).not.toContain(tankIntro);
+		expect(tank).toContain(tankIntro);
+		expect(tank).not.toContain(intro);
 	});
 
 	// #451, Punkt 3 (V-8): zwei gleiche Zeilen mit Leistungszeitraum beginnen mit ihrer Rechnung, in jeder Sprache

@@ -20,6 +20,10 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Issue #1480 (`needs-decision`) for a building ohne Tank after a change of fuel (Fachreview 1478-1)
 - [x] Slice review round 2 of the C-1 fix: docs/reviews/1478-review-2.md; C-1, C-2 closed; Minors C-3 (load test of `fuel`) and C-4 (non-allocable) fixed, each test seen red; C-5 stays in the report
 - [x] Persona Dr. Weber (Holz beside the oil tank in Musterhaus Zentrum): docs/design/personas/weber-1478.md
-- [ ] daten-pruefer; personas per `docs/design/personas/README.md`
+- [x] Persona Marco (phone, Musterhaus Zentrum drafts, invoice page): docs/design/personas/marco-1478.md
+- [x] daten-pruefer: docs/reviews/1478-datenpruefung-1.md; all amounts of Anna Schmidt and Pierre Dubois 2025 to the Rappen, QR-bills decoded; D-1 Minor (a category agreed after a draft does not mark it not current) existed before, stays in the report
+- [x] `fach-reviewer` feature round on Weber P-1 to P-4 and Marco P-1: docs/reviews/1478-fachreview-2.md; V-6 Major fixed (`fuelIntroDeliveryFuel`), V-7 (`sharesNoteDeliveryFuel` with `{categories}`) and V-10 (`invoices_fuel_delivery` on the invoice page, scenario in `invoice-detail.feature`, no red run of its own: its DOM test was seen red) fixed word for word, render and DOM tests seen red; V-8, V-9 existed before, stay in the report; Weber P-1 beyond V-6 rejected (the purchase billed without own Tankbestand is the product owner's decision, Fachreview 1478-2)
+- [x] The invoice page reads `category.isFuel` from the invoice response (contract `invoice.json`), not a `fuel` value of its load (fitness: maintainability of the load); api-contracts test seen red
+- [ ] Slice review round of the feature-review fixes
 - [ ] Checks of "Before marking anything complete"
 - [ ] Archive session, PR `Fixes #1478`

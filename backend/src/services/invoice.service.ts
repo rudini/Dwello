@@ -57,15 +57,14 @@ function selectWithDetails() {
 				address: buildings.address
 			},
 			accountingPeriod: buildings.accountingPeriod, // for the Aufbewahrungsfrist (#1410)
-			// whether a one-day invoice is a delivery (#1474, #1478), without a query of its own (P2)
-			isFuel: sql<boolean>`coalesce(${categories.isFuel}, false)`,
-			noTank: buildings.noTank,
+			noTank: buildings.noTank, // whether a one-day invoice is a delivery (#1474, #1478), without a query of its own (P2)
 			category: {
 				id: categories.id,
 				name: categories.name,
 				nameDE: categories.nameDE,
 				isAllowedUtilityCost: categories.isAllowedUtilityCost,
 				isHeatingCost: categories.isHeatingCost,
+				isFuel: categories.isFuel, // a one-day invoice in it can be a delivery (#1474, #1478)
 				type: categories.type
 			},
 			distributionKey: {
@@ -585,9 +584,9 @@ export async function getInvoicesForStatement(
 		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id);
 	// a one-day invoice of a fuel category is a delivery too: beside the tank's of another fuel ('fuel', #1478), without
 	// any Tankbestand of a building not recorded without a tank (#1474)
-	const delivery = ({ invoice, isFuel, noTank }: (typeof results)[number]) =>
+	const delivery = ({ invoice, category, noTank }: (typeof results)[number]) =>
 		isDelivery(invoice) &&
-		(invoice.categoryId === tank?.categoryId || (!!invoice.servicePeriodStart && isFuel && (!!tank || !noTank)));
+		(invoice.categoryId === tank?.categoryId || (!!invoice.servicePeriodStart && !!category?.isFuel && (!!tank || !noTank)));
 	const kind = (row: (typeof results)[number]) =>
 		!tank?.covered || row.invoice.categoryId !== tank.categoryId ? undefined : delivery(row) ? ('delivery' as const) : ('other' as const);
 
