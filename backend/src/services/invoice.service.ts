@@ -19,7 +19,7 @@ import {
 import { categorizeInvoice, extractInvoice, recategorizeInvoice } from './llm.service';
 import { validateInvoiceForUtilityStatement } from './utility-validation.service';
 import { buildingExists } from './building.service';
-import { isDelivery, periodReadings } from './fuel-stock.service';
+import { isDelivery, periodReadings, untrackedFuelCategories } from './fuel-stock.service';
 import { getCategory } from './category.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { checkedFile } from './document.service';
@@ -580,7 +580,13 @@ export async function getInvoicesForStatement(
 		.where(and(eq(invoices.buildingId, buildingId), eq(invoices.isValidUtilityCost, true), inPeriodOf(periodStart, periodEnd)))
 		// invoices of one day in the order they were entered, so the statement's positions keep their order (#759)
 		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id);
-	const delivery = (invoice: (typeof results)[number]['invoice']) => invoice.categoryId === tank?.categoryId && isDelivery(invoice);
+	// without any Tankbestand only a one-day invoice of a fuel category is a delivery (#1474)
+	const untracked = tank ? null : await untrackedFuelCategories(buildingId);
+	const delivery = (invoice: (typeof results)[number]['invoice']) =>
+		isDelivery(invoice) &&
+		(tank
+			? invoice.categoryId === tank.categoryId
+			: !!invoice.servicePeriodStart && !!untracked?.has(invoice.categoryId ?? ''));
 	const kind = (invoice: (typeof results)[number]['invoice']) =>
 		!tank?.covered || invoice.categoryId !== tank.categoryId ? undefined : delivery(invoice) ? ('delivery' as const) : ('other' as const);
 

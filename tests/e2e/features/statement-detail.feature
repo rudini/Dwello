@@ -808,7 +808,6 @@ Funktionalität: Abrechnungsdetail
   # #1474 (PO 25.11.2026, dritte Runde; Fachreview 1474-2 V-5): ohne jeden Tankbestand zählt eine Rechnung der
   # Brennstoff-Kategorie mit eintägigem Leistungszeitraum als Lieferung über die ganze Periode ihres Liefertags, nicht nur
   # an ihrem Tag; 900.00 / 2 Wohnungen = 450.00 × 139/365 = 171.37
-  @wip
   Szenario: Eine Lieferung von Heizmaterial ohne jeden Tankbestand zählt im PDF nach den Mietstagen der ganzen Periode
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
