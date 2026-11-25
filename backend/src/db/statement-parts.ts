@@ -41,7 +41,7 @@ export type InvoicePart = {
 	noPeriod?: true; // an invoice without Leistungszeitraum: it bills the period (#241)
 	whole?: { start: string; end: string; amount: number }; // a Leistungszeitraum beyond the period, with the invoice's amount
 	fuelStock?: true; // the change of the Tankbestand, not an invoice (#239)
-	delivery?: true; // a delivery into the tank: it bills the whole period (#1470)
+	delivery?: true | 'fuel'; // a delivery into the tank, or of another fuel ('fuel', #1478): it bills the whole period (#1470)
 	// a heating invoice shared by the Heizprofil's months in its days (#71): the tenant's months, those days' months
 	profile?: { percent: number; months: MonthShare[]; periodMonths: MonthShare[] };
 };

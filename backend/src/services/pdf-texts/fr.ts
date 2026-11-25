@@ -70,6 +70,7 @@ export const fr: Record<string, string> = {
 	days: '{days}/{total} jours',
 	partNoPeriod: '{name} sans période de prestation, valable pour toute la période de décompte{colon}CHF {amount}, {days}\u00a0jours\u00a0de\u00a0location sur {total} jours',
 	partDelivery: '{name}, livraison dans la citerne, valable pour toute la période de décompte{colon}CHF {amount}, {days}\u00a0jours\u00a0de\u00a0location sur {total} jours', // #1470, Fachreview 1470-1 V-3
+	partDeliveryFuel: '{name}, livraison de combustible, valable pour toute la période de décompte{colon}CHF {amount}, {days}\u00a0jours\u00a0de\u00a0location sur {total} jours', // #1478, Fachreview 1478-1 V-1
 	partBeyond: 'Période de prestation {wholeStart} – {wholeEnd} (facture de CHF {wholeAmount} pour {wholeDays} jours), dont {start} – {end} ({total} jours){colon}CHF {amount}, {days}\u00a0jours\u00a0de\u00a0location sur {total}',
 	partStock: 'Variation du stock de combustible {start} – {end}{colon}CHF {amount}, {days}\u00a0jours\u00a0de\u00a0location sur {total}',
 	partLine: 'Période de prestation {start} – {end}{colon}CHF {amount}, {days}\u00a0jours\u00a0de\u00a0location sur {total}',
@@ -131,6 +132,7 @@ export const fr: Record<string, string> = {
 	sharesNoteFuel: 'Coûts de l’immeuble pour le combustible en citerne\u00a0: la consommation (voir «\u00a0Frais de chauffage et d’eau chaude\u00a0»). Elle compte pour toute la période de décompte, même si une livraison a une période de prestation.',
 	sharesNoteFuelOther: ' Les autres factures de la même catégorie, par exemple pour la révision de la citerne, ne sont pas des livraisons\u00a0: elles comptent selon les jours de leur période de prestation compris dans la période.', // #1469, Fachreview 1469-1 V-1
 	sharesNoteDelivery: ' Pour la citerne, le stock initial et le stock final ne sont pas saisis tous les deux. Les livraisons de combustible dans la citerne pendant cette période de décompte sont donc décomptées comme consommation\u00a0; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation.', // #1470, Fachreview 1470-1 V-2, 1470-2 V-7; #1477 (Fachreview 1474-3 V-8)
+	sharesNoteDeliveryFuel: ' Pour le combustible d’une autre catégorie que celle de la citerne, aucun stock de combustible n’est saisi. Ses livraisons pendant cette période de décompte sont donc décomptées comme consommation, séparément de la consommation de la citerne\u00a0; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation.', // #1478, Fachreview 1478-1 M-1
 	heatingSection: 'Frais de chauffage et d’eau chaude',
 	fuelIntro: 'Le décompte porte sur le combustible consommé et non sur les achats.',
 	fuelOpening: 'Stock initial au {date}',

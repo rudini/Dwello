@@ -71,6 +71,7 @@ export const de: Record<string, string> = {
 	days: '{days}/{total} Tage',
 	partNoPeriod: '{name} ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen',
 	partDelivery: '{name}, Lieferung in den Tank, gilt für die ganze Abrechnungsperiode{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen', // #1470, Fachreview 1470-1 V-3
+	partDeliveryFuel: '{name}, Lieferung von Heizmaterial, gilt für die ganze Abrechnungsperiode{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen', // #1478, Fachreview 1478-1 V-1
 	partBeyond: 'Leistungszeitraum {wholeStart} – {wholeEnd} (Rechnung CHF {wholeAmount} für {wholeDays} Tage), davon {start} – {end} ({total} Tage){colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen',
 	partStock: 'Veränderung Tankbestand {start} – {end}{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen',
 	partLine: 'Leistungszeitraum {start} – {end}{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen',
@@ -132,6 +133,7 @@ export const de: Record<string, string> = {
 	sharesNoteFuel: 'Kosten des Gebäudes bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten). Er zählt über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.',
 	sharesNoteFuelOther: ' Weitere Rechnungen derselben Kategorie, zum Beispiel für die Tankrevision, sind keine Lieferung: Sie zählen mit den Tagen ihres Leistungszeitraums, die in die Periode fallen.', // #1469, Fachreview 1469-1 V-1
 	sharesNoteDelivery: ' Für den Tank sind der Anfangs- und der Endbestand nicht beide erfasst. Die Lieferungen von Heizmaterial in den Tank in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.', // #1470, Fachreview 1470-1 V-2, 1470-2 V-7; #1477 (Fachreview 1474-3 V-8)
+	sharesNoteDeliveryFuel: ' Für Heizmaterial einer anderen Kategorie als der des Tanks ist kein Tankbestand erfasst. Seine Lieferungen in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet, getrennt vom Verbrauch aus dem Tank; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.', // #1478, Fachreview 1478-1 M-1
 	heatingSection: 'Heiz- und Warmwasserkosten',
 	fuelIntro: 'Abgerechnet wird das verbrauchte Heizmaterial, nicht der Einkauf.',
 	fuelOpening: 'Anfangsbestand am {date}',

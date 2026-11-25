@@ -14,7 +14,7 @@ export interface InPeriod {
 	amount: number;
 	noPeriod?: true; // no Leistungszeitraum: the whole period by its Rechnungsdatum
 	whole?: { start: string; end: string; amount: number };
-	delivery?: true; // a delivery into the tank: the whole period of its delivery date (#451, #1470)
+	delivery?: true | 'fuel'; // a delivery into the tank, or of another fuel ('fuel', #1478): the whole period of its delivery date (#451, #1470)
 }
 
 /** Per building and category the Verteilschlüssel of the latest invoice with one (`GET /invoices/latest-keys`, #379) */

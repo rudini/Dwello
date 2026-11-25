@@ -161,7 +161,7 @@ export const runShareNote = (data: StatementPDFData) =>
 // An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241);
 // the change of the Tankbestand is no invoice and says so (#239)
 const partText = (part: InvoicePart) =>
-	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.delivery ? 'partDelivery' : part.whole ? 'partBeyond' : 'partLine';
+	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.delivery === 'fuel' ? 'partDeliveryFuel' : part.delivery ? 'partDelivery' : part.whole ? 'partBeyond' : 'partLine';
 // A line names its invoice where dates and amount match no single receipt: without a Leistungszeitraum (its dates are
 // the period's) or the same as another line's (#236), by Rechnungsdatum and Rechnungsnummer as on the receipt (#451);
 // the Tankbestand, once per position, never is
@@ -230,10 +230,15 @@ function sharesNote(data: StatementPDFData, t: Record<string, string>) {
 	});
 	// «Vereinbart ab» (#368, Fachreview 368-B M-1): those days are not the Mietstage of the header
 	const from = data.agreedCosts?.some((cost) => cost.from) ? t.sharesNoteAgreedFrom : '';
-	if (data.fuel) return `${shares}${from} ${t.sharesNoteFuel}${data.fuel.position === undefined ? '' : t.sharesNoteFuelOther}`;
+	const fuel = fuelDeliveryNote(data, t);
+	if (data.fuel) return `${shares}${from} ${t.sharesNoteFuel}${data.fuel.position === undefined ? '' : t.sharesNoteFuelOther}${fuel}`;
 	// without both stocks a delivery bills the whole period although its receipt shows one day (#1470)
-	return shares + from + (data.lineItems.some((item) => item.tankDelivery) ? t.sharesNoteDelivery : '');
+	return shares + from + (data.lineItems.some((item) => item.tankDelivery === true) ? t.sharesNoteDelivery : '') + fuel;
 }
+
+// a delivery of another fuel, without a Tankbestand of its own, bills its purchase (#1478, Fachreview 1478-1 M-1)
+const fuelDeliveryNote = (data: StatementPDFData, t: Record<string, string>) =>
+	data.lineItems.some((item) => item.tankDelivery === 'fuel') ? t.sharesNoteDeliveryFuel : '';
 
 // The rounded percentage, also of a share by the Heizprofil (#256); a credit over other days than an invoice of its
 // position gives a Zeitanteil above 100 % or below 0 % (#237)

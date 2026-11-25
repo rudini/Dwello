@@ -13,9 +13,9 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 - [x] Branch `ccr-153ae8d3-conoid-1478` from origin/main (#1477 merged)
 - [x] `@wip` scenarios «Eine Lieferung einer zweiten Brennstoff-Kategorie zählt im PDF nach den Mietstagen / nach dem Heizprofil der ganzen Periode» (`statement-detail.feature`; seen red: «Holz 900.00 450.00 1/1 Tage 450.00»); step «es gibt die umlagefähige Heizkosten-Kategorie {string} als Brennstoff», `invoiceOn` takes an own category
-- [ ] `fach-reviewer` on the scenarios and every text and place that prints the value (PDF line, notes, heating section, statement page)
-- [ ] Rule in `getInvoicesForStatement` (`delivery()`), `*.pg.test.ts` seen red; glossary row «Verbrauch (Heizmaterial)»
-- [ ] Texts the fach-reviewer gives, each with a failing test first
+- [x] `fach-reviewer` round 1 on the scenarios and every text and place that prints the value: docs/reviews/1478-fachreview-1.md; V-1, M-1, V-2, V-4 fixed, V-3 glossary sentences word for word; proposed issue for a building ohne Tank after a change of fuel
+- [x] Rule in `getInvoicesForStatement` (`delivery()`, part marker `delivery: 'fuel'`), V-2 included (`isFuel` without `no_tank` beside a Tankbestand); `fuel-stock.pg.test.ts` seen red, each guard taken out once; the multi-day case pins kept behaviour
+- [x] Texts `partDeliveryFuel`, `sharesNoteDeliveryFuel` (PDF), `statements_part_delivery_fuel(_profile)` (page) in de/fr/it/en as the report gives them, render and DOM tests seen red; glossary rows «Verbrauch (Heizmaterial)», «Brennstoff (Kategorie)», «Anteil nach Heizprofil»; scenarios green without `@wip`; E2E «Tank|Lieferung|Brennstoff|Heizprofil|PDF» 173 passed; backend `bun run test` 2450 pass
 - [ ] Slice review (`code-reviewer`)
 - [ ] daten-pruefer; personas per `docs/design/personas/README.md`
 - [ ] Checks of "Before marking anything complete"

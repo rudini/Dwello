@@ -70,6 +70,7 @@ export const it: Record<string, string> = {
 	days: '{days}/{total} giorni',
 	partNoPeriod: '{name} senza periodo di prestazione, vale per l’intero periodo di conteggio{colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total} giorni',
 	partDelivery: '{name}, fornitura nel serbatoio, vale per l’intero periodo di conteggio{colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total} giorni', // #1470, Fachreview 1470-1 V-3
+	partDeliveryFuel: '{name}, fornitura di combustibile, vale per l’intero periodo di conteggio{colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total} giorni', // #1478, Fachreview 1478-1 V-1
 	partBeyond: 'Periodo di prestazione {wholeStart} – {wholeEnd} (fattura di CHF {wholeAmount} per {wholeDays} giorni), di cui {start} – {end} ({total} giorni){colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total}',
 	partStock: 'Variazione della scorta di combustibile {start} – {end}{colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total}',
 	partLine: 'Periodo di prestazione {start} – {end}{colon}CHF {amount}, {days}\u00a0giorni\u00a0di\u00a0locazione su {total}',
@@ -131,6 +132,7 @@ export const it: Record<string, string> = {
 	sharesNoteFuel: 'Costi dell’immobile per il combustibile del serbatoio: il consumo (vedi «Spese di riscaldamento e acqua calda»). Conta per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.',
 	sharesNoteFuelOther: ' Le altre fatture della stessa categoria, per esempio per la revisione del serbatoio, non sono forniture: contano secondo i giorni del loro periodo di prestazione che rientrano nel periodo.', // #1469, Fachreview 1469-1 V-1
 	sharesNoteDelivery: ' Per il serbatoio la scorta iniziale e la scorta finale non sono registrate entrambe. Le forniture di combustibile nel serbatoio in questo periodo di conteggio sono quindi conteggiate come consumo; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.', // #1470, Fachreview 1470-1 V-2, 1470-2 V-7; #1477 (Fachreview 1474-3 V-8)
+	sharesNoteDeliveryFuel: ' Per il combustibile di un’altra categoria rispetto a quella del serbatoio non è registrata alcuna scorta di combustibile. Le sue forniture in questo periodo di conteggio sono quindi conteggiate come consumo, separatamente dal consumo del serbatoio; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.', // #1478, Fachreview 1478-1 M-1
 	heatingSection: 'Spese di riscaldamento e acqua calda',
 	fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
 	fuelOpening: 'Scorta iniziale al {date}',

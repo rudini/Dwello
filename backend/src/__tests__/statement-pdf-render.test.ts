@@ -705,6 +705,38 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(await text(false)).not.toContain(note);
 	});
 
+	// #1478 (Fachreview 1478-1 V-1): a delivery of another fuel category than the tank's goes into no tank; the line
+	// says so, in every language
+	it.each([
+		['de', 'Rechnung vom 05.10.2025, Lieferung von Heizmaterial, gilt für die ganze Abrechnungsperiode: CHF 900.00, Ihre Mietstage 139 von 365 Tagen'],
+		['fr', 'Facture du 05.10.2025, livraison de combustible, valable pour toute la période de décompte : CHF 900.00, 139 jours de location sur 365 jours'],
+		['it', 'Fattura del 05.10.2025, fornitura di combustibile, vale per l’intero periodo di conteggio: CHF 900.00, 139 giorni di locazione su 365 giorni'],
+		['en', 'Invoice dated 05.10.2025, delivery of fuel, applies to the whole billing period: CHF 900.00; your days rented: 139 of 365 days']
+	] as const)('nennt eine Lieferung einer anderen Brennstoff-Kategorie auf %s nicht als Lieferung in den Tank', async (language, line) => {
+		const parts = [{ start: '2025-01-01', end: '2025-12-31', amount: 900, days: 139, total: 365, delivery: 'fuel' as const, invoiceDate: '2025-10-05' }, special[1]];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1695.65, apartmentShare: 847.83, periodShare: 0.5, invoiceParts: parts, tenantShare: 420 }] };
+
+		expect(readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing).toContain(line);
+	});
+
+	// #1478 (Fachreview 1478-1 M-1): a delivery of another fuel category has no Tankbestand of its own; the PDF says its
+	// purchase is billed, over the whole period, beside the tank's notes or without them, in every language
+	it.each([
+		['de', 'Für Heizmaterial einer anderen Kategorie als der des Tanks ist kein Tankbestand erfasst. Seine Lieferungen in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet, getrennt vom Verbrauch aus dem Tank; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.', 'Für den Tank sind'],
+		['fr', 'Pour le combustible d’une autre catégorie que celle de la citerne, aucun stock de combustible n’est saisi. Ses livraisons pendant cette période de décompte sont donc décomptées comme consommation, séparément de la consommation de la citerne ; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation.', 'Pour la citerne, le stock'],
+		['it', 'Per il combustibile di un’altra categoria rispetto a quella del serbatoio non è registrata alcuna scorta di combustibile. Le sue forniture in questo periodo di conteggio sono quindi conteggiate come consumo, separatamente dal consumo del serbatoio; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.', 'Per il serbatoio la scorta'],
+		['en', 'For fuel in a category other than the tank’s, no fuel stock is recorded. Its deliveries in this billing period are therefore billed as consumption, separately from the consumption from the tank; they count for the whole billing period, even if a delivery has a service period.', 'For the tank, the opening']
+	] as const)('erklärt auf %s, dass eine Lieferung einer anderen Brennstoff-Kategorie ohne Tankbestand über die ganze Periode zählt', async (language, note, tankNote) => {
+		const text = async (tankDelivery: boolean | 'fuel', fuel?: StatementPDFData['fuel']) =>
+			readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, fuel, lineItems: [{ ...mixed.lineItems[0], tankDelivery }] }, config, language), 'base64')).flowing;
+		const tank = await text('fuel');
+
+		expect(tank).toContain(note);
+		expect(tank).not.toContain(tankNote);
+		expect(await text('fuel', heated.fuel)).toContain(note);
+		expect(await text(true)).not.toContain(note);
+	});
+
 	// #451, Punkt 3 (V-8): zwei gleiche Zeilen mit Leistungszeitraum beginnen mit ihrer Rechnung, in jeder Sprache
 	it.each([
 		['de', 'Rechnung vom 05.10.2025 (Nr. 4711), Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen', 'Rechnung vom 06.10.2025, Leistungszeitraum'],

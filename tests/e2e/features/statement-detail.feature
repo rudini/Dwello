@@ -823,8 +823,7 @@ Funktionalität: Abrechnungsdetail
   # #1478 (PO 25.11.2026): eine Rechnung mit eintägigem Leistungszeitraum in einer zweiten Brennstoff-Kategorie, nicht
   # der des Tankbestands, zählt wie eine Lieferung über die ganze Periode ihres Liefertags, nicht nur an ihrem Tag; der
   # Tank hat Anfangs- und Endbestand. Nach Tagen: 900.00 / 2 Wohnungen = 450.00 × 139/365 = 171.37; nach Heizprofil ab
-  # 15.08.: 450.00 × 50 % = 225.00
-  @wip
+  # 15.08.: 450.00 × 50 % = 225.00; das PDF sagt, dass ihr Einkauf abgerechnet ist (Fachreview 1478-1 M-1)
   Szenario: Eine Lieferung einer zweiten Brennstoff-Kategorie zählt im PDF nach den Mietstagen der ganzen Periode
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -840,9 +839,8 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
-    Und steht im PDF nicht "Für den Tank sind der Anfangs- und der Endbestand nicht beide erfasst."
+    Und steht im PDF "Für Heizmaterial einer anderen Kategorie als der des Tanks ist kein Tankbestand erfasst. Seine Lieferungen in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet, getrennt vom Verbrauch aus dem Tank; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat."
 
-  @wip
   Szenario: Eine Lieferung einer zweiten Brennstoff-Kategorie zählt im PDF nach dem Heizprofil der ganzen Periode
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
