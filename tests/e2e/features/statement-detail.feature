@@ -805,6 +805,21 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "900.00 450.00 50.00 % 225.00"
 
+  # #1474 (PO 25.11.2026, dritte Runde; Fachreview 1474-2 V-5): ohne jeden Tankbestand zählt eine Rechnung der
+  # Brennstoff-Kategorie mit eintägigem Leistungszeitraum als Lieferung über die ganze Periode ihres Liefertags, nicht nur
+  # an ihrem Tag; 900.00 / 2 Wohnungen = 450.00 × 139/365 = 171.37
+  Szenario: Eine Lieferung von Heizmaterial ohne jeden Tankbestand zählt im PDF nach den Mietstagen der ganzen Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
+
   # #1470 (Fachreview 1470-1 V-3): unter der Position nennt die Zeile der Lieferung ihre Rechnung, keinen
   # Leistungszeitraum, den kein Beleg zeigt; 1'084.00 / 2 = 542.00; 900.00 × 139/365 + 184.00 × 139/184 = 342.74 +
   # 139.00, Ihr Anteil 0.5 × 481.74 = 240.87

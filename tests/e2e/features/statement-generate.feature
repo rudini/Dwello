@@ -314,6 +314,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Heizung": "Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Fläche (m²)» verteilt."
 
+  # #1474 (Fachreview 1474-1 V-3): eine Lieferung zählt nach ihrem Liefertag, auch für den Verteilschlüssel der
+  # Veränderung Tankbestand: geliefert am 20.12.2024, verrechnet am 20.01.2025, gilt ihr Schlüssel schon 2024
+  Szenario: Die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung nach ihrem Liefertag
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-03-15" nach dem Verteilschlüssel "Pro Einheit"
+    Und im Gebäude "Lindenhof" gibt es danach eine Rechnung der Kategorie "Heizung" über "500" Franken vom "2025-01-20" nach dem Verteilschlüssel "Pro Fläche (m²)"
+    Und die Rechnung "Heizung 2025-01-20" gilt danach für die Zeit vom "2024-12-20" bis "2024-12-20"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Fläche (m²)» verteilt."
+
   # #1469 (PO 23.11.2026, dritte Runde; Fachreview 1469-1 M-1): eine Rechnung der Kategorie des Tanks mit einem
   # Leistungszeitraum über mehrere Tage ist keine Lieferung; die Vorschau sagt es und nennt sie, ohne anzuhalten, nicht
   # aber die Lieferung mit eintägigem Leistungszeitraum

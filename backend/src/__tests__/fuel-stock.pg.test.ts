@@ -5,7 +5,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it, setSystemTime } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, categories, distributionKeys, invoices } from '../db/schema';
 import { calculateStatement } from '../services/statement-generation.service';
@@ -368,6 +368,21 @@ describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
 		});
 	});
 
+	// Fachreview 1474-1 V-3: delivered 20.12.2025, invoiced 20.01.2026, the delivery and its key count in 2025
+	it('verteilt den Verbrauch nach dem Schlüssel der letzten Lieferung nach ihrem Liefertag, nicht ihrem Rechnungsdatum', async () => {
+		const values = {
+			amount: '1000.00',
+			invoiceDate: '2026-01-20',
+			servicePeriodStart: '2025-12-20',
+			servicePeriodEnd: '2025-12-20'
+		};
+		await withInvoice({ ...values, distributionKeyId: await perUnitKey() }, async () => {
+			expect(await heatingLines(2025)).toMatchObject([
+				{ distributionKeyName: 'Per Unit', totalBuildingAmount: 1400 }
+			]);
+		});
+	});
+
 	it('verteilt den Verbrauch nach dem Schlüssel der letzten Lieferung, nicht dem einer späteren Tankrevision', async () => {
 		const values = { amount: '100.00', invoiceDate: '2025-11-01', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-12-31' };
 		await withInvoice({ ...values, distributionKeyId: await perUnitKey() }, async () => {
@@ -418,6 +433,66 @@ describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
 		await withInvoice({ ...values, distributionKeyId: await perUnitKey() }, async () => {
 			expect((await findings(rental.building, 2024)).map((f) => f.kind)).not.toContain('keys');
 		});
+	});
+});
+
+// #1474 (PO 25.11.2026, third round; Fachreview 1474-2 V-5): without any Tankbestand a one-day invoice of a fuel
+// category is a delivery too, over the whole period of its delivery day
+describe('Lieferung ohne jeden Tankbestand', () => {
+	const linesIn2026 = async (values: Parameters<typeof insertInvoice>[1]) => {
+		await insertInvoice(noTank.building, {
+			amount: '900.00',
+			invoiceDate: '2026-10-05',
+			servicePeriodStart: '2026-09-30',
+			servicePeriodEnd: '2026-09-30',
+			...values
+		});
+		try {
+			return await linesOf(noTank.contract, 2026);
+		} finally {
+			await db
+				.delete(invoices)
+				.where(
+					and(eq(invoices.buildingId, noTank.building), eq(invoices.invoiceDate, '2026-10-05'))
+				);
+		}
+	};
+
+	it('rechnet eine eintägige Rechnung der Brennstoff-Kategorie über die ganze Periode ihres Liefertags ab', async () => {
+		expect(
+			(await linesIn2026({ categoryId: heating })).find((line) => line.categoryId === heating)
+		).toMatchObject({
+			billedDays: 365,
+			invoices: [{ start: '2026-01-01', end: '2026-12-31', delivery: true }]
+		});
+	});
+
+	it('zählt eine Rechnung der Brennstoff-Kategorie ohne Leistungszeitraum nicht als Lieferung', async () => {
+		const lines = await linesIn2026({
+			categoryId: heating,
+			servicePeriodStart: undefined,
+			servicePeriodEnd: undefined
+		});
+		const [invoice] = lines.find((line) => line.categoryId === heating)?.invoices ?? [];
+		expect(invoice).toMatchObject({ amount: 900, start: '2026-01-01', end: '2026-12-31' });
+		expect(invoice).not.toHaveProperty('delivery');
+	});
+
+	it('rechnet eine eintägige Rechnung einer anderen Kategorie mit ihrem Tag ab', async () => {
+		expect(
+			(await linesIn2026({ categoryId: caretaker })).find((line) => line.categoryId === caretaker)
+		).toMatchObject({ billedDays: 1 });
+	});
+
+	it('rechnet in einem Gebäude, das ohne Tank festgehalten ist, eine eintägige Rechnung mit ihrem Tag ab', async () => {
+		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, noTank.building));
+		try {
+			expect(
+				(await linesIn2026({ categoryId: heating })).find((line) => line.categoryId === heating)
+			).toMatchObject({ billedDays: 1 });
+		} finally {
+			await db.update(buildings).set({ noTank: false }).where(eq(buildings.id, noTank.building));
+		}
 	});
 });
 

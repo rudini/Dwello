@@ -3,7 +3,7 @@
  * the end, not the purchases of the period
  */
 
-import { and, asc, desc, eq, isNotNull, isNull, lte, or } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, isNull, lte, or, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, categories, distributionKeys, fuelStocks, invoices } from '../db/schema';
 import { getTypedConfig } from './config.service';
@@ -73,6 +73,7 @@ export const isDelivery = (invoice: { servicePeriodStart: string | null; service
 // The distribution key of the category's latest allocable delivery up to the period end (else any later one), else
 // the configured default; a Revision with its own days is no delivery (#1469)
 async function keyFor(buildingId: string, categoryId: string, periodEnd: string) {
+	const delivered = sql`coalesce(${invoices.servicePeriodEnd}, ${invoices.invoiceDate})`; // its delivery day (#1474)
 	const latest = (upTo?: string) =>
 		db
 			.select({ id: invoices.distributionKeyId, deliveryId: invoices.id })
@@ -84,10 +85,10 @@ async function keyFor(buildingId: string, categoryId: string, periodEnd: string)
 					eq(invoices.isValidUtilityCost, true),
 					isNotNull(invoices.distributionKeyId), // one recorded before the key was required (#379) has none
 					or(isNull(invoices.servicePeriodStart), eq(invoices.servicePeriodStart, invoices.servicePeriodEnd)), // isDelivery
-					upTo ? lte(invoices.invoiceDate, upTo) : undefined
+					upTo ? lte(delivered, upTo) : undefined
 				)
 			)
-			.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt), desc(invoices.id)) // of one day the last entered (#770)
+			.orderBy(desc(delivered), desc(invoices.createdAt), desc(invoices.id)) // of one day the last entered (#770)
 			.limit(1);
 	const [bill] = [...(await latest(periodEnd)), ...(await latest())];
 	const id = bill?.id ?? (await getTypedConfig('default_distribution_key_id'));

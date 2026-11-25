@@ -57,6 +57,9 @@ function selectWithDetails() {
 				address: buildings.address
 			},
 			accountingPeriod: buildings.accountingPeriod, // for the Aufbewahrungsfrist (#1410)
+			// a fuel category of a building not recorded without a tank: without any Tankbestand a one-day invoice in it
+			// is a delivery (#1474), without a query of its own (P2)
+			fuel: sql<boolean>`coalesce(${categories.isFuel} and not ${buildings.noTank}, false)`,
 			category: {
 				id: categories.id,
 				name: categories.name,
@@ -580,20 +583,23 @@ export async function getInvoicesForStatement(
 		.where(and(eq(invoices.buildingId, buildingId), eq(invoices.isValidUtilityCost, true), inPeriodOf(periodStart, periodEnd)))
 		// invoices of one day in the order they were entered, so the statement's positions keep their order (#759)
 		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id);
-	const delivery = (invoice: (typeof results)[number]['invoice']) => invoice.categoryId === tank?.categoryId && isDelivery(invoice);
-	const kind = (invoice: (typeof results)[number]['invoice']) =>
-		!tank?.covered || invoice.categoryId !== tank.categoryId ? undefined : delivery(invoice) ? ('delivery' as const) : ('other' as const);
+	// without any Tankbestand only a one-day invoice of a fuel category is a delivery (#1474)
+	const delivery = ({ invoice, fuel }: (typeof results)[number]) =>
+		isDelivery(invoice) &&
+		(tank ? invoice.categoryId === tank.categoryId : !!invoice.servicePeriodStart && fuel);
+	const kind = (row: (typeof results)[number]) =>
+		!tank?.covered || row.invoice.categoryId !== tank.categoryId ? undefined : delivery(row) ? ('delivery' as const) : ('other' as const);
 
 	return results
-		.filter(({ invoice }) => kind(invoice) !== 'delivery' || !invoice.servicePeriodEnd || invoice.servicePeriodEnd <= periodEnd)
+		.filter((row) => kind(row) !== 'delivery' || !row.invoice.servicePeriodEnd || row.invoice.servicePeriodEnd <= periodEnd)
 		.map((row) => ({
 			...row.invoice,
 			building: row.building,
 			category: row.category,
 			distributionKey: row.distributionKey,
 			llmCategory: null,
-			tank: kind(row.invoice),
-			inPeriod: delivery(row.invoice)
+			tank: kind(row),
+			inPeriod: delivery(row)
 				? { start: periodStart, end: periodEnd, amount: parseFloat(row.invoice.amount), delivery: true as const }
 				: inPeriod(row.invoice, periodStart, periodEnd)
 		}));

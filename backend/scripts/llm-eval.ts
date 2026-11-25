@@ -3,11 +3,12 @@
  * cost types from the leaflet of the Mieterverband «Zulässige und unzulässige Nebenkosten» (2026) and
  * Art. 5–6c VMWG, each with the expected answer. Reports the hit rate; no threshold, outside CI. Needs the
  * migrated database (DATABASE_URL): the prompt lists the predefined Kategorien (#202).
+ * Then how it reads the Leistungszeitraum of the invoices in llm-eval/ (#1474).
  *
  *   bun run llm:eval
  */
 
-import { proposeAllocability } from '../src/services/llm.service';
+import { extractInvoice, proposeAllocability } from '../src/services/llm.service';
 
 // [cost type as a landlord would name the category, umlagefähig]
 const cases: [string, boolean][] = [
@@ -70,4 +71,33 @@ for (const [name, expected] of cases) {
 	console.log(`${proposal?.isAllowedUtilityCost === expected ? 'ok    ' : 'FALSCH'} ${name}: erwartet ${expected}, KI ${answer}`);
 }
 console.log(`Trefferquote: ${hits} von ${cases.length} (${Math.round((hits / cases.length) * 100)} %)`);
+
+// [invoice image in llm-eval/, Leistungszeitraum the KI should read: start, end]; the one delivery date of heating
+// material is both, the day of a service or of other goods none (#1474)
+const invoices: [string, string | null, string | null][] = [
+	['heizoel-lieferdatum.png', '2026-06-28', '2026-06-28'], // Lieferdatum 28.06., Rechnungsdatum 05.07.
+	['heizoel-bestelldatum.png', '2026-01-08', '2026-01-08'], // bestellt 15.12.2025, geliefert 08.01., Rechnung 12.01.
+	['pellets-zwei-lieferungen.png', null, null], // two delivery days: no Leistungszeitraum
+	['salz-lieferdatum.png', null, null], // Regeneriersalz is no Heizmaterial
+	['kaminfeger-ausgefuehrt-am.png', null, null],
+	['werke-leistungszeitraum.png', '2026-01-01', '2026-03-31'],
+	['hauswart-ohne-datum.png', null, null]
+];
+let read = 0;
+for (const [file, start, end] of invoices) {
+	const image = Buffer.from(
+		await Bun.file(`${import.meta.dir}/llm-eval/${file}`).arrayBuffer()
+	).toString('base64');
+	const extraction = await extractInvoice(file, [`data:image/png;base64,${image}`]).catch(
+		() => null
+	);
+	const fields = extraction && extraction !== 'unreadable' ? extraction.fields : null;
+	const ok = !!fields && fields.servicePeriodStart === start && fields.servicePeriodEnd === end;
+	if (ok) read++;
+	const answer = fields
+		? `${fields.servicePeriodStart} bis ${fields.servicePeriodEnd}`
+		: 'kein Vorschlag';
+	console.log(`${ok ? 'ok    ' : 'FALSCH'} ${file}: erwartet ${start} bis ${end}, KI ${answer}`);
+}
+console.log(`Leistungszeitraum: ${read} von ${invoices.length}`);
 process.exit(0);
