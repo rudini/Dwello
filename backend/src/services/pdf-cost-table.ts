@@ -239,8 +239,8 @@ function sharesNote(data: StatementPDFData, t: Record<string, string>) {
 // a delivery of another fuel, without a Tankbestand of its own, bills its purchase, named by its positions (#1478,
 // Fachreview 1478-1 M-1, 1478-2 V-6, V-7); empty without one
 export const fuelDeliveryText = (data: StatementPDFData, text: string) => {
-	const categories = data.lineItems.filter((item) => item.tankDelivery === 'fuel').map((item) => item.category);
-	return categories.length ? fill(text, { categories: categories.join(', ') }) : '';
+	const categories = new Set(data.lineItems.filter((item) => item.tankDelivery === 'fuel').map((item) => item.category));
+	return categories.size ? fill(text, { categories: [...categories].join(', ') }) : '';
 };
 
 // The rounded percentage, also of a share by the Heizprofil (#256); a credit over other days than an invoice of its

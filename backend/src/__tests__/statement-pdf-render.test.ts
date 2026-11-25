@@ -738,6 +738,14 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(await text(true)).not.toContain(note);
 	});
 
+	// Code-Review 1478-feature-1: a category with two positions (two keys) is named once
+	it('nennt eine Brennstoff-Kategorie mit zwei Positionen einmal', async () => {
+		const wood = { ...mixed.lineItems[0], category: 'Holz', tankDelivery: 'fuel' as const };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, lineItems: [wood, wood] }, config, 'de'), 'base64')).flowing;
+
+		expect(text).toContain('Für «Holz» ist kein Tankbestand erfasst.');
+	});
+
 	// #1478 (Fachreview 1478-2 V-6): beside a delivery of another fuel category the heating section says that only the
 	// tank bills the consumption, in every language
 	it.each([

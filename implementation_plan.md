@@ -24,6 +24,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] daten-pruefer: docs/reviews/1478-datenpruefung-1.md; all amounts of Anna Schmidt and Pierre Dubois 2025 to the Rappen, QR-bills decoded; D-1 Minor (a category agreed after a draft does not mark it not current) existed before, stays in the report
 - [x] `fach-reviewer` feature round on Weber P-1 to P-4 and Marco P-1: docs/reviews/1478-fachreview-2.md; V-6 Major fixed (`fuelIntroDeliveryFuel`), V-7 (`sharesNoteDeliveryFuel` with `{categories}`) and V-10 (`invoices_fuel_delivery` on the invoice page, scenario in `invoice-detail.feature`, no red run of its own: its DOM test was seen red) fixed word for word, render and DOM tests seen red; V-8, V-9 existed before, stay in the report; Weber P-1 beyond V-6 rejected (the purchase billed without own Tankbestand is the product owner's decision, Fachreview 1478-2)
 - [x] The invoice page reads `category.isFuel` from the invoice response (contract `invoice.json`), not a `fuel` value of its load (fitness: maintainability of the load); api-contracts test seen red
-- [ ] Slice review round of the feature-review fixes
+- [x] Slice review round 1 of the feature-review fixes: docs/reviews/1478-feature-review-1.md; C-1 Blocker fixed (the tank's own category gets no hint of another fuel, DOM test seen red), C-2 fixed, C-3: the load test pins kept behaviour (said in the commit); duplicate category names in `{categories}` removed (render test seen red)
+- [x] Persona re-runs: docs/design/personas/marco-1478-2.md (P-1 closed), weber-1478-2.md (P-1, P-3 closed; P-5, P-6 Minor wording stay in the report)
+- [ ] Slice review round 2 of the C-1 fix
 - [ ] Checks of "Before marking anything complete"
 - [ ] Archive session, PR `Fixes #1478`

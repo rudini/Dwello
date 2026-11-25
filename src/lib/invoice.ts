@@ -37,10 +37,11 @@ export const otherFuelDelivery = (
 	tank: string | undefined,
 	invoice: Pick<
 		InvoiceWithDetails,
-		'category' | 'isValidUtilityCost' | 'servicePeriodStart' | 'servicePeriodEnd'
+		'categoryId' | 'category' | 'isValidUtilityCost' | 'servicePeriodStart' | 'servicePeriodEnd'
 	>
 ) =>
 	!!tank &&
+	invoice.categoryId !== tank &&
 	invoice.isValidUtilityCost &&
 	!!invoice.category?.isFuel &&
 	invoice.servicePeriodStart === invoice.servicePeriodEnd;

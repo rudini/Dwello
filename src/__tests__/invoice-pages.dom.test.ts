@@ -594,6 +594,13 @@ describe('Rechnungsdetail', () => {
 			);
 		});
 
+		// Code-Review 1478-feature-1 C-1: the tank's own category is a fuel too, its delivery goes into the tank
+		it('sagt bei einer eintägigen Lieferung in den Tank nichts zur Lieferung von Heizmaterial', () => {
+			show(InvoicePage, { data: { invoice: fuelInvoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }), tank: 'c1' } });
+			expect(byTestId('invoice-tank-hint')).not.toBeNull();
+			expect(byTestId('invoice-fuel-hint')).toBeNull();
+		});
+
 		// Code-Review 1478-2 C-4: a non-allocable invoice counts in no statement, as in the tank's category
 		it('sagt bei einer nicht umlagefähigen eintägigen Rechnung einer anderen Brennstoff-Kategorie, dass nur die Tage zählen', () => {
 			const values = { servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10', isValidUtilityCost: false };
