@@ -18,7 +18,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Texts `partDeliveryFuel`, `sharesNoteDeliveryFuel` (PDF), `statements_part_delivery_fuel(_profile)` (page) in de/fr/it/en as the report gives them, render and DOM tests seen red; glossary rows «Verbrauch (Heizmaterial)», «Brennstoff (Kategorie)», «Anteil nach Heizprofil»; scenarios green without `@wip`; E2E «Tank|Lieferung|Brennstoff|Heizprofil|PDF» 173 passed; backend `bun run test` 2450 pass
 - [x] Slice review round 1: docs/reviews/1478-review-1.md; C-1 fixed (invoice page hides «Nur die Tage …» for a one-day invoice of another fuel beside the tank, DOM test seen red, guard `fuel` taken out once), C-2 Minor: that test pins kept behaviour, said in the next commit
 - [x] Issue #1480 (`needs-decision`) for a building ohne Tank after a change of fuel (Fachreview 1478-1)
-- [ ] Slice review round 2 of the C-1 fix
+- [x] Slice review round 2 of the C-1 fix: docs/reviews/1478-review-2.md; C-1, C-2 closed; Minors C-3 (load test of `fuel`) and C-4 (non-allocable) fixed, each test seen red; C-5 stays in the report
+- [x] Persona Dr. Weber (Holz beside the oil tank in Musterhaus Zentrum): docs/design/personas/weber-1478.md
 - [ ] daten-pruefer; personas per `docs/design/personas/README.md`
 - [ ] Checks of "Before marking anything complete"
 - [ ] Archive session, PR `Fixes #1478`

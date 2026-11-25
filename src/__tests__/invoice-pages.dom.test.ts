@@ -583,6 +583,13 @@ describe('Rechnungsdetail', () => {
 			expect(text()).not.toContain('Nur die Tage in der Abrechnungsperiode zählen.');
 		});
 
+		// Code-Review 1478-2 C-4: a non-allocable invoice counts in no statement, as in the tank's category
+		it('sagt bei einer nicht umlagefähigen eintägigen Rechnung einer anderen Brennstoff-Kategorie, dass nur die Tage zählen', () => {
+			const values = { servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10', isValidUtilityCost: false };
+			show(InvoicePage, { data: { invoice: invoice(values), tank: 'c2', fuel: true } });
+			expect(text()).toContain('Nur die Tage in der Abrechnungsperiode zählen.');
+		});
+
 		it('sagt bei einer eintägigen Rechnung einer anderen Kategorie, die kein Brennstoff ist, dass nur die Tage zählen', () => {
 			show(InvoicePage, { data: { invoice: invoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }), tank: 'c2', fuel: false } });
 			expect(text()).toContain('Nur die Tage in der Abrechnungsperiode zählen.');

@@ -264,6 +264,18 @@ describe('Rechnungsdetail', () => {
 		expect(shown.distributionKey?.name).toBe('Pro Fläche (m²)');
 	});
 
+	// #1478 (Code-Review 1478-2 C-3): whether the invoice's category is a fuel, from the categories the page loads
+	it('nennt, ob die Kategorie der Rechnung ein Brennstoff ist', async () => {
+		const [row] = categoryList.categories;
+		const fuelOf = async (isFuel: boolean) => {
+			const { fetch } = backend({ '/invoices/i1': invoice({ categoryId: row.id }), '/categories': { categories: [{ ...row, isFuel }] } });
+			return ((await detailLoad({ params: { id: 'i1' }, url: new URL('http://localhost/invoices/i1'), fetch } as never)) as { fuel: boolean }).fuel;
+		};
+
+		expect(await fuelOf(true)).toBe(true);
+		expect(await fuelOf(false)).toBe(false);
+	});
+
 	it('zeigt die Rechnungsnummer des Backends', async () => {
 		const { fetch } = backend({ '/invoices/i1': invoice() });
 		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, url: new URL('http://localhost/invoices/i1'), fetch } as never)) as {

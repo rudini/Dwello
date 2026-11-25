@@ -19,7 +19,10 @@
 	const delivery = $derived(tankDelivery(tank, invoice));
 	// beside the tank, a one-day invoice of another fuel counts over the whole period too (#1478, Code-Review 1478-1 C-1)
 	const fuelDelivery = $derived(
-		!!tank && !!fuel && invoice.servicePeriodStart === invoice.servicePeriodEnd
+		!!tank &&
+			invoice.isValidUtilityCost &&
+			!!fuel &&
+			invoice.servicePeriodStart === invoice.servicePeriodEnd
 	);
 
 	const changed = (iso?: string) => (iso ? formatDateTime(iso) : '–');
