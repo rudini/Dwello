@@ -130,7 +130,7 @@ export const en: Record<string, string> = {
 	sharesNoteHeatingParts: ' For heating costs, the time share is the share under the heating profile (see ‘Heating and hot water costs’); for an invoice with a service period, the months of the heating profile within it count. Where these months total 0\u00a0% in the heating profile, your days rented within it count instead.',
 	sharesNoteFuel: 'Building costs for fuel from a tank: the consumption (see ‘Heating and hot water costs’). It counts for the whole billing period, even if a delivery has a service period.',
 	sharesNoteFuelOther: ' Other invoices of the same category, for example for a tank inspection, are not deliveries: they count by the days of their service period that fall within the period.', // #1469, Fachreview 1469-1 V-1
-	sharesNoteDelivery: ' For the tank, the opening or the closing stock is missing. The deliveries of fuel into the tank in this billing period are therefore billed as consumption; they count for the whole billing period, even if a delivery has a service period.', // #1470, Fachreview 1470-1 V-2, 1470-2 V-7
+	sharesNoteDelivery: ' For the tank, the opening and the closing stock are not both recorded. The deliveries of fuel into the tank in this billing period are therefore billed as consumption; they count for the whole billing period, even if a delivery has a service period.', // #1470, Fachreview 1470-1 V-2, 1470-2 V-7; #1477 (Fachreview 1474-3 V-8)
 	heatingSection: 'Heating and hot water costs',
 	fuelIntro: 'The fuel consumed is billed, not the fuel purchased.',
 	fuelOpening: 'Opening stock on {date}',
