@@ -72,12 +72,13 @@ for (const [name, expected] of cases) {
 }
 console.log(`Trefferquote: ${hits} von ${cases.length} (${Math.round((hits / cases.length) * 100)} %)`);
 
-// [invoice image in llm-eval/, Leistungszeitraum the KI should read: start, end]; the one delivery date of goods is
-// both, the day of a service none (#1474)
+// [invoice image in llm-eval/, Leistungszeitraum the KI should read: start, end]; the one delivery date of heating
+// material is both, the day of a service or of other goods none (#1474)
 const invoices: [string, string | null, string | null][] = [
 	['heizoel-lieferdatum.png', '2026-06-28', '2026-06-28'], // Lieferdatum 28.06., Rechnungsdatum 05.07.
 	['heizoel-bestelldatum.png', '2026-01-08', '2026-01-08'], // bestellt 15.12.2025, geliefert 08.01., Rechnung 12.01.
 	['pellets-zwei-lieferungen.png', null, null], // two delivery days: no Leistungszeitraum
+	['salz-lieferdatum.png', null, null], // Regeneriersalz is no Heizmaterial
 	['kaminfeger-ausgefuehrt-am.png', null, null],
 	['werke-leistungszeitraum.png', '2026-01-01', '2026-03-31'],
 	['hauswart-ohne-datum.png', null, null]

@@ -19,6 +19,7 @@ const answer = (fields: object) =>
 		dueDate: null,
 		description: 'Allgemeinstrom Q1',
 		nonAllocableItems: false,
+		heatingMaterial: true,
 		confidence: { billingEntityName: 0.95, invoiceNumber: 0.9, invoiceDate: 0.4, totalAmount: 0.9, description: 0.8 },
 		...fields
 	});
@@ -107,11 +108,11 @@ describe('Antwort der KI zu einem Beleg', () => {
 		expect(buildExtractionPrompt('Werke Akonto.pdf')).toContain('"advance_invoice" für eine Akontorechnung');
 	});
 
-	// #1474, variant (a) of Fachreview 1474-1 as the product owner decided (24.11.2026, second round): the KI lists
-	// the delivery days of goods, Dwello takes a single one as the Leistungszeitraum
-	it('verlangt die Liefertage gelieferter Ware, ohne Rechnungs-, Bestelldatum oder den Tag einer Arbeit', () => {
+	// #1474, as the product owner decided (24.11.2026 second round, 25.11.2026 third round, Fachreview 1474-2): the KI lists
+	// the delivery days of heating material, Dwello takes a single one as the Leistungszeitraum
+	it('verlangt die Liefertage von Heizmaterial, ohne Rechnungs-, Bestelldatum oder den Tag einer Arbeit', () => {
 		expect(buildExtractionPrompt('Heizöl.pdf')).toContain(
-			'- deliveryDates: bei einer Rechnung über gelieferte Ware (z.B. Heizöl, Pellets, Holz) jeder Tag, an dem geliefert wurde (z.B. «Lieferdatum», «geliefert am», «Lieferung vom»), als Liste (JJJJ-MM-TT); Rechnungs-, Bestell-, Auftrags-, Offert- und Fälligkeitsdatum sind kein Liefertag, der Tag einer ausgeführten Arbeit (z.B. «ausgeführt am») auch nicht; sonst []'
+			'- deliveryDates: bei einer Rechnung über Heizmaterial (z.B. Heizöl, Flüssiggas, Pellets, Holz) jeder Tag, an dem geliefert wurde (z.B. «Lieferdatum», «geliefert am», «Lieferung vom»), als Liste (JJJJ-MM-TT); Rechnungs-, Bestell-, Auftrags-, Offert- und Fälligkeitsdatum sind kein Liefertag, der Tag einer ausgeführten Arbeit (z.B. «ausgeführt am») auch nicht; sonst []'
 		);
 	});
 
@@ -130,6 +131,17 @@ describe('Antwort der KI zu einem Beleg', () => {
 		expect(unsure(0.9)).toEqual([]);
 		expect(unsure(0.5)).toEqual(['servicePeriodStart', 'servicePeriodEnd']);
 		expect(buildExtractionPrompt('Heizöl.pdf')).toContain('"deliveryDates": <0 bis 1>');
+	});
+
+	// PO 25.11.2026 (third round): a delivery of other goods, e.g. Regeneriersalz, keeps no Leistungszeitraum
+	it('setzt für den Liefertag anderer Ware als Heizmaterial keinen Leistungszeitraum', () => {
+		expect(buildExtractionPrompt('Salz.pdf')).toContain(
+			'- heatingMaterial: true, wenn die Rechnung Heizmaterial liefert (Heizöl, Flüssiggas, Pellets, Holz), sonst false (z.B. Salz, Reinigungsmittel, eine Arbeit)'
+		);
+		const parsed = parseExtractionResponse(
+			answer({ heatingMaterial: false, deliveryDates: ['2026-02-10'] })
+		);
+		expect(parsed?.fields).toMatchObject({ servicePeriodStart: null, servicePeriodEnd: null });
 	});
 
 	it('setzt bei mehreren Liefertagen keinen Leistungszeitraum', () => {

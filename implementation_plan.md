@@ -22,7 +22,10 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] `fach-reviewer` round 2 on the `deliveryDates` form: docs/reviews/1474-fachreview-2.md; V-1 to V-4 closed, V-5 waits for a product decision (sent to the parent session), V-6 fixed (confidence of `deliveryDates`)
 - [x] `llm:eval` after (qwen/qwen3-vl-8b-instruct via OpenRouter): Leistungszeitraum 6/6 (before 4/6 on the same six cases); allocability 42/48 and 44/48, every «kein Vorschlag» an HTTP 429 of OpenRouter, the one wrong answer (ZEV) is also wrong 6 of 6 times with main's prompt (allocability prompt unchanged); before 48/48 and 47/48
 - [ ] Slice review (`code-reviewer`), closing round
-- [ ] daten-pruefer on the V-3 key change (amounts of the Veränderung Tankbestand)
+- [x] PO decision 25.11.2026 third round (V-5, option 1): prompt line narrowed to Heizmaterial (Fachreview 1474-2 wording); eval with it: salt 6/7, so a field `heatingMaterial` gates the delivery days: 7/7 twice
+- [ ] `@wip` scenario «Eine Lieferung von Heizmaterial ohne jeden Tankbestand zählt im PDF nach den Mietstagen der ganzen Periode» (seen red: 1/1 Tage 450.00), `fach-reviewer` round 3 on it, the glossary addition and the `heatingMaterial` line
+- [ ] Rule: in a fuel category of a building with no Tankbestand and not recorded without a tank, a one-day Leistungszeitraum is a delivery; glossary row «Verbrauch (Heizmaterial)»
+- [ ] daten-pruefer on the V-3 key change and the V-5 rule (amounts of the Veränderung Tankbestand)
 - [ ] No scenario for the prompt: the E2E KI double reads by file name, not the invoice image, so it cannot show what the KI reads
 - [ ] Checks of "Before marking anything complete"
 - [ ] Archive session, PR `Fixes #1474`, merge on green
