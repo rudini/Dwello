@@ -26,7 +26,7 @@ export interface LatestKey {
 
 export interface InvoiceWithDetails extends Invoice {
 	building: { id: string; name: string; address: string } | null;
-	category: Pick<Category, Names | 'isAllowedUtilityCost' | 'isHeatingCost' | 'type'> | null;
+	category: Pick<Category, Names | 'isAllowedUtilityCost' | 'isHeatingCost' | 'isFuel' | 'type'> | null; // isFuel: #1478
 	distributionKey: (Pick<DistributionKey, Names> & { formula?: string | null }) | null; // formula: #1309
 	llmCategory: Pick<Category, Names> | null;
 	beleg: Pick<InvoiceDocument, 'fileName' | 'mimeType' | 'deductedAmount' | 'nonAllocableItems'> | null;
