@@ -562,11 +562,12 @@ export function testData(api: CallTheApi) {
 			await post(`buildings/${ids.get(buildingTitle)}/fuel-stocks`, { readingDate, amount, categoryId: heating.id });
 		},
 
-		// Invoice in a predefined category given by its German name, distributed by area; optionally the period it bills
+		// Invoice in an own category or a predefined one given by its German name, distributed by area; optionally the
+		// period it bills
 		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string, service?: [string, string]) {
-			const category = await predefinedCategory(categoryName);
+			const categoryId = ids.get(categoryName) ?? (await predefinedCategory(categoryName)).id;
 			const period = service && { servicePeriodStart: service[0], servicePeriodEnd: service[1] };
-			const id = await invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
+			const id = await invoice(buildingTitle, { categoryId, ...period }, `${categoryName} ${date}`, amount, date);
 			ids.set(`Rechnung ${categoryName} ${date}`, id);
 			return id;
 		},
@@ -631,6 +632,7 @@ export function testData(api: CallTheApi) {
 
 		// An own allocable category shared like heating, not marked as fuel (#100)
 		heatingCategory: (title: string) => addCategory(title, () => ({ isAllowedUtilityCost: true, isHeatingCost: true })),
+		fuelCategory: (title: string) => addCategory(title, () => ({ isAllowedUtilityCost: true, isHeatingCost: true, isFuel: true })),
 
 		// An own fuel category with a Tankbestand of the building; the reading goes before the category (#100)
 		async fuelCategoryWithStock(buildingTitle: string, categoryTitle: string) {

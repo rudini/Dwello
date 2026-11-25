@@ -8,3 +8,15 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and write the session to its own archive file at the end. A session that appears on `main` after this one started makes this one parallel from then on: at the merge before the push take `main`'s plan and move this checklist into the pull request.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History: `docs/archive/implementation-plan-verlauf.md` (phases 0–22 and the sessions up to 2026-11-08, closed: add nothing) and `docs/archive/sessions/` (one file per later session).
+
+## Session: 2026-11-25 issue #1478, a one-day invoice in a second fuel category counts like a delivery
+
+- [x] Branch `ccr-153ae8d3-conoid-1478` from origin/main (#1477 merged)
+- [x] `@wip` scenarios «Eine Lieferung einer zweiten Brennstoff-Kategorie zählt im PDF nach den Mietstagen / nach dem Heizprofil der ganzen Periode» (`statement-detail.feature`; seen red: «Holz 900.00 450.00 1/1 Tage 450.00»); step «es gibt die umlagefähige Heizkosten-Kategorie {string} als Brennstoff», `invoiceOn` takes an own category
+- [ ] `fach-reviewer` on the scenarios and every text and place that prints the value (PDF line, notes, heating section, statement page)
+- [ ] Rule in `getInvoicesForStatement` (`delivery()`), `*.pg.test.ts` seen red; glossary row «Verbrauch (Heizmaterial)»
+- [ ] Texts the fach-reviewer gives, each with a failing test first
+- [ ] Slice review (`code-reviewer`)
+- [ ] daten-pruefer; personas per `docs/design/personas/README.md`
+- [ ] Checks of "Before marking anything complete"
+- [ ] Archive session, PR `Fixes #1478`

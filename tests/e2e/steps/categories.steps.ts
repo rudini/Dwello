@@ -92,6 +92,10 @@ Given('es gibt die umlagefähige Heizkosten-Kategorie {string}', async ({ seed }
 	await seed.heatingCategory(title);
 });
 
+Given('es gibt die umlagefähige Heizkosten-Kategorie {string} als Brennstoff', async ({ seed }, title: string) => {
+	await seed.fuelCategory(title);
+});
+
 When(
 	'der Liegenschaftsverwalter die umlagefähige Heizkosten-Kategorie {string} als Brennstoff erfasst',
 	async ({ verwalter, seed }, title: string) => {
