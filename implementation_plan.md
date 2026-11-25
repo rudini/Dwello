@@ -8,26 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and write the session to its own archive file at the end. A session that appears on `main` after this one started makes this one parallel from then on: at the merge before the push take `main`'s plan and move this checklist into the pull request.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History: `docs/archive/implementation-plan-verlauf.md` (phases 0–22 and the sessions up to 2026-11-08, closed: add nothing) and `docs/archive/sessions/` (one file per later session).
-
-## Session: #1474 single delivery date as one-day Leistungszeitraum
-
-- [x] Branch `ccr-153ae8d3-conoid-1474` from origin/main
-- [x] `llm:eval` before (allocability + new extraction cases), model and scores noted here: qwen/qwen3-vl-8b-instruct via OpenRouter, allocability 48/48, Leistungszeitraum 2/4
-- [x] Eval cases for the extraction prompt: oil invoice with Lieferdatum ≠ Rechnungsdatum, non-fuel invoice with one Leistungsdatum, invoice with start and end, invoice with neither
-- [x] Failing test of the prompt rule; parsing tests of one, several and no delivery days (each seen red)
-- [x] `fach-reviewer` on the prompt wording before implementing: docs/reviews/1474-fachreview-1.md; V-1 waits for a product decision (sent to the parent session)
-- [x] Fachreview V-3: fuel-stock `keyFor` takes the key of the latest delivery by its delivery day (`fuel-stock.service.ts`, `fuel-stock.pg.test.ts`), scenario «Die Veränderung Tankbestand folgt dem Verteilschlüssel der letzten Lieferung nach ihrem Liefertag» in `statement-generate.feature`
-- [x] Slice review V-3 round 1: docs/reviews/1474-v3-review-1.md
-- [x] PO decision 24.11.2026 second round: option (a), goods only. Fachreview wording (a) put into the period line: eval 4/6 (Kaminfeger got a one-day period, two pellet deliveries a range). Final form: period line unchanged, new field `deliveryDates`, Dwello takes exactly one as the one-day Leistungszeitraum: 6/6 twice
-- [x] `fach-reviewer` round 2 on the `deliveryDates` form: docs/reviews/1474-fachreview-2.md; V-1 to V-4 closed, V-5 waits for a product decision (sent to the parent session), V-6 fixed (confidence of `deliveryDates`)
-- [x] `llm:eval` after (qwen/qwen3-vl-8b-instruct via OpenRouter): Leistungszeitraum 6/6 (before 4/6 on the same six cases); allocability 42/48 and 44/48, every «kein Vorschlag» an HTTP 429 of OpenRouter, the one wrong answer (ZEV) is also wrong 6 of 6 times with main's prompt (allocability prompt unchanged); before 48/48 and 47/48
-- [x] Slice review round 1 of the prompt and rule slice: docs/reviews/1474-review-1.md (no findings; C-1 closed)
-- [ ] Persona Dr. Weber (oil delivery in Seepark without Tankbestand), then daten-pruefer
-- [ ] Closing `code-reviewer` round before the push
-- [x] PO decision 25.11.2026 third round (V-5, option 1): prompt line narrowed to Heizmaterial (Fachreview 1474-2 wording); eval with it: salt 6/7, so a field `heatingMaterial` gates the delivery days: 7/7 twice
-- [x] `@wip` scenario «Eine Lieferung von Heizmaterial ohne jeden Tankbestand zählt im PDF nach den Mietstagen der ganzen Periode» (seen red: 1/1 Tage 450.00), `fach-reviewer` round 3 on it, the glossary addition and the `heatingMaterial` line: docs/reviews/1474-fachreview-3.md; V-5, V-6 closed, V-7 fixed (its glossary sentence word for word), V-8 and V-9 Minor stay in the report (V-8 changes a text a non-@wip #1470 scenario checks; V-9 a glossary row the decision does not name)
-- [x] Rule: in a fuel category of a building with no Tankbestand and not recorded without a tank, a one-day Leistungszeitraum is a delivery (`untrackedFuelCategories`, `getInvoicesForStatement`); glossary row «Verbrauch (Heizmaterial)»; scenario green, each guard seen red in `fuel-stock.pg.test.ts`; E2E «Tank|Lieferung|Verteilschlüssel» 111 passed; backend `bun run test` 2437 pass
-- [ ] daten-pruefer on the V-3 key change and the V-5 rule (amounts of the Veränderung Tankbestand)
-- [ ] No scenario for the prompt: the E2E KI double reads by file name, not the invoice image, so it cannot show what the KI reads
-- [ ] Checks of "Before marking anything complete"
-- [ ] Archive session, PR `Fixes #1474`, merge on green
