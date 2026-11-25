@@ -31,6 +31,20 @@ export const tankDelivery = (
 		? (invoice.servicePeriodStart ?? null) === (invoice.servicePeriodEnd ?? null)
 		: undefined;
 
+/** Beside the building's tank, whether the allocable one-day invoice of another fuel category counts as a delivery of
+ *  Heizmaterial, over the whole period (#1478, as the backend) */
+export const otherFuelDelivery = (
+	tank: string | undefined,
+	invoice: Pick<
+		InvoiceWithDetails,
+		'category' | 'isValidUtilityCost' | 'servicePeriodStart' | 'servicePeriodEnd'
+	>
+) =>
+	!!tank &&
+	invoice.isValidUtilityCost &&
+	!!invoice.category?.isFuel &&
+	invoice.servicePeriodStart === invoice.servicePeriodEnd;
+
 /** The Leistungszeitraum as the backend stores it: both dates, or null without one */
 export const servicePeriodOf = (values: { servicePeriodStart: string; servicePeriodEnd: string }) => ({
 	servicePeriodStart: values.servicePeriodStart || null,
