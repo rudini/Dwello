@@ -57,7 +57,7 @@ function selectWithDetails() {
 				address: buildings.address
 			},
 			accountingPeriod: buildings.accountingPeriod, // for the Aufbewahrungsfrist (#1410)
-			noTank: buildings.noTank, // whether a one-day invoice is a delivery (#1474, #1478), without a query of its own (P2)
+			noTank: buildings.noTank, // whether a delivery goes into no tank (#1480), without a query of its own (P2)
 			category: {
 				id: categories.id,
 				name: categories.name,
@@ -583,10 +583,9 @@ export async function getInvoicesForStatement(
 		// invoices of one day in the order they were entered, so the statement's positions keep their order (#759)
 		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id);
 	// a one-day invoice of a fuel category is a delivery too: beside the tank's of another fuel ('fuel', #1478), without
-	// any Tankbestand of a building not recorded without a tank (#1474)
-	const delivery = ({ invoice, category, noTank }: (typeof results)[number]) =>
-		isDelivery(invoice) &&
-		(invoice.categoryId === tank?.categoryId || (!!invoice.servicePeriodStart && !!category?.isFuel && (!!tank || !noTank)));
+	// any Tankbestand (#1474), also of a building recorded without a tank, into none ('noTank', #1480)
+	const delivery = ({ invoice, category }: (typeof results)[number]) =>
+		isDelivery(invoice) && (invoice.categoryId === tank?.categoryId || (!!invoice.servicePeriodStart && !!category?.isFuel));
 	const kind = (row: (typeof results)[number]) =>
 		!tank?.covered || row.invoice.categoryId !== tank.categoryId ? undefined : delivery(row) ? ('delivery' as const) : ('other' as const);
 
@@ -604,7 +603,7 @@ export async function getInvoicesForStatement(
 						start: periodStart,
 						end: periodEnd,
 						amount: parseFloat(row.invoice.amount),
-						delivery: !tank || row.invoice.categoryId === tank.categoryId ? (true as const) : ('fuel' as const)
+						delivery: !tank ? (row.noTank ? ('noTank' as const) : (true as const)) : row.invoice.categoryId === tank.categoryId ? (true as const) : ('fuel' as const)
 					}
 				: inPeriod(row.invoice, periodStart, periodEnd)
 		}));

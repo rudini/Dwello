@@ -738,6 +738,33 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(await text(true)).not.toContain(note);
 	});
 
+	// #1480 (Fachreview 1480-1 V-1): in a building recorded without a tank a delivery goes into no tank; the PDF says
+	// the building has none, its purchase is billed over the whole period and names no tank's stocks, in every language
+	it.each([
+		['de', 'Das Gebäude hat keinen Tank, oder der Tank ist stillgelegt; ein Bestand an Heizmaterial wird nicht geführt. Abgerechnet sind deshalb die Lieferungen von Heizmaterial («Heizung») in dieser Abrechnungsperiode, also der Einkauf, nicht der Verbrauch. Sie zählen über die ganze Abrechnungsperiode, auch für Mieter, die vor einer Lieferung ausgezogen sind. Eine Rechnung mit einem Leistungszeitraum über mehrere Tage, zum Beispiel für die Reinigung des Ofens, ist keine Lieferung: Sie zählt mit den Tagen, die in die Periode fallen.', 'Für den Tank sind'],
+		['fr', 'L’immeuble n’a pas de citerne, ou la citerne est désaffectée ; aucun stock de combustible n’est tenu. Sont donc décomptées les livraisons de combustible (« Heizung ») pendant cette période de décompte, c’est-à-dire les achats, et non la consommation. Elles comptent pour toute la période de décompte, aussi pour les locataires partis avant une livraison. Une facture dont la période de prestation couvre plusieurs jours, par exemple pour le nettoyage du poêle, n’est pas une livraison : elle compte selon les jours compris dans la période.', 'Pour la citerne, le stock'],
+		['it', 'L’immobile non ha un serbatoio, oppure il serbatoio è dismesso; non viene tenuta alcuna scorta di combustibile. Sono quindi conteggiate le forniture di combustibile («Heizung») in questo periodo di conteggio, cioè gli acquisti, non il consumo. Contano per l’intero periodo di conteggio, anche per gli inquilini partiti prima di una fornitura. Una fattura con un periodo di prestazione di più giorni, per esempio per la pulizia della stufa, non è una fornitura: conta secondo i giorni che rientrano nel periodo.', 'Per il serbatoio la scorta'],
+		['en', 'The building has no tank, or the tank is decommissioned; no fuel stock is kept. The deliveries of fuel (‘Heizung’) in this billing period are therefore billed, that is, the purchases, not the consumption. They count for the whole billing period, also for tenants who moved out before a delivery. An invoice with a service period of several days, for example for cleaning the stove, is not a delivery: it counts by the days that fall within the period.', 'For the tank, the opening']
+	] as const)('erklärt auf %s, dass in einem Gebäude ohne Tank eine Lieferung über die ganze Periode zählt', async (language, note, tankNote) => {
+		const text = async (tankDelivery: true | 'noTank') =>
+			readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, lineItems: [{ ...mixed.lineItems[0], category: 'Heizung', tankDelivery }] }, config, language), 'base64')).flowing;
+		const [noTank, tank] = [await text('noTank'), await text(true)];
+
+		expect(noTank).toContain(note);
+		expect(tank).not.toContain(note);
+		expect(noTank).not.toContain(tankNote);
+	});
+
+	it('nennt eine Lieferung in einem Gebäude ohne Tank als Lieferung von Heizmaterial, nicht in den Tank', async () => {
+		const parts = [{ start: '2025-01-01', end: '2025-12-31', amount: 900, days: 139, total: 365, delivery: 'noTank' as const, invoiceDate: '2025-10-05' }, special[1]];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1695.65, apartmentShare: 847.83, periodShare: 0.5, invoiceParts: parts, tenantShare: 420 }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64')).flowing;
+
+		expect(text).toContain('Rechnung vom 05.10.2025, Lieferung von Heizmaterial, gilt für die ganze Abrechnungsperiode: CHF 900.00, Ihre Mietstage 139 von 365 Tagen');
+		expect(text).not.toContain('Lieferung in den Tank');
+		expect(text).not.toContain('Für den Tank sind');
+	});
+
 	// Code-Review 1478-feature-1: a category with two positions (two keys) is named once
 	it('nennt eine Brennstoff-Kategorie mit zwei Positionen einmal', async () => {
 		const wood = { ...mixed.lineItems[0], category: 'Holz', tankDelivery: 'fuel' as const };

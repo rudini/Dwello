@@ -594,6 +594,29 @@ describe('Rechnungsdetail', () => {
 			);
 		});
 
+		// #1480 (Fachreview 1480-1 V-2, Code-Review 1480-1 C-1): without a tank's category (no reading at all, #1474, or a
+		// building recorded without a tank) a one-day invoice of a fuel category is a delivery too and says so
+		it.each([
+			['de', 'Zählt als Lieferung von Heizmaterial, ganz in der Abrechnungsperiode ihres Liefertags. Das Gebäude hat keinen Tank, oder für sein Heizmaterial ist kein Tankbestand erfasst; abgerechnet wird deshalb der Einkauf. Gilt die Rechnung für eine längere Zeit, zum Beispiel für die Reinigung des Ofens, tragen Sie diese Zeit als Leistungszeitraum ein.'],
+			['fr', 'Compte comme livraison de combustible, entièrement dans la période de décompte de son jour de livraison. L’immeuble n’a pas de citerne, ou aucun stock de combustible n’est saisi pour lui ; ce sont donc les achats qui sont décomptés. Si la facture porte sur une période plus longue, par exemple pour le nettoyage du poêle, saisissez cette période comme période de prestation.'],
+			['it', 'Conta come fornitura di combustibile, interamente nel periodo di conteggio del suo giorno di fornitura. L’immobile non ha un serbatoio, oppure per il suo combustibile non è registrata alcuna scorta; si conteggiano quindi gli acquisti. Se la fattura vale per un periodo più lungo, per esempio per la pulizia della stufa, inserisca questo periodo come periodo di prestazione.'],
+			['en', 'Counts as a delivery of fuel, wholly in the billing period of its delivery day. The building has no tank, or no fuel stock is recorded for it; the purchase is therefore billed. If the invoice covers a longer time, for example cleaning the stove, enter that time as the service period.']
+		] as const)('sagt auf %s bei einer eintägigen Brennstoff-Rechnung ohne Tankbestand, dass sie als Lieferung zählt', (locale, hint) => {
+			overwriteGetLocale(() => locale);
+			try {
+				show(InvoicePage, { data: { invoice: fuelInvoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }) } });
+				expect(byTestId('invoice-fuel-hint')?.textContent?.trim()).toBe(hint);
+			} finally {
+				overwriteGetLocale(() => baseLocale);
+			}
+		});
+
+		it('sagt bei einer eintägigen Brennstoff-Rechnung ohne Tankbestand nicht, dass nur die Tage in der Periode zählen', () => {
+			show(InvoicePage, { data: { invoice: fuelInvoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }) } });
+			expect(text()).toContain('Leistungszeitraum 10.03.2025 – 10.03.2025');
+			expect(text()).not.toContain('Nur die Tage in der Abrechnungsperiode zählen.');
+		});
+
 		// Code-Review 1478-feature-1 C-1: the tank's own category is a fuel too, its delivery goes into the tank
 		it('sagt bei einer eintägigen Lieferung in den Tank nichts zur Lieferung von Heizmaterial', () => {
 			show(InvoicePage, { data: { invoice: fuelInvoice({ servicePeriodStart: '2025-03-10', servicePeriodEnd: '2025-03-10' }), tank: 'c1' } });

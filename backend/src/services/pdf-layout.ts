@@ -12,7 +12,7 @@ import { de } from './pdf-texts/de';
 import { en } from './pdf-texts/en';
 import { fr } from './pdf-texts/fr';
 import { it } from './pdf-texts/it';
-import type { AdvanceLine, InvoicePart, Language, MonthShare } from '../db/schema';
+import type { AdvanceLine, Delivery, InvoicePart, Language, MonthShare } from '../db/schema';
 
 /**
  * Translation strings for each language (the languages SIX provides for the payment part)
@@ -36,7 +36,7 @@ export interface LineItem {
 	invoiceParts?: Part[] | null; // the invoices of a position over different days, with their days (#226)
 	byProfile?: boolean; // shared by the heating profile, not by days
 	heating?: boolean; // a heating cost: the tenant may ask for the detailed heating statement (Art. 8 Abs. 1 VMWG)
-	tankDelivery?: boolean | 'fuel'; // bills a delivery into the tank, or of another fuel ('fuel', #1478), over the whole period (#1470)
+	tankDelivery?: boolean | Delivery; // bills a delivery, over the whole period (#1470)
 	segments?: Segment[] | null; // #1284: its parts before and from the day an apartment no longer exists
 	tenantShare: number;
 }

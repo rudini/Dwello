@@ -49,7 +49,7 @@
 				<!-- a delivery into the tank counts over the whole period (Fachreview 1469-3 V-9) -->
 				{#if fuelDelivery}
 					<dd class="text-ink-muted" data-testid="invoice-fuel-hint">
-						{m.invoices_fuel_delivery()}
+						{tank ? m.invoices_fuel_delivery() : m.invoices_fuel_delivery_no_stock()}
 					</dd>
 				{:else if delivery !== true}
 					<dd class="text-ink-muted">{m.invoices_service_period_days()}</dd>
