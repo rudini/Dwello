@@ -28,6 +28,7 @@
 		"name": "Caretaker",
 		"nameDE": "Hauswart",
 		"isAllowedUtilityCost": true,
+		"isFuel": false,
 		"type": "predefined"
 	},
 	"distributionKey": {

@@ -16,6 +16,7 @@ import {
 	retentionNote,
 	missedWarning,
 	tankHint,
+	fuelHint,
 	overrideReason,
 	recategorizeError,
 	utilityCost,
@@ -48,3 +49,4 @@ export const deleteDialogTitleShare = ShareInViewport.of(deleteDialogTitle);
 
 export const retentionOnDelete = Text.of(retentionNote);
 export const tankHintOfInvoice = Text.of(tankHint);
+export const fuelHintOfInvoice = Text.of(fuelHint);

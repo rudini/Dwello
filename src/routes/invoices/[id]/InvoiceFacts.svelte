@@ -5,7 +5,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import DeductedHint from '../DeductedHint.svelte';
 	import { formatCurrency, formatDate, formatDateTime } from '$lib/utils/format';
-	import { tankDelivery } from '$lib/invoice';
+	import { otherFuelDelivery, tankDelivery } from '$lib/invoice';
 
 	// What the invoice says: date, amount, building and service, and the statements it is in; tank: the category of
 	// the building's tank (#1469)
@@ -15,6 +15,9 @@
 		tank
 	}: { invoice: InvoiceWithDetails; statements: BilledStatement[]; tank?: string } = $props();
 	const delivery = $derived(tankDelivery(tank, invoice));
+	// beside the tank, a one-day invoice of another fuel counts over the whole period too and says so (#1478, Code-Review
+	// 1478-1 C-1, Fachreview 1478-2 V-10)
+	const fuelDelivery = $derived(otherFuelDelivery(tank, invoice));
 
 	const changed = (iso?: string) => (iso ? formatDateTime(iso) : '–');
 </script>
@@ -44,7 +47,11 @@
 					{formatDate(invoice.servicePeriodStart)} – {formatDate(invoice.servicePeriodEnd)}
 				</dd>
 				<!-- a delivery into the tank counts over the whole period (Fachreview 1469-3 V-9) -->
-				{#if delivery !== true}
+				{#if fuelDelivery}
+					<dd class="text-ink-muted" data-testid="invoice-fuel-hint">
+						{m.invoices_fuel_delivery()}
+					</dd>
+				{:else if delivery !== true}
 					<dd class="text-ink-muted">{m.invoices_service_period_days()}</dd>
 				{/if}
 				{@render tankHint()}

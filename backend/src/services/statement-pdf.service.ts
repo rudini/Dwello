@@ -120,7 +120,7 @@ function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: 
 		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, invoiceDate: item.invoices?.[i]?.invoiceDate, invoiceNumber: item.invoices?.[i]?.invoiceNumber })),
 		byProfile: heating && byProfile,
 		heating,
-		tankDelivery: item.invoices?.some((invoice) => invoice.delivery),
+		tankDelivery: item.invoices?.find((invoice) => invoice.delivery)?.delivery, // one category: one kind (#1478)
 		// #1284 (Fachreview 1284-1 V-2): each part with the fraction among the apartments that count in it
 		segments: item.segments?.map(({ keyValues, ...segment }) => ({
 			...segment,

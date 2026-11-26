@@ -496,6 +496,69 @@ describe('Lieferung ohne jeden Tankbestand', () => {
 	});
 });
 
+// #1478 (PO 25.11.2026): a one-day invoice of a second fuel category, not the tank's, is a delivery too, over the
+// whole period of its delivery day, without a Tankbestand of its own; the tank keeps its Verbrauch
+describe('Lieferung einer zweiten Brennstoff-Kategorie', () => {
+	let wood: string;
+	beforeAll(async () => {
+		[{ id: wood }] = await db
+			.insert(categories)
+			.values({ name: `Holz ${token}`, type: 'custom', isAllowedUtilityCost: true, isHeatingCost: true, isFuel: true })
+			.returning();
+		await sendJson('PUT', `/api/v1/contracts/${rental.contract}/agreements`, { categoryId: wood, agreed: true });
+	});
+	afterAll(async () => {
+		await db.delete(invoices).where(eq(invoices.categoryId, wood));
+		await db.delete(categories).where(eq(categories.id, wood));
+	});
+	const linesIn2025 = async (values: Parameters<typeof insertInvoice>[1]) => {
+		await insertInvoice(rental.building, {
+			categoryId: wood,
+			amount: '900.00',
+			invoiceDate: '2025-10-05',
+			servicePeriodStart: '2025-09-30',
+			servicePeriodEnd: '2025-09-30',
+			description: 'Holz 1478',
+			...values
+		});
+		try {
+			return await linesOf(rental.contract, 2025);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, 'Holz 1478'));
+		}
+	};
+
+	it('rechnet eine eintägige Rechnung der zweiten Brennstoff-Kategorie über die ganze Periode ihres Liefertags ab', async () => {
+		expect((await linesIn2025({})).find((line) => line.categoryId === wood)).toMatchObject({
+			billedDays: 365,
+			invoices: [{ start: '2025-01-01', end: '2025-12-31', delivery: 'fuel' }]
+		});
+	});
+
+	// Fachreview 1478-1 V-2: a building recorded without a tank that still has a Tankbestand in the period
+	it('rechnet die eintägige Rechnung auch in einem Gebäude ohne Tank mit Tankbestand in der Periode ganz ab', async () => {
+		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, rental.building));
+		try {
+			expect((await linesIn2025({})).find((line) => line.categoryId === wood)).toMatchObject({ billedDays: 365 });
+		} finally {
+			await db.update(buildings).set({ noTank: false }).where(eq(buildings.id, rental.building));
+		}
+	});
+
+	it('zählt die Lieferung der zweiten Brennstoff-Kategorie nicht zum Verbrauch des Tanks', async () => {
+		expect((await linesIn2025({})).find((line) => line.categoryId === heating)?.totalBuildingAmount).toBe(500 - 100);
+	});
+
+	it('rechnet eine Rechnung der zweiten Brennstoff-Kategorie über mehrere Tage mit ihren Tagen ab', async () => {
+		const lines = await linesIn2025({ servicePeriodStart: '2025-09-01', servicePeriodEnd: '2025-09-30' });
+		expect(lines.find((line) => line.categoryId === wood)).toMatchObject({ billedDays: 30 });
+	});
+
+	it('rechnet eine eintägige Rechnung einer Kategorie, die kein Brennstoff ist, neben dem Tank mit ihrem Tag ab', async () => {
+		expect((await linesIn2025({ categoryId: caretaker })).find((line) => line.categoryId === caretaker)).toMatchObject({ billedDays: 1 });
+	});
+});
+
 describe('Tankbestand über die API', () => {
 	it('listet die Stichtage des Gebäudes', async () => {
 		const list = (await (await callApi(stocks())).json()) as { readingDate: string; amount: string; categoryId: string }[];

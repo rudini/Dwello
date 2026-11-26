@@ -1686,6 +1686,18 @@ describe('Abrechnungsdetail', () => {
 		expect(invoicesText()).toContain('Lieferung in den Tank, gilt für die ganze Abrechnungsperiode: CHF 900.00, Anteil nach Heizprofil: 50.00 %');
 	});
 
+	// #1478 (Fachreview 1478-1 V-1): eine Lieferung einer anderen Brennstoff-Kategorie als der des Tanks geht in keinen Tank
+	it('nennt eine Lieferung einer anderen Brennstoff-Kategorie nicht als Lieferung in den Tank', () => {
+		detail({ lineItems: [line({ invoices: [{ ...delivery, part: { days: 139, total: 365, delivery: 'fuel' } }, { ...other, part: { days: 139, total: 184 } }] })] });
+		expect(invoicesText()).toContain('Lieferung von Heizmaterial, gilt für die ganze Abrechnungsperiode: CHF 900.00, Ihre Mietstage 139 von 365 Tagen');
+	});
+
+	it('nennt eine Lieferung einer anderen Brennstoff-Kategorie nach Heizprofil mit dem Anteil nach Heizprofil', () => {
+		const profile = { percent: 50, months: [], periodMonths: [] };
+		detail({ lineItems: [line({ invoices: [{ ...delivery, part: { days: 139, total: 365, delivery: 'fuel', profile } }, { ...other, part: { days: 139, total: 184, profile } }] })] });
+		expect(invoicesText()).toContain('Lieferung von Heizmaterial, gilt für die ganze Abrechnungsperiode: CHF 900.00, Anteil nach Heizprofil: 50.00 %');
+	});
+
 	// V-14: ein Betrag unter null (sinkender Tankbestand, Gutschrift) steht wie im PDF mit Minus vor der Zahl
 	it('rechnet einen Betrag unter null in der Berechnung mit Minus vor der Zahl', () => {
 		const invoices = [

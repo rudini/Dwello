@@ -14,7 +14,7 @@ export interface InPeriod {
 	amount: number;
 	noPeriod?: true; // no Leistungszeitraum: the whole period by its Rechnungsdatum
 	whole?: { start: string; end: string; amount: number };
-	delivery?: true; // a delivery into the tank: the whole period of its delivery date (#451, #1470)
+	delivery?: true | 'fuel'; // a delivery into the tank, or of another fuel ('fuel', #1478): the whole period of its delivery date (#451, #1470)
 }
 
 /** Per building and category the Verteilschlüssel of the latest invoice with one (`GET /invoices/latest-keys`, #379) */
@@ -26,7 +26,7 @@ export interface LatestKey {
 
 export interface InvoiceWithDetails extends Invoice {
 	building: { id: string; name: string; address: string } | null;
-	category: Pick<Category, Names | 'isAllowedUtilityCost' | 'isHeatingCost' | 'type'> | null;
+	category: Pick<Category, Names | 'isAllowedUtilityCost' | 'isHeatingCost' | 'isFuel' | 'type'> | null; // isFuel: #1478
 	distributionKey: (Pick<DistributionKey, Names> & { formula?: string | null }) | null; // formula: #1309
 	llmCategory: Pick<Category, Names> | null;
 	beleg: Pick<InvoiceDocument, 'fileName' | 'mimeType' | 'deductedAmount' | 'nonAllocableItems'> | null;

@@ -13,6 +13,13 @@
 	const factor = (part: NonNullable<StatementLineInvoice['part']>) =>
 		part.profile ? `${part.profile.percent.toFixed(2)} %` : `${part.days}/${part.total}`;
 
+	// a delivery: into the tank, the whole period, not its delivery day (#1470); of another fuel, into no tank (#1478,
+	// Fachreview 1478-1 V-1)
+	const deliveryTexts = {
+		true: [m.statements_part_delivery, m.statements_part_delivery_profile],
+		fuel: [m.statements_part_delivery_fuel, m.statements_part_delivery_fuel_profile]
+	};
+
 	// by the Heizprofil its share instead of the days, as the PDF (#507)
 	function partText({ part, start, end, amount, fuelStock }: StatementLineInvoice) {
 		const { days, total, noPeriod, whole, profile, delivery } = part!;
@@ -31,8 +38,8 @@
 			? [m.statements_part_stock, m.statements_part_stock_profile]
 			: noPeriod
 				? [m.statements_part_no_period, m.statements_part_no_period_profile]
-				: delivery // into the tank: the whole period, not its delivery day (#1470)
-					? [m.statements_part_delivery, m.statements_part_delivery_profile]
+				: delivery
+					? deliveryTexts[`${delivery}`]
 					: whole
 						? [m.statements_part_beyond, m.statements_part_beyond_profile]
 						: [m.statements_part_line, m.statements_part_line_profile];

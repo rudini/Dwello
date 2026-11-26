@@ -57,15 +57,14 @@ function selectWithDetails() {
 				address: buildings.address
 			},
 			accountingPeriod: buildings.accountingPeriod, // for the Aufbewahrungsfrist (#1410)
-			// a fuel category of a building not recorded without a tank: without any Tankbestand a one-day invoice in it
-			// is a delivery (#1474), without a query of its own (P2)
-			fuel: sql<boolean>`coalesce(${categories.isFuel} and not ${buildings.noTank}, false)`,
+			noTank: buildings.noTank, // whether a one-day invoice is a delivery (#1474, #1478), without a query of its own (P2)
 			category: {
 				id: categories.id,
 				name: categories.name,
 				nameDE: categories.nameDE,
 				isAllowedUtilityCost: categories.isAllowedUtilityCost,
 				isHeatingCost: categories.isHeatingCost,
+				isFuel: categories.isFuel, // a one-day invoice in it can be a delivery (#1474, #1478)
 				type: categories.type
 			},
 			distributionKey: {
@@ -583,10 +582,11 @@ export async function getInvoicesForStatement(
 		.where(and(eq(invoices.buildingId, buildingId), eq(invoices.isValidUtilityCost, true), inPeriodOf(periodStart, periodEnd)))
 		// invoices of one day in the order they were entered, so the statement's positions keep their order (#759)
 		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id);
-	// without any Tankbestand only a one-day invoice of a fuel category is a delivery (#1474)
-	const delivery = ({ invoice, fuel }: (typeof results)[number]) =>
+	// a one-day invoice of a fuel category is a delivery too: beside the tank's of another fuel ('fuel', #1478), without
+	// any Tankbestand of a building not recorded without a tank (#1474)
+	const delivery = ({ invoice, category, noTank }: (typeof results)[number]) =>
 		isDelivery(invoice) &&
-		(tank ? invoice.categoryId === tank.categoryId : !!invoice.servicePeriodStart && fuel);
+		(invoice.categoryId === tank?.categoryId || (!!invoice.servicePeriodStart && !!category?.isFuel && (!!tank || !noTank)));
 	const kind = (row: (typeof results)[number]) =>
 		!tank?.covered || row.invoice.categoryId !== tank.categoryId ? undefined : delivery(row) ? ('delivery' as const) : ('other' as const);
 
@@ -600,7 +600,12 @@ export async function getInvoicesForStatement(
 			llmCategory: null,
 			tank: kind(row),
 			inPeriod: delivery(row)
-				? { start: periodStart, end: periodEnd, amount: parseFloat(row.invoice.amount), delivery: true as const }
+				? {
+						start: periodStart,
+						end: periodEnd,
+						amount: parseFloat(row.invoice.amount),
+						delivery: !tank || row.invoice.categoryId === tank.categoryId ? (true as const) : ('fuel' as const)
+					}
 				: inPeriod(row.invoice, periodStart, periodEnd)
 		}));
 }

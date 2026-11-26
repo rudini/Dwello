@@ -15,6 +15,7 @@ import {
 	distributionKeyRows,
 	missedWarningText,
 	tankHintOfInvoice,
+	fuelHintOfInvoice,
 	reasonForOverride,
 	reasonOfCategory,
 	reasonsOfCategory,
@@ -282,6 +283,10 @@ Given('der Liegenschaftsverwalter ist auf der Detailseite der Rechnung {string}'
 
 Then('sagt die Rechnung zum Tank {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(tankHintOfInvoice).toBe(text);
+});
+
+Then('sagt die Rechnung zur Lieferung von Heizmaterial {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(fuelHintOfInvoice).toBe(text);
 });
 
 // after the amount as positive anchor (#1469)

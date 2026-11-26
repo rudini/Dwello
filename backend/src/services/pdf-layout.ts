@@ -36,7 +36,7 @@ export interface LineItem {
 	invoiceParts?: Part[] | null; // the invoices of a position over different days, with their days (#226)
 	byProfile?: boolean; // shared by the heating profile, not by days
 	heating?: boolean; // a heating cost: the tenant may ask for the detailed heating statement (Art. 8 Abs. 1 VMWG)
-	tankDelivery?: boolean; // bills a delivery into the tank over the whole period (#1470)
+	tankDelivery?: boolean | 'fuel'; // bills a delivery into the tank, or of another fuel ('fuel', #1478), over the whole period (#1470)
 	segments?: Segment[] | null; // #1284: its parts before and from the day an apartment no longer exists
 	tenantShare: number;
 }
