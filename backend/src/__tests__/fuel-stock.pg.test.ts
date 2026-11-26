@@ -414,9 +414,9 @@ describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
 		});
 	});
 
-	// #1470, Fachreview 1470-1 V-1: after the year of decommissioning there is no tank to deliver into; a one-day
-	// invoice of the former tank's category counts on its day, like any invoice
-	it('rechnet nach der Stilllegung des Tanks eine eintägige Rechnung mit ihrem Tag ab, nicht als Lieferung', async () => {
+	// #1480 (PO 26.11.2026, option 1): after the year of decommissioning a one-day invoice of the former tank's
+	// category counts like a delivery over the whole period, as without any Tankbestand (#1474)
+	it('rechnet nach der Stilllegung des Tanks eine eintägige Rechnung über die ganze Periode ihres Liefertags ab', async () => {
 		const own = await createRental(`${token}-1470`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
 		await record('2022-12-31', '800.00', own.building);
 		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, own.building));
@@ -425,7 +425,7 @@ describe('Lieferung in den Tank nach dem Leistungszeitraum', () => {
 		await db.delete(invoices).where(eq(invoices.buildingId, own.building));
 		await own.remove();
 
-		expect(lines.filter((line) => line.categoryId === heating)).toMatchObject([{ billedDays: 1 }]);
+		expect(lines.filter((line) => line.categoryId === heating)).toMatchObject([{ billedDays: 366 }]);
 	});
 
 	it('meldet keine verschiedenen Verteilschlüssel der Lieferungen, wenn nur eine Tankrevision einen anderen hat', async () => {
@@ -484,12 +484,13 @@ describe('Lieferung ohne jeden Tankbestand', () => {
 		).toMatchObject({ billedDays: 1 });
 	});
 
-	it('rechnet in einem Gebäude, das ohne Tank festgehalten ist, eine eintägige Rechnung mit ihrem Tag ab', async () => {
+	// #1480 (PO 26.11.2026, option 1): also in a building recorded without a tank
+	it('rechnet in einem Gebäude, das ohne Tank festgehalten ist, eine eintägige Rechnung über die ganze Periode ab', async () => {
 		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, noTank.building));
 		try {
 			expect(
 				(await linesIn2026({ categoryId: heating })).find((line) => line.categoryId === heating)
-			).toMatchObject({ billedDays: 1 });
+			).toMatchObject({ billedDays: 365, invoices: [{ delivery: 'noTank' }] });
 		} finally {
 			await db.update(buildings).set({ noTank: false }).where(eq(buildings.id, noTank.building));
 		}

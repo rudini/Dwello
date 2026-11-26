@@ -14,11 +14,13 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 #1480: in a building recorded «ohne Tank», a one-day invoice of a fuel category counts like a delivery over the whole period in every period (PO 26.11.2026, option 1). Branch `ccr-153ae8d3-conoid-1480`.
 
 - [x] `@wip` scenarios in `statement-detail.feature` (Gebäude ohne Tank; after the change of fuel), seen red at «1/1 Tage»
-- [ ] `fach-reviewer` round 1 on the scenarios: every text and every place that prints the changed value, glossary rows «Gebäude ohne Tank» and «Verbrauch (Heizmaterial)»
-- [ ] Fix its findings; texts and further scenarios from its report
-- [ ] `tdd`: backend rule in `getInvoicesForStatement` (the two pg tests that pin the old rule change by the decision)
-- [ ] Texts and places named by the review
-- [ ] Glossary rows adapted
+- [x] `fach-reviewer` round 1 on the scenarios: `docs/reviews/1480-fachreview-1.md` (V-1 Major, V-2 to V-6 Minor)
+- [x] V-1: delivery kind `'noTank'` (`getInvoicesForStatement`), line text of another fuel, PDF note `sharesNoteDeliveryNoTank`; scenario steps, pdf-render and DOM tests seen red
+- [x] V-2: invoice detail says `invoices_fuel_delivery_no_stock` without a tank's category; scenario in `invoice-detail.feature` seen red
+- [x] V-4: `buildings_no_tank_help`; V-6: `docs/nebenkostenabrechnung-anforderungen.md`; V-5: issue #1482 (`needs-decision`); V-3 stays (PR text)
+- [x] `tdd`: backend rule in `getInvoicesForStatement` (the two pg tests that pinned the old rule flip by the decision)
+- [x] Glossary rows «Gebäude ohne Tank», «Verbrauch (Heizmaterial)» with the wording of 1480-fachreview-1
+- [x] Files: `invoice.service.ts`, `statement-parts.ts` (`Delivery`), `schema.ts`, `api/invoice.ts`, `pdf-layout.ts`, `pdf-cost-table.ts`, `pdf-texts/*.ts`, `LineInvoices.svelte`, `InvoiceFacts.svelte`, `src/lib/invoice.ts`, `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, tests
 - [ ] Slice review `code-reviewer`
 - [ ] Feature review: personas, `fach-reviewer`, `daten-pruefer`
 - [ ] Before marking complete; archive; PR `Fixes #1480`

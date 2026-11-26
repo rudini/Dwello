@@ -738,6 +738,33 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(await text(true)).not.toContain(note);
 	});
 
+	// #1480 (Fachreview 1480-1 V-1): in a building recorded without a tank a delivery goes into no tank; the PDF says
+	// the building has none, its purchase is billed over the whole period and names no tank's stocks, in every language
+	it.each([
+		['de', 'Für das Gebäude ist kein Tank erfasst, oder der Tank ist stillgelegt. Die Lieferungen von Heizmaterial («Heizung») in dieser Abrechnungsperiode sind deshalb als Verbrauch abgerechnet, also der Einkauf; sie zählen über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat. Eine Rechnung mit einem Leistungszeitraum über mehrere Tage, zum Beispiel für die Reinigung des Ofens, ist keine Lieferung: Sie zählt mit den Tagen, die in die Periode fallen.', 'Für den Tank sind'],
+		['fr', 'Pour l’immeuble, aucune citerne n’est saisie, ou la citerne est désaffectée. Les livraisons de combustible (« Heizung ») pendant cette période de décompte sont donc décomptées comme consommation, c’est-à-dire les achats ; elles comptent pour toute la période de décompte, même si une livraison a une période de prestation. Une facture dont la période de prestation couvre plusieurs jours, par exemple pour le nettoyage du poêle, n’est pas une livraison : elle compte selon les jours compris dans la période.', 'Pour la citerne, le stock'],
+		['it', 'Per l’immobile non è registrato alcun serbatoio, oppure il serbatoio è dismesso. Le forniture di combustibile («Heizung») in questo periodo di conteggio sono quindi conteggiate come consumo, cioè gli acquisti; contano per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione. Una fattura con un periodo di prestazione di più giorni, per esempio per la pulizia della stufa, non è una fornitura: conta secondo i giorni che rientrano nel periodo.', 'Per il serbatoio la scorta'],
+		['en', 'For the building, no tank is recorded, or the tank is decommissioned. The deliveries of fuel (‘Heizung’) in this billing period are therefore billed as consumption, that is, the purchases; they count for the whole billing period, even if a delivery has a service period. An invoice with a service period of several days, for example for cleaning the stove, is not a delivery: it counts by the days that fall within the period.', 'For the tank, the opening']
+	] as const)('erklärt auf %s, dass in einem Gebäude ohne Tank eine Lieferung über die ganze Periode zählt', async (language, note, tankNote) => {
+		const text = async (tankDelivery: true | 'noTank') =>
+			readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, lineItems: [{ ...mixed.lineItems[0], category: 'Heizung', tankDelivery }] }, config, language), 'base64')).flowing;
+		const [noTank, tank] = [await text('noTank'), await text(true)];
+
+		expect(noTank).toContain(note);
+		expect(tank).not.toContain(note);
+		expect(noTank).not.toContain(tankNote);
+	});
+
+	it('nennt eine Lieferung in einem Gebäude ohne Tank als Lieferung von Heizmaterial, nicht in den Tank', async () => {
+		const parts = [{ start: '2025-01-01', end: '2025-12-31', amount: 900, days: 139, total: 365, delivery: 'noTank' as const, invoiceDate: '2025-10-05' }, special[1]];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1695.65, apartmentShare: 847.83, periodShare: 0.5, invoiceParts: parts, tenantShare: 420 }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64')).flowing;
+
+		expect(text).toContain('Rechnung vom 05.10.2025, Lieferung von Heizmaterial, gilt für die ganze Abrechnungsperiode: CHF 900.00, Ihre Mietstage 139 von 365 Tagen');
+		expect(text).not.toContain('Lieferung in den Tank');
+		expect(text).not.toContain('Für den Tank sind');
+	});
+
 	// Code-Review 1478-feature-1: a category with two positions (two keys) is named once
 	it('nennt eine Brennstoff-Kategorie mit zwei Positionen einmal', async () => {
 		const wood = { ...mixed.lineItems[0], category: 'Holz', tankDelivery: 'fuel' as const };

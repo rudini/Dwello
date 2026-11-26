@@ -822,8 +822,8 @@ Funktionalität: Abrechnungsdetail
 
   # #1480 (PO 26.11.2026, Option 1): in einem Gebäude ohne Tank zählt eine Rechnung einer Brennstoff-Kategorie mit
   # eintägigem Leistungszeitraum in jeder Periode wie eine Lieferung über die ganze Periode ihres Liefertags, wie ohne
-  # jeden Tankbestand (#1474); 900.00 / 2 Wohnungen = 450.00 × 139/365 = 171.37
-  @wip
+  # jeden Tankbestand (#1474); 900.00 / 2 Wohnungen = 450.00 × 139/365 = 171.37; das PDF nennt keinen Tank
+  # (Fachreview 1480-1 V-1)
   Szenario: Eine Lieferung von Heizmaterial in einem Gebäude ohne Tank zählt im PDF nach den Mietstagen der ganzen Periode
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -836,9 +836,11 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
+    Und steht im PDF "Für das Gebäude ist kein Tank erfasst, oder der Tank ist stillgelegt."
+    Aber steht im PDF nicht "Lieferung in den Tank"
+    Und steht im PDF nicht "Für den Tank"
 
   # #1480: nach dem Umstieg vom stillgelegten Öltank auf Holz aus einem Lager; die Ölbestände decken 2025 nicht mehr
-  @wip
   Szenario: Nach dem Umstieg zählt eine Lieferung des neuen Heizmaterials im PDF nach den Mietstagen der ganzen Periode
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -855,6 +857,9 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
+    Und steht im PDF "Für das Gebäude ist kein Tank erfasst, oder der Tank ist stillgelegt."
+    Aber steht im PDF nicht "Lieferung in den Tank"
+    Und steht im PDF nicht "Für den Tank"
 
   # #1478 (PO 25.11.2026): eine Rechnung mit eintägigem Leistungszeitraum in einer zweiten Brennstoff-Kategorie, nicht
   # der des Tankbestands, zählt wie eine Lieferung über die ganze Periode ihres Liefertags, nicht nur an ihrem Tag; der

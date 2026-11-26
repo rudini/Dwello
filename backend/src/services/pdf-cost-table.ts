@@ -7,7 +7,7 @@ import { fill, formatCHF } from './pdf-format';
 import { segmentLine } from './pdf-segments';
 import { carryLine, labelOf, offsetLine, priorLine, priorRow, rounding, signed, totalRows, unrounded } from './pdf-balance';
 import { COLORS, COLUMNS, FONT, PAGE, formatDate, heading, room, row, rowHeight, rule, total, type Doc, type LineItem, type Page, type Part, type StatementPDFData } from './pdf-layout';
-import type { AdvanceLine, InvoicePart, MonthShare } from '../db/schema';
+import type { AdvanceLine, Delivery, InvoicePart, MonthShare } from '../db/schema';
 
 /** 0.6694 → 66.94 % (always two places) */
 const formatShare = (share: number) => `${(Math.round(share * 10000) / 100).toFixed(2)} %`;
@@ -160,8 +160,10 @@ export const runShareNote = (data: StatementPDFData) =>
 
 // An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241);
 // the change of the Tankbestand is no invoice and says so (#239)
+// a delivery into the tank, or into none: of another fuel (#1478) or in a building without a tank (#1480)
+const deliveryText: Record<`${Delivery}`, string> = { true: 'partDelivery', fuel: 'partDeliveryFuel', noTank: 'partDeliveryFuel' };
 const partText = (part: InvoicePart) =>
-	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.delivery === 'fuel' ? 'partDeliveryFuel' : part.delivery ? 'partDelivery' : part.whole ? 'partBeyond' : 'partLine';
+	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.delivery ? deliveryText[`${part.delivery}`] : part.whole ? 'partBeyond' : 'partLine';
 // A line names its invoice where dates and amount match no single receipt: without a Leistungszeitraum (its dates are
 // the period's) or the same as another line's (#236), by Rechnungsdatum and Rechnungsnummer as on the receipt (#451);
 // the Tankbestand, once per position, never is
@@ -233,13 +235,14 @@ function sharesNote(data: StatementPDFData, t: Record<string, string>) {
 	const fuel = fuelDeliveryText(data, t.sharesNoteDeliveryFuel);
 	if (data.fuel) return `${shares}${from} ${t.sharesNoteFuel}${data.fuel.position === undefined ? '' : t.sharesNoteFuelOther}${fuel}`;
 	// without both stocks a delivery bills the whole period although its receipt shows one day (#1470)
-	return shares + from + (data.lineItems.some((item) => item.tankDelivery === true) ? t.sharesNoteDelivery : '') + fuel;
+	const noTank = fuelDeliveryText(data, t.sharesNoteDeliveryNoTank, 'noTank'); // a building without a tank names none (#1480)
+	return shares + from + (data.lineItems.some((item) => item.tankDelivery === true) ? t.sharesNoteDelivery : '') + fuel + noTank;
 }
 
 // a delivery of another fuel, without a Tankbestand of its own, bills its purchase, named by its positions (#1478,
 // Fachreview 1478-1 M-1, 1478-2 V-6, V-7); empty without one
-export const fuelDeliveryText = (data: StatementPDFData, text: string) => {
-	const categories = new Set(data.lineItems.filter((item) => item.tankDelivery === 'fuel').map((item) => item.category));
+export const fuelDeliveryText = (data: StatementPDFData, text: string, kind: Exclude<Delivery, true> = 'fuel') => {
+	const categories = new Set(data.lineItems.filter((item) => item.tankDelivery === kind).map((item) => item.category));
 	return categories.size ? fill(text, { categories: [...categories].join(', ') }) : '';
 };
 

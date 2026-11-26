@@ -3,7 +3,7 @@
  * BFF maps them and the frontend takes its types from them (#837, ADR 0005). Only types of `schema.ts` here
  */
 
-import type { Category, DistributionKey, Invoice, InvoiceDocument } from '../db/schema';
+import type { Category, Delivery, DistributionKey, Invoice, InvoiceDocument } from '../db/schema';
 
 type Names = 'id' | 'name' | 'nameDE';
 
@@ -14,7 +14,7 @@ export interface InPeriod {
 	amount: number;
 	noPeriod?: true; // no Leistungszeitraum: the whole period by its Rechnungsdatum
 	whole?: { start: string; end: string; amount: number };
-	delivery?: true | 'fuel'; // a delivery into the tank, or of another fuel ('fuel', #1478): the whole period of its delivery date (#451, #1470)
+	delivery?: Delivery; // the whole period of its delivery date
 }
 
 /** Per building and category the Verteilschlüssel of the latest invoice with one (`GET /invoices/latest-keys`, #379) */
