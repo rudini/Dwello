@@ -21,6 +21,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] `tdd`: backend rule in `getInvoicesForStatement` (the two pg tests that pinned the old rule flip by the decision)
 - [x] Glossary rows «Gebäude ohne Tank», «Verbrauch (Heizmaterial)» with the wording of 1480-fachreview-1
 - [x] Files: `invoice.service.ts`, `statement-parts.ts` (`Delivery`), `schema.ts`, `api/invoice.ts`, `pdf-layout.ts`, `pdf-cost-table.ts`, `pdf-texts/*.ts`, `LineInvoices.svelte`, `InvoiceFacts.svelte`, `src/lib/invoice.ts`, `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, tests
-- [ ] Slice review `code-reviewer`
+- [x] Slice review `code-reviewer` round 1: `docs/reviews/1480-review-1.md` (C-1, C-2 Minor: DOM tests pin the texts, seen red)
 - [ ] Feature review: personas, `fach-reviewer`, `daten-pruefer`
 - [ ] Before marking complete; archive; PR `Fixes #1480`

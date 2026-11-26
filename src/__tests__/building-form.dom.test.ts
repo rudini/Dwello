@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import type { SubmitFunction } from '@sveltejs/kit';
@@ -40,6 +41,25 @@ describe('Gebäude speichern', () => {
 		flushSync();
 		const button = byTestId('building-form-submit')!;
 		expect(button.textContent).toContain('Wird gespeichert');
+	});
+});
+
+// #1480 (Fachreview 1480-1 V-4, Code-Review 1480-1 C-2): the help at «Kein Tank oder Tank stillgelegt» says what counts
+// after a switch to pellets or wood, in every language
+describe('Gebäude ohne Tank', () => {
+	it.each([
+		['de', 'Für Gebäude mit Fernwärme, Erdgas aus der Leitung oder Wärmepumpe, oder wenn der Tank oder das Lager für Heizmaterial stillgelegt ist. Beim Erstellen der Abrechnungen fragt Dwello dann nicht mehr nach dem Tankbestand. Im Jahr der Stilllegung erfassen Sie zuerst auf der Seite des Gebäudes den Endbestand am letzten Tag der Abrechnungsperiode, auch wenn er 0 ist, und setzen dann das Häkchen. Bezieht das Gebäude danach Heizmaterial, zum Beispiel Pellets oder Holz aus einem Lager, zählt jede Lieferung über die ganze Abrechnungsperiode ihres Liefertags; abgerechnet wird der Einkauf.'],
+		['fr', 'Pour les immeubles chauffés à distance, au gaz naturel du réseau ou par pompe à chaleur, ou si la citerne ou le dépôt de combustible est désaffecté. Lors de l’établissement des décomptes, Dwello ne demande alors plus le stock de combustible. L’année de la désaffectation, saisissez d’abord sur la page de l’immeuble le stock final au dernier jour de la période de décompte, même s’il est de 0, puis cochez la case. Si l’immeuble reçoit ensuite du combustible, par exemple des pellets ou du bois d’un dépôt, chaque livraison compte pour toute la période de décompte de son jour de livraison ; ce sont les achats qui sont décomptés.'],
+		['it', 'Per immobili con teleriscaldamento, gas naturale di rete o pompa di calore, o se il serbatoio o il deposito di combustibile è dismesso. Quando allestisce i conteggi, Dwello non chiede quindi più la scorta di combustibile. Nell’anno della dismissione registri prima nella pagina dell’immobile la scorta finale all’ultimo giorno del periodo di conteggio, anche se è 0, e poi metta la spunta. Se in seguito l’immobile riceve combustibile, per esempio pellet o legna da un deposito, ogni fornitura conta per l’intero periodo di conteggio del suo giorno di fornitura; si conteggiano gli acquisti.'],
+		['en', 'For buildings with district heating, mains gas or a heat pump, or when the tank or fuel store is decommissioned. When you create statements, Dwello then no longer asks for the fuel stock. In the year of decommissioning, first add the closing stock on the last day of the billing period on the building’s page, even if it is 0, and then tick the box. If the building then receives fuel, for example pellets or wood from a store, each delivery counts for the whole billing period of its delivery day; the purchase is billed.']
+	] as const)('erklärt auf %s, wann das Gebäude ohne Tank ist und was danach für eine Lieferung gilt', (locale, help) => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(BuildingForm, { mode: 'create' as const, errors: {}, cancelHref: '/buildings' });
+			expect(document.body.textContent).toContain(help);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
 	});
 });
 
