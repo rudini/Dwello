@@ -820,6 +820,42 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
 
+  # #1480 (PO 26.11.2026, Option 1): in einem Gebäude ohne Tank zählt eine Rechnung einer Brennstoff-Kategorie mit
+  # eintägigem Leistungszeitraum in jeder Periode wie eine Lieferung über die ganze Periode ihres Liefertags, wie ohne
+  # jeden Tankbestand (#1474); 900.00 / 2 Wohnungen = 450.00 × 139/365 = 171.37
+  @wip
+  Szenario: Eine Lieferung von Heizmaterial in einem Gebäude ohne Tank zählt im PDF nach den Mietstagen der ganzen Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und das Gebäude "Lindenhof" hat keinen Tank oder der Tank ist stillgelegt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
+
+  # #1480: nach dem Umstieg vom stillgelegten Öltank auf Holz aus einem Lager; die Ölbestände decken 2025 nicht mehr
+  @wip
+  Szenario: Nach dem Umstieg zählt eine Lieferung des neuen Heizmaterials im PDF nach den Mietstagen der ganzen Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" war am "2022-12-31" Heizöl für "800" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "0.00" Franken im Tank
+    Und das Gebäude "Lindenhof" hat keinen Tank oder der Tank ist stillgelegt
+    Und es gibt die umlagefähige Heizkosten-Kategorie "Holz" als Brennstoff
+    Und im Mietvertrag von "Lea Graf" ist "Holz" vereinbart
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Holz" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-09-30" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
+
   # #1478 (PO 25.11.2026): eine Rechnung mit eintägigem Leistungszeitraum in einer zweiten Brennstoff-Kategorie, nicht
   # der des Tankbestands, zählt wie eine Lieferung über die ganze Periode ihres Liefertags, nicht nur an ihrem Tag; der
   # Tank hat Anfangs- und Endbestand. Nach Tagen: 900.00 / 2 Wohnungen = 450.00 × 139/365 = 171.37; nach Heizprofil ab
