@@ -268,7 +268,7 @@ Funktionalität: Rechnungsdetail
     Angenommen das Gebäude "Seeblick" hat keinen Tank oder der Tank ist stillgelegt
     Und im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2025-03-10" für die Zeit vom "2025-03-10" bis "2025-03-10"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung "Heizung 2025-03-10"
-    Dann sagt die Rechnung zur Lieferung von Heizmaterial "Zählt als Lieferung von Heizmaterial: Sie gilt für die ganze Abrechnungsperiode ihres Liefertags. Für dieses Gebäude ist kein Tankbestand erfasst; abgerechnet wird der Einkauf. Gilt die Rechnung für eine längere Zeit, zum Beispiel für die Reinigung des Ofens, tragen Sie diese Zeit als Leistungszeitraum ein."
+    Dann sagt die Rechnung zur Lieferung von Heizmaterial "Zählt als Lieferung von Heizmaterial, ganz in der Abrechnungsperiode ihres Liefertags. Das Gebäude hat keinen Tank, oder für sein Heizmaterial ist kein Tankbestand erfasst; abgerechnet wird deshalb der Einkauf. Gilt die Rechnung für eine längere Zeit, zum Beispiel für die Reinigung des Ofens, tragen Sie diese Zeit als Leistungszeitraum ein."
 
   # #1469: ohne Tank im Gebäude ist eine Heizkostenrechnung keine Lieferung in den Tank (Fernwärme, Helga P-4 von #451)
   Szenario: Ohne Tank sagt eine Heizkostenrechnung nichts zur Lieferung in den Tank

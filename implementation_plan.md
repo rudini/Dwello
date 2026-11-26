@@ -22,5 +22,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Glossary rows «Gebäude ohne Tank», «Verbrauch (Heizmaterial)» with the wording of 1480-fachreview-1
 - [x] Files: `invoice.service.ts`, `statement-parts.ts` (`Delivery`), `schema.ts`, `api/invoice.ts`, `pdf-layout.ts`, `pdf-cost-table.ts`, `pdf-texts/*.ts`, `LineInvoices.svelte`, `InvoiceFacts.svelte`, `src/lib/invoice.ts`, `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, tests
 - [x] Slice review `code-reviewer` round 1: `docs/reviews/1480-review-1.md` (C-1, C-2 Minor: DOM tests pin the texts, seen red)
-- [ ] Feature review: personas, `fach-reviewer`, `daten-pruefer`
+- [x] Feature review: personas Dr. Weber, Helga, Marco (`docs/design/personas/*-1480.md`), `daten-pruefer` `docs/reviews/1480-datenpruefung-1.md` (no findings), `fach-reviewer` `docs/reviews/1480-fachreview-2.md` (V-7 Major, V-8, V-9 Minor: texts of `buildings_no_tank_help`, `invoices_fuel_delivery_no_stock`, `sharesNoteDeliveryNoTank`, glossary bracket; answer Helga P-1, Weber P-1; tests seen red)
+- [ ] Persona re-run Helga, Dr. Weber on the new texts
+- [ ] Closing `code-reviewer` round
 - [ ] Before marking complete; archive; PR `Fixes #1480`

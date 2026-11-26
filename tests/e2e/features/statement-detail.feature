@@ -836,7 +836,8 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
-    Und steht im PDF "Für das Gebäude ist kein Tank erfasst, oder der Tank ist stillgelegt."
+    Und steht im PDF "Das Gebäude hat keinen Tank, oder der Tank ist stillgelegt; ein Bestand an Heizmaterial wird nicht geführt."
+    Und steht im PDF "also der Einkauf, nicht der Verbrauch"
     Aber steht im PDF nicht "Lieferung in den Tank"
     Und steht im PDF nicht "Für den Tank"
 
@@ -857,7 +858,8 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "900.00 450.00 139/365 Tage 171.37"
-    Und steht im PDF "Für das Gebäude ist kein Tank erfasst, oder der Tank ist stillgelegt."
+    Und steht im PDF "Das Gebäude hat keinen Tank, oder der Tank ist stillgelegt; ein Bestand an Heizmaterial wird nicht geführt."
+    Und steht im PDF "also der Einkauf, nicht der Verbrauch"
     Aber steht im PDF nicht "Lieferung in den Tank"
     Und steht im PDF nicht "Für den Tank"
 
